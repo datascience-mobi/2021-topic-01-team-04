@@ -1,0 +1,57 @@
+---
+title: "Bioinfo 4"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+load("/Users/moritzcarlonaeumann/Library/Mobile Documents/com~apple~CloudDocs/Studium/Semester/Semester 4 alles/Bioinfo 4/prism_datasets.rda")
+load("/Users/moritzcarlonaeumann/Library/Mobile Documents/com~apple~CloudDocs/Studium/Semester/Semester 4 alles/Bioinfo 4/cellline_datasets.rda")
+
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+### Lets explore and understand our dataset more
+
+**1.** What is the dimension of our dataset (i.e. how many rows/columns are there in our data)
+
+```{r}
+# Dimension
+dim(prism)
+```
+
+```{r, results='hide'}
+# Number of columns
+ncol(prism)
+# Number of rows
+nrow(prism)
+```
+
+**2.** What are the column names of our dataset
+The treatment names (columns names) represent the drug, the dose and the assay. For example, BRD-A00077618-236-07-6::0.0024414::HTS002 indicates treatment with the drug BRD-A00077618-236-07-6, with a dose of 2.4 nM, in assay HTS002. Values represent log fold changes with respect to a control DMSO experiment.
+
+```{r}
+colnames(prism[,1:10]) # Similarly rownames for rows
+rownames(prism[1:10,])
+```
