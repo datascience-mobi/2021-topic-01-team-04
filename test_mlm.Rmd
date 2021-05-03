@@ -1,0 +1,19 @@
+---
+title: "TESTER"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+load("C:/Users/X-Dragon/OneDrive/Dokumente/Uni/Informatics/Project-01-4/prism_datasets.rda")
+cellline <- load("C:/Users/X-Dragon/OneDrive/Dokumente/Uni/Informatics/Project-01-4/cellline_datasets.rda")
+```
+
+```{r}
+head(prism)
+head(cellline)
+```
