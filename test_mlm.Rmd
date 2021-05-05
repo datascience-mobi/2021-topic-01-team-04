@@ -9,11 +9,19 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ```{r}
-load("C:/Users/X-Dragon/OneDrive/Dokumente/Uni/Informatics/Project-01-4/prism_datasets.rda")
-cellline <- load("C:/Users/X-Dragon/OneDrive/Dokumente/Uni/Informatics/Project-01-4/cellline_datasets.rda")
+globalobjectremover <- function(incfuncs = F) {
+  if (incfuncs == F) {
+    rm(list = setdiff(ls(), lsf.str()))
+  } else if (incfuncs == T) {
+    rm(list = ls())
+  } else {
+    print("Error>> incfuncs has wrong variable type. Use a boolean value.")
+  }
+}
+load("./Data/prism_datasets.rda")
+load("./Data/cellline_datasets.rda")
 ```
 
 ```{r}
-head(prism)
-head(cellline)
+prism.dim <- dim(prism); prism.achilles.dim <- dim(prism.achilles); prism.cl.dim <- dim(prism.cl); prism.cnv.dim <- dim(prism.cnv); prism.exp.dim <- dim(prism.exp); prism.snv.dim <- dim(prism.snv); prism.treat.dim <- dim(prism.treat)
 ```
