@@ -11,14 +11,76 @@ load("/Users/moritzcarlonaeumann/Library/Mobile Documents/com~apple~CloudDocs/St
 
 ```
 
-## R Markdown
+### Lets explore and understand our dataset more
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+1. prism_datasets.rda: this object contains three data frames:
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+1.1 The data.frame prism represents the effect of the treatment (columns) on cell growth of cell lines) rows. 
 
-```{r cars}
-summary(cars)
+What are the column names of our dataset
+The treatment names (columns names) represent the drug, the dose and the assay.
+
+```{r}
+dim(prism)
+ncol(prism)
+nrow(prism)
+colnames(prism[,1:3]) 
+rownames(prism[1:3,])
+```
+For example, BRD-A00077618-236-07-6::0.0024414::HTS002 indicates treatment with the drug BRD-A00077618-236-07-6, with a dose of 2.4 nM, in assay HTS002. Values represent log fold changes with respect to a control DMSO experiment.
+
+1.2 The data.frame prism.treat gives, for each treatment (row) the information about the treatment and the drug used.
+
+```{r}
+dim(prism.treat)
+colnames(prism.treat[,1:11]) 
+rownames(prism.treat[1:3,])
+```
+```{r}
+prism.treat[1,1:11] 
+```
+
+1.3 The data.frame prism.cl gives information regarding the cell lines. The DepMap_ID provides the uniform cell line identifiers used in all the data sets below. The CCLE_Name is encoded as cell line name _ Tissue of origin. The columns lineage and disease refers to the tissue/tumor of origin.
+
+```{r}
+dim(prism.cl)
+colnames(prism.cl[,1:41]) 
+rownames(prism.cl[1:3,])
+```
+```{r}
+prism.cl[1,1:41] 
+prism.cl[1:3,20] 
+prism.cl[1:3,6]
+a <- c(which(prism.cl[,20] == 'Pancreatic Cancer'))
+which(prism.cl[,6] == 'Pancreatic Cancer')
+a
+length(a)
+```
+
+2 cellline_datasets.rda: this object contains data frames related to the cell line expression and genetic alterations, as well as the CRISPR/Cas9 knock-out data
+
+2.1 The data frame prism.exp consists of gene TPM (transcripts per million) values. These values reflect the level of gene expression, higher values suggests over expression of genes and vice versa. The rows of this matrix are the cell lines and the columns are the genes.
+
+```{r}
+dim(prism.exp)
+```
+
+2.2 The data frame prism.cnv consist of gene copy number (CN) values. In absolute terms, CN = 2, since there are two alleles per genes. In cancer, genes might be amplified CN > 2 or deleted CN < 2. These values reflect the copy number level per gene, higher values means amplification of genes and vice versa. The rows of this matrix are the gene names and the columns are the cancer cell line identifiers.
+
+```{r}
+dim(prism.cnv)
+```
+
+2.3 The data frame prism.snv is the annotation file for the various mutations observed in a sample. The isDeleterious flag specifies if mutation has a functional effect or not.
+
+```{r}
+dim(prism.snv)
+```
+
+2.4 The data frame prism.achilles consists of gene knockdown scores. The score is a measure of how essential/important is a particular gene for the cell survival. This score reflects whether upon knocking down that genes does the cell reduce its proliferation or increases it or has no change. Smaller values refers to higher essentiality. The rows of this matrix are the gene names and the columns are the cancer cell line identifiers.
+
+```{r}
+dim(prism.achilles)
 ```
 
 ## Including Plots
@@ -27,31 +89,4 @@ You can also embed plots, for example:
 
 ```{r pressure, echo=FALSE}
 plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
-
-
-### Lets explore and understand our dataset more
-
-**1.** What is the dimension of our dataset (i.e. how many rows/columns are there in our data)
-
-```{r}
-# Dimension
-dim(prism)
-```
-
-```{r, results='hide'}
-# Number of columns
-ncol(prism)
-# Number of rows
-nrow(prism)
-```
-
-**2.** What are the column names of our dataset
-The treatment names (columns names) represent the drug, the dose and the assay. For example, BRD-A00077618-236-07-6::0.0024414::HTS002 indicates treatment with the drug BRD-A00077618-236-07-6, with a dose of 2.4 nM, in assay HTS002. Values represent log fold changes with respect to a control DMSO experiment.
-
-```{r}
-colnames(prism[,1:10]) # Similarly rownames for rows
-rownames(prism[1:10,])
 ```
