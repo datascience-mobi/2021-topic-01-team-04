@@ -81,6 +81,7 @@ dim(prism.snv)
 
 ```{r}
 dim(prism.achilles)
+colnames(prism.achilles)
 ```
 
 ## Including Plots
