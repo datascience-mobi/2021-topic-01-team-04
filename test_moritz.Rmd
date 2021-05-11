@@ -91,25 +91,25 @@ colnames(prism.achilles)
 2.1 The data frame prism.exp consists of gene TPM (transcripts per million) values. These values reflect the level of gene expression, higher values suggests over expression of genes and vice versa. The rows of this matrix are the cell lines and the columns are the genes.
 
 ```{r}
-
+dim(prism.exp)
 ```
 
 2.2 The data frame prism.cnv consist of gene copy number (CN) values. In absolute terms, CN = 2, since there are two alleles per genes. In cancer, genes might be amplified CN > 2 or deleted CN < 2. These values reflect the copy number level per gene, higher values means amplification of genes and vice versa. The rows of this matrix are the gene names and the columns are the cancer cell line identifiers.
 
 ```{r}
-
+dim(prism.cnv)
 ```
 
 2.3 The data frame prism.snv is the annotation file for the various mutations observed in a sample. The isDeleterious flag specifies if mutation has a functional effect or not.
 
 ```{r}
-
+dim(prism.snv)
 ```
 
 2.4 The data frame prism.achilles consists of gene knockdown scores. The score is a measure of how essential/important is a particular gene for the cell survival. This score reflects whether upon knocking down that genes does the cell reduce its proliferation or increases it or has no change. Smaller values refers to higher essentiality. The rows of this matrix are the gene names and the columns are the cancer cell line identifiers.
 
 ```{r}
-
+dim(prism.achilles)
 ```
 
 ## Including Plots
