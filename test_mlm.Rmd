@@ -34,8 +34,8 @@ a <- c(which(prism.cl[, 20] == "Pancreatic Cancer"), which (prism.cl[, 6] == "Pa
 a
 length(a)
 ```
-
 ```{r}
-pancan <- prism.cl[a, ]
+glimpse(prism)
+glimpse(pancan)
 ```
 
