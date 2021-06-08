@@ -1,0 +1,46 @@
+---
+title: "DataCleaner"
+author: "Autumn"
+date: "02/06/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Assortment of Different Data Cleanup Steps done.
+
+```{r}
+load("../../InformaticsProjectData/prism_datasets.rda")
+load("../../InformaticsProjectData/cellline_datasets.rda")
+```
+
+
+## prism.exp dataset
+
+### 1. creating the dataset *prism.exp.pancreatic* 
+
+*prism.exp.pancreatic* contains the prism.exp data frame with just the relevant cancer cell lines
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# to get an approximate overview
+str(prism.exp)
+
+# In order to extract the desired cell lines, we need the Depmap IDs of the desired pancreatic cancer celllines. We get the desired Depmap ID's using the prism.cl data set and the subset function. The subset function returns rows of a data frame, which meet the desired condition. We save the reduced prism.cl data set as the cl.metadata.exp variable. 
+cl.metadata.exp = subset(prism.cl, Type_for_Manuscript == "Pancreatic" )
+
+# Using the previously created data frame, we extract the first column, which contains DepmapID's, and assign them to the Pancreatic.cl.vector. This vector contains Depmap ID's of all pancreatic cancer cell lines in our dataset.
+Pancreatic.cl.Vector = cl.metadata.exp[,1]
+
+# There are 33 pancreatic cancer cellines
+length(Pancreatic.cl.Vector)
+
+# Because the rownames of prism.exp are DepmapID's, it is now possible to reduce the prism.exp dataset to the desired cell lines.
+prism.exp.pancreatic = prism.exp[Pancreatic.cl.Vector,]
+
+# to keep it clean
+rm(cl.metadata.exp)
+```

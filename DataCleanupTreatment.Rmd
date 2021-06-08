@@ -1,0 +1,123 @@
+---
+title: "DataCleanupTreatment"
+author: "Autumn"
+date: "02/06/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+globalobjectremover <- function(incfuncs = F) {
+  if (incfuncs == F) {
+    rm(list = setdiff(ls(pos = ".GlobalEnv"), lsf.str(pos = ".GlobalEnv")), pos = ".GlobalEnv")
+  } else if (incfuncs == T) {
+    rm(list = ls(pos = ".GlobalEnv"), pos = ".GlobalEnv")
+  } else {
+    print("Error>> incfuncs has wrong variable type. Use a boolean value.")
+  }
+}
+
+globalobjectremover(T)
+```
+
+```{r}
+load("../../InformaticsProjectData/prism_datasets.rda")
+load("../../InformaticsProjectData/cellline_datasets.rda")
+```
+
+```{r}
+# custom functions
+
+# lateral is.na
+lat.is.na <- function(x, TF = F) {
+  r <- as.vector(sapply(x, is.na))
+  if (TF) {
+    return(r)
+  } else if (!TF) {
+    return(!r)
+  } else {
+    return("ERROR!")
+  }
+}
+
+# frame is.na
+frame.is.na <- function(X, TF = F) {
+  R <- X
+  for (i in 1:nrow(X)) {
+    R[i, ] <- lat.is.na(X[i, ], TF)
+  }
+  return(R)
+}
+
+# vector inverter
+v.inv <- function(x) {
+  r <- c()
+  for (i in 0:length(x)) {
+    r <- append(r, x[length(x) - i])
+  }
+  return(r)
+}
+
+# cleaner
+cleaner <- function(X) {
+  fin <- frame.is.na(X)
+  fin1 <- which(apply(fin, 1, function(a) {sum(!a)}) == ncol(X))
+  fin2 <- which(apply(fin, 2, function(b) {sum(!b)}) == nrow(X))
+  
+  fin1 <- v.inv(fin1)
+  fin2 <- v.inv(fin2)
+  if (length(fin1) > 0) {
+    if (length(fin2) > 0) {
+      return(list(X[-fin1, -fin2], fin[-fin1, -fin2]))
+    } else if (length(fin2) == 0) {
+      return(list(X[-fin1, ], fin[-fin1, ]))
+    }
+  } else if (length(fin1) == 0) {
+    if (length(fin2) > 0) {
+      return(list(X[, -fin2], fin[, -fin2]))
+    } else if (length(fin2) == 0) {
+      return(list(X, fin))
+    }
+  } else {
+    return("ERROR! Please refer to the source code.")
+  }
+  
+}
+
+# extractor
+extractor <- function(X, phrase = "Pancreatic Cancer") {
+  return(X[which(prism.cl[, 20] == phrase), ])
+}
+```
+
+
+```{r}
+# deleting information-void rows and columns from prism
+
+clean <- cleaner(prism)
+prism.clean <- as.data.frame(clean[1])
+prism.fin.clean <- as.data.frame(clean[2])
+```
+
+
+```{r}
+# extract pancreatic cancer cell line data
+
+pancan <- extractor(prism)
+
+
+# deleting information-void rows and columns from pancan
+
+clean <- cleaner(pancan)
+
+pancan.clean <- as.data.frame(clean[1])
+pancan.fin.clean <- as.data.frame(clean[2])
+```
+
+
+```{r}
+
+```
+
+
