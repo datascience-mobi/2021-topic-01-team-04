@@ -18,6 +18,7 @@ globalobjectremover <- function(incfuncs = F) {
     print("Error>> incfuncs has wrong variable type. Use a boolean value.")
   }
 }
+
 load("../../InformaticsProjectData/prism_datasets.rda")
 load("../../InformaticsProjectData/cellline_datasets.rda")
 ```

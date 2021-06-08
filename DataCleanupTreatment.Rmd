@@ -7,6 +7,18 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+globalobjectremover <- function(incfuncs = F) {
+  if (incfuncs == F) {
+    rm(list = setdiff(ls(pos = ".GlobalEnv"), lsf.str(pos = ".GlobalEnv")), pos = ".GlobalEnv")
+  } else if (incfuncs == T) {
+    rm(list = ls(pos = ".GlobalEnv"), pos = ".GlobalEnv")
+  } else {
+    print("Error>> incfuncs has wrong variable type. Use a boolean value.")
+  }
+}
+
+#globalobjectremover()
 ```
 
 ```{r}
@@ -15,6 +27,68 @@ load("../../InformaticsProjectData/cellline_datasets.rda")
 ```
 
 ```{r}
-sum(duplicated(prism))
+#custom functions
+
+#lateral is.na
+lat.is.na <- function(x, TF = F) {
+  r <- as.vector(sapply(x, is.na))
+  if (TF) {
+    return(r)
+  } else if (!TF) {
+    return(!r)
+  } else {
+    return("ERROR")
+  }
+}
+
+#frame is.na
+frame.is.na <- function(X, TF = F) {
+  R <- X
+  for (i in 1:nrow(X)) {
+    R[i, ] <- lat.is.na(X[i, ], TF)
+  }
+  return(R)
+}
+
+#vector inverter
+v.inv <- function(x) {
+  r <- c()
+  for (i in 0:length(x)) {
+    r <- append(r, x[length(x) - i])
+  }
+  return(r)
+}
+```
+
+
+```{r}
+#large function calls
+
+fin <- frame.is.na(prism)
+```
+
+
+```{r}
+#deleting information-void rows and columns
+
+fin1 <- which(apply(fin, 1, function(a) {
+  sum(!a)
+}) == ncol(prism))
+
+fin2 <- which(apply(fin, 2, function(b) {
+  sum(!b)
+}) == nrow(prism))
+
+names(fin1) <- NULL
+names(fin2) <- NULL
+
+fin1 <- v.inv(fin1); fin2 <- v.inv(fin2)
+
+prism.clean <- prism[-fin1, -fin2]
+fin.clean <- fin[-fin1, -fin2]
+```
+
+```{r}
+a <- apply()
 ```
 
