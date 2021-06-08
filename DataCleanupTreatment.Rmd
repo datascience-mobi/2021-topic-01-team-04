@@ -18,7 +18,7 @@ globalobjectremover <- function(incfuncs = F) {
   }
 }
 
-#globalobjectremover()
+globalobjectremover(T)
 ```
 
 ```{r}
@@ -27,9 +27,9 @@ load("../../InformaticsProjectData/cellline_datasets.rda")
 ```
 
 ```{r}
-#custom functions
+# custom functions
 
-#lateral is.na
+# lateral is.na
 lat.is.na <- function(x, TF = F) {
   r <- as.vector(sapply(x, is.na))
   if (TF) {
@@ -37,11 +37,11 @@ lat.is.na <- function(x, TF = F) {
   } else if (!TF) {
     return(!r)
   } else {
-    return("ERROR")
+    return("ERROR!")
   }
 }
 
-#frame is.na
+# frame is.na
 frame.is.na <- function(X, TF = F) {
   R <- X
   for (i in 1:nrow(X)) {
@@ -50,7 +50,7 @@ frame.is.na <- function(X, TF = F) {
   return(R)
 }
 
-#vector inverter
+# vector inverter
 v.inv <- function(x) {
   r <- c()
   for (i in 0:length(x)) {
@@ -58,37 +58,66 @@ v.inv <- function(x) {
   }
   return(r)
 }
+
+# cleaner
+cleaner <- function(X) {
+  fin <- frame.is.na(X)
+  fin1 <- which(apply(fin, 1, function(a) {sum(!a)}) == ncol(X))
+  fin2 <- which(apply(fin, 2, function(b) {sum(!b)}) == nrow(X))
+  
+  fin1 <- v.inv(fin1)
+  fin2 <- v.inv(fin2)
+  if (length(fin1) > 0) {
+    if (length(fin2) > 0) {
+      return(list(X[-fin1, -fin2], fin[-fin1, -fin2]))
+    } else if (length(fin2) == 0) {
+      return(list(X[-fin1, ], fin[-fin1, ]))
+    }
+  } else if (length(fin1) == 0) {
+    if (length(fin2) > 0) {
+      return(list(X[, -fin2], fin[, -fin2]))
+    } else if (length(fin2) == 0) {
+      return(list(X, fin))
+    }
+  } else {
+    return("ERROR! Please refer to the source code.")
+  }
+  
+}
+
+# extractor
+extractor <- function(X, phrase = "Pancreatic Cancer") {
+  return(X[which(prism.cl[, 20] == phrase), ])
+}
 ```
 
 
 ```{r}
-#large function calls
+# deleting information-void rows and columns from prism
 
-fin <- frame.is.na(prism)
+clean <- cleaner(prism)
+prism.clean <- as.data.frame(clean[1])
+prism.fin.clean <- as.data.frame(clean[2])
 ```
 
 
 ```{r}
-#deleting information-void rows and columns
+# extract pancreatic cancer cell line data
 
-fin1 <- which(apply(fin, 1, function(a) {
-  sum(!a)
-}) == ncol(prism))
+pancan <- extractor(prism)
 
-fin2 <- which(apply(fin, 2, function(b) {
-  sum(!b)
-}) == nrow(prism))
 
-names(fin1) <- NULL
-names(fin2) <- NULL
+# deleting information-void rows and columns from pancan
 
-fin1 <- v.inv(fin1); fin2 <- v.inv(fin2)
+clean <- cleaner(pancan)
 
-prism.clean <- prism[-fin1, -fin2]
-fin.clean <- fin[-fin1, -fin2]
+pancan.clean <- as.data.frame(clean[1])
+pancan.fin.clean <- as.data.frame(clean[2])
 ```
+
 
 ```{r}
-a <- apply()
+
 ```
+
 
