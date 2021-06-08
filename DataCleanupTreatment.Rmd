@@ -13,3 +13,8 @@ knitr::opts_chunk$set(echo = TRUE)
 load("../../InformaticsProjectData/prism_datasets.rda")
 load("../../InformaticsProjectData/cellline_datasets.rda")
 ```
+
+```{r}
+sum(duplicated(prism))
+```
+
