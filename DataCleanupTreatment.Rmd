@@ -21,10 +21,12 @@ globalobjectremover <- function(incfuncs = F) {
 globalobjectremover(T)
 ```
 
+
 ```{r}
 load("../../InformaticsProjectData/prism_datasets.rda")
 load("../../InformaticsProjectData/cellline_datasets.rda")
 ```
+
 
 ```{r}
 # custom functions
@@ -50,23 +52,13 @@ frame.is.na <- function(X, TF = F) {
   return(R)
 }
 
-# vector inverter
-v.inv <- function(x) {
-  r <- c()
-  for (i in 0:length(x)) {
-    r <- append(r, x[length(x) - i])
-  }
-  return(r)
-}
-
 # cleaner
 cleaner <- function(X) {
   fin <- frame.is.na(X)
   fin1 <- which(apply(fin, 1, function(a) {sum(!a)}) == ncol(X))
   fin2 <- which(apply(fin, 2, function(b) {sum(!b)}) == nrow(X))
-  
-  fin1 <- v.inv(fin1)
-  fin2 <- v.inv(fin2)
+  fin1 <- rev(fin1)
+  fin2 <- rev(fin2)
   if (length(fin1) > 0) {
     if (length(fin2) > 0) {
       return(list(X[-fin1, -fin2], fin[-fin1, -fin2]))
@@ -120,4 +112,9 @@ pancan.fin.clean <- as.data.frame(clean[2])
 
 ```
 
+
+```{r}
+frame.is.na(prism.clean)
+frame.is.na(pancan.clean)
+```
 
