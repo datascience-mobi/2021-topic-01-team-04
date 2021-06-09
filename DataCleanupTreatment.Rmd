@@ -18,13 +18,16 @@ globalobjectremover <- function(incfuncs = F) {
   }
 }
 
-#globalobjectremover(T)
+globalobjectremover(T)
 ```
 
 
 ```{r}
 load("../../InformaticsProjectData/prism_datasets.rda")
 load("../../InformaticsProjectData/cellline_datasets.rda")
+
+# equalising rownames
+rownames(prism.cl) <- prism.cl[, "DepMap_ID"]
 ```
 
 
@@ -45,7 +48,8 @@ lat.is.na <- function(x, TF = F) {
 
 # frame is.na
 frame.is.na <- function(X, TF = F) {
-  R <- X
+  R <- as.data.frame(matrix(nrow = nrow(X), ncol = ncol(X)))
+  rownames(R) <- rownames(X); colnames(R) <- colnames(X)
   for (i in 1:nrow(X)) {
     R[i, ] <- lat.is.na(X[i, ], TF)
   }
@@ -55,8 +59,8 @@ frame.is.na <- function(X, TF = F) {
 # cleaner
 row.col.cleaner <- function(X) {
   fin <- frame.is.na(X)
-  fin1 <- rev(which(apply(fin, 1, function(a) {sum(!a)}) == ncol(X)))
-  fin2 <- rev(which(apply(fin, 2, function(b) {sum(!b)}) == nrow(X)))
+  fin1 <- as.vector(rev(which(apply(fin, 1, function(a) {sum(!a)}) == ncol(X))))
+  fin2 <- as.vector(rev(which(apply(fin, 2, function(b) {sum(!b)}) == nrow(X))))
   if (length(fin1) > 0) {
     if (length(fin2) > 0) {
       return(list(X[-fin1, -fin2], fin[-fin1, -fin2]))
@@ -74,14 +78,21 @@ row.col.cleaner <- function(X) {
   }
 }
 
-# extractor
+# extractor      NEED TO FIX, EXTRACT PANCAN FROM PRISM CORRECTLY WITH ASSOCIATED ROWNAMES, ROWNAMES PROBABLY TO BE TAKEN FROM PRISM, ISOLATION INSTRUCTION FROM PRISM.CL
 prism.extractor <- function(X, phrase = "Pancreatic Cancer") {
-  return(X[rownames(prism.cl[which(prism.cl[, 20] == phrase), ]), ])
-} 
+  rn <- rownames(prism.cl)
+  R <- X[rn, ]
+  rownames(R) <- rn
+  return(R)
+}
 
-prism.extractor <- function(X, phrase = "Pancreatic Cancer") {
-  if ()
-  return(X[rownames(prism.cl[which(prism.cl[, 20] == phrase), ]), ])
+#data frame list extractor
+l.prism.extractor <- function(X, phrase = "Pancreatic Cancer") {
+  R <- list()
+  for (i in 1:length(X)) {
+    R <- append(R, prism.extractor(X[i]))
+  }
+  return(R)
 }
 
 
@@ -89,27 +100,21 @@ prism.extractor <- function(X, phrase = "Pancreatic Cancer") {
 
 ```
 
-
 ```{r}
 # deleting information-void rows and columns from prism
 
 clean <- row.col.cleaner(prism)
 prism.clean <- as.data.frame(clean[1])
 prism.fin.clean <- as.data.frame(clean[2])
+rm(clean)
 ```
 
 
 ```{r}
 # extract pancreatic cancer cell line data
 
-pancan <- prism.extractor(prism.clean)
-
-
-# deleting information-void rows and columns from pancan
-
-clean <- row.col.cleaner(pancan)
-pancan.clean <- as.data.frame(clean[1])
-pancan.fin.clean <- as.data.frame(clean[2])
+pancan.clean <- prism.extractor(prism.clean)
+pancan.fin.clean <- prism.extractor(prism.fin.clean)
 ```
 
 
@@ -119,5 +124,10 @@ pancan.fin.clean <- as.data.frame(clean[2])
 
 
 ```{r}
-
+tata <- c()
+for (i in 0:length(rownames(pancan.clean))) {
+    tata <- append(tata, which(rownames(prism.cl) == rownames(pancan.clean)[i]))
+}
+tata
+rownames(pancan.clean)
 ```
