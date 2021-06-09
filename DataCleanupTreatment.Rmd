@@ -77,7 +77,9 @@ row.col.cleaner <- function(X) {
 # extractor
 prism.extractor <- function(X, phrase = "Pancreatic Cancer") {
   return(X[which(prism.cl[, 20] == phrase), ])
-}
+} 
+# make extractor also able to extracted from pre-cleaned prism data frames
+
 ```
 
 
