@@ -44,3 +44,28 @@ prism.exp.pancreatic = prism.exp[Pancreatic.cl.Vector,]
 # to keep it clean
 rm(cl.metadata.exp)
 ```
+
+
+## prism.cnv dataset
+### 1. creating the dataset *prism.cnv.pancreatic*
+
+*prism.cnv.pancreatic* contains the prism.cnv data frame with just the relevant cancer cell lines
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# overview
+str(prism.cnv)
+
+# extraction of pancreatic cells
+cl.metadata.cnv = subset(prism.cl, Type_for_Manuscript == "Pancreatic" )
+
+Pancreatic.cl.Vector = cl.metadata.exp[,1]
+
+prism.cnv.pancreatic = prism.cnv[Pancreatic.cl.Vector,]
+
+# Data clean-up
+rm(cl.metadata.cnv)
+
+```
+
