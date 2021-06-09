@@ -76,8 +76,9 @@ row.col.cleaner <- function(X) {
 
 # extractor
 prism.extractor <- function(X, phrase = "Pancreatic Cancer") {
-  return(X[which(prism.cl[, 20] == phrase), ])
+  return(X[rownames(prism.cl[which(prism.cl[, 20] == phrase), ]), ])
 } 
+
 # make extractor also able to extracted from pre-cleaned prism data frames
 
 ```
@@ -95,7 +96,7 @@ prism.fin.clean <- as.data.frame(clean[2])
 ```{r}
 # extract pancreatic cancer cell line data
 
-pancan <- prism.extractor(prism)
+pancan <- prism.extractor(prism.clean)
 
 
 # deleting information-void rows and columns from pancan
