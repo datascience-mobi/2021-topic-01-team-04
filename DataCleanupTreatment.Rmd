@@ -18,7 +18,7 @@ globalobjectremover <- function(incfuncs = F) {
   }
 }
 
-globalobjectremover(T)
+#globalobjectremover(T)
 ```
 
 
@@ -53,12 +53,10 @@ frame.is.na <- function(X, TF = F) {
 }
 
 # cleaner
-cleaner <- function(X) {
+row.col.cleaner <- function(X) {
   fin <- frame.is.na(X)
-  fin1 <- which(apply(fin, 1, function(a) {sum(!a)}) == ncol(X))
-  fin2 <- which(apply(fin, 2, function(b) {sum(!b)}) == nrow(X))
-  fin1 <- rev(fin1)
-  fin2 <- rev(fin2)
+  fin1 <- rev(which(apply(fin, 1, function(a) {sum(!a)}) == ncol(X)))
+  fin2 <- rev(which(apply(fin, 2, function(b) {sum(!b)}) == nrow(X)))
   if (length(fin1) > 0) {
     if (length(fin2) > 0) {
       return(list(X[-fin1, -fin2], fin[-fin1, -fin2]))
@@ -74,7 +72,6 @@ cleaner <- function(X) {
   } else {
     return("ERROR! Please refer to the source code.")
   }
-  
 }
 
 # extractor
@@ -87,7 +84,7 @@ extractor <- function(X, phrase = "Pancreatic Cancer") {
 ```{r}
 # deleting information-void rows and columns from prism
 
-clean <- cleaner(prism)
+clean <- row.col.cleaner(prism)
 prism.clean <- as.data.frame(clean[1])
 prism.fin.clean <- as.data.frame(clean[2])
 ```
@@ -101,7 +98,7 @@ pancan <- extractor(prism)
 
 # deleting information-void rows and columns from pancan
 
-clean <- cleaner(pancan)
+clean <- row.col.cleaner(pancan)
 
 pancan.clean <- as.data.frame(clean[1])
 pancan.fin.clean <- as.data.frame(clean[2])
@@ -114,7 +111,5 @@ pancan.fin.clean <- as.data.frame(clean[2])
 
 
 ```{r}
-frame.is.na(prism.clean)
-frame.is.na(pancan.clean)
-```
 
+```
