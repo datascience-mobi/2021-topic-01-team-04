@@ -1,40 +1,22 @@
 ---
-title: "DataCleanupTreatment"
+title: "Presets"
 author: "Autumn"
-date: "02/06/2021"
+date: "11/06/2021"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-
-library(knitr)
-
-globalobjectremover <- function(incfuncs = F) {
-  if (incfuncs == F) {
-    rm(list = setdiff(ls(pos = ".GlobalEnv"), lsf.str(pos = ".GlobalEnv")), pos = ".GlobalEnv")
-  } else if (incfuncs == T) {
-    rm(list = ls(pos = ".GlobalEnv"), pos = ".GlobalEnv")
-  } else {
-    print("Error>> incfuncs has wrong variable type. Use a boolean value.")
-  }
-}
-
+knitr::opts_chunk$set(echo = F)
 ```
 
+```{r loading}
+load("./Github/2021-topic-01-team-04/Data/prism_datasets.rda", envir = .GlobalEnv)
+load("./Github/2021-topic-01-team-04/Data/cellline_datasets.rda", envir = .GlobalEnv)
 
-```{r}
-load("Data/prism_datasets.rda")
-load("Data/cellline_datasets.rda")
-
-# equalising rownames
 rownames(prism.cl) <- prism.cl[, "DepMap_ID"]
 ```
 
-
-```{r}
-# custom functions
-
+```{r functions}
 # lateral is.na
 lat.is.na <- function(x, TF = F) {
   r <- as.vector(sapply(x, is.na))
@@ -107,44 +89,5 @@ extraction.verifier <- function(X, phrase = "Pancreatic Cancer") {
     return(F)
   }
 }
-
-# make extractor also able to extracted from pre-cleaned prism data frames
-
 ```
 
-
-```{r}
-# deleting information-void rows and columns from prism
-
-clean <- row.col.cleaner(prism)
-prism.clean <- as.data.frame(clean[1])
-prism.fin.clean <- as.data.frame(clean[2])
-rm(clean)
-```
-
-
-```{r}
-# extract pancreatic cancer cell line data
-
-clean <- row.col.cleaner(prism.extractor(prism))
-pancan.clean <- as.data.frame(clean[1])
-pancan.fin.clean <- as.data.frame(clean[2])
-rm(clean)
-
-extraction.verifier(pancan.clean); extraction.verifier(pancan.fin.clean)
-```
-
-```{r}
-
-```
-
-
-
-```{r}
-
-```
-
-
-```{r}
-
-```

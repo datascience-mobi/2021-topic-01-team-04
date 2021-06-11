@@ -1,6 +1,14 @@
-get
+# global object remover
 
-# custom functions
+globalobjectremover <- function(incfuncs = F) {
+  if (incfuncs == F) {
+    rm(list = setdiff(ls(pos = ".GlobalEnv"), lsf.str(pos = ".GlobalEnv")), pos = ".GlobalEnv")
+  } else if (incfuncs == T) {
+    rm(list = ls(pos = ".GlobalEnv"), pos = ".GlobalEnv")
+  } else {
+    print("Error>> incfuncs has wrong variable type. Use a boolean value.")
+  }
+}
 
 # lateral is.na
 lat.is.na <- function(x, TF = F) {
@@ -73,24 +81,4 @@ extraction.verifier <- function(X, phrase = "Pancreatic Cancer") {
   } else {
     return(F)
   }
-}
-
-
-# deleting information-void rows and columns from prism
-
-clean <- row.col.cleaner(prism)
-prism.clean <- as.data.frame(clean[1])
-prism.fin.clean <- as.data.frame(clean[2])
-rm(clean)
-
-
-# extract pancreatic cancer cell line data
-
-clean <- row.col.cleaner(prism.extractor(prism))
-pancan.clean <- as.data.frame(clean[1])
-pancan.fin.clean <- as.data.frame(clean[2])
-rm(clean)
-
-if (!extraction.verifier(pancan.clean) | !extraction.verifier(pancan.fin.clean)) {
-  print("Extraction of Pancreatic Cancer Cell Lines have Failed")
 }
