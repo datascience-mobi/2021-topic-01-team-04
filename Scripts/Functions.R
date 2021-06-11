@@ -82,3 +82,87 @@ extraction.verifier <- function(X, phrase = "Pancreatic Cancer") {
     return(F)
   }
 }
+
+# whole data frame NA to values         NEEDS FIXES REGARDING THE CORRECT POSITIONING OF NEW DATA POINTS IN DATA FRAME
+df.NA.to.val <- function(X, mar, fun) {
+  if (typeof(X) != "list") {
+    stop("Please use data frame type for 'X'.")
+  }
+  if (fun == "Median" | fun == "median") {
+    if (mar == 1) {
+      for (a in 1:nrow(X)) {
+        X[a, which(is.na(t[a, ]))] <- median(X[a, ])
+      }
+    } else if (mar == 2) {
+      for (b in 1:ncol(X)) {
+        for (a in 1:nrow(X)) {
+          if (is.na(X[a, b])) {
+            X[a, b] <- median(X[, b])
+          }
+        }
+      }
+    } else {
+      stop("Please use 1 (rows) or 2 (cols) as parameters for 'mar'.")
+    }
+  } else if (fun == "Mean" | fun == "mean") {
+    if (mar == 1) {
+      for (a in 1:nrow(X)) {
+        for (b in 1:ncol(X)) {
+          if (is.na(X[a, b])) {
+            X[a, b] <- mean(X[a, ])
+          }
+        }
+      }
+    } else if (mar == 2) {
+      for (b in 1:ncol(X)) {
+        for (a in 1:nrow(X)) {
+          if (is.na(X[a, b])) {
+            X[a, b] <- mean(X[, b])
+          }
+        }
+      }
+    } else {
+      stop("Please use 1 (rows) or 2 (cols) as parameters for 'mar'.")
+    }
+  } else if (fun == "Normal" | fun == "normal") {
+    if (mar == 1) {
+      for (a in 1:nrow(X)) {
+        for (b in 1:ncol(X)) {
+          if (is.na(X[a, b])) {
+            X[a, b] <- rnorm(1, mean = mean(X[a, ]), sd = sd(x[a, ]))
+          }
+        }
+      }
+    } else if (mar == 2) {
+      for (b in 1:ncol(X)) {
+        for (a in 1:nrow(X)) {
+          if (is.na(X[a, b])) {
+            X[a, b] <- rnorm(1, mean = mean(X[, b]), sd = sd(x[, b]))
+          }
+        }
+      }
+    } else {
+      stop("Please use 1 (rows) or 2 (cols) as parameters for 'mar'.")
+    }
+  } else {
+    stop("Please use mean, median or normal as parameters for 'fun'.")
+  }
+  return(X)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

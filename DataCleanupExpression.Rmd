@@ -35,6 +35,10 @@ length(pan.cl.Vector)
 
 # Because the rownames of prism.exp are DepmapID's, it is now possible to reduce the prism.exp dataset to the desired cell lines.
 prism.exp.pan = prism.exp[pan.cl.Vector,]
+
+
+###     !!! please note, that you can reach a function package including a function to extract pancreatic cancer data points from any of the cell line * x data frames. 
+###     !!! the package can be loaded through:  "source("Scripts/Functions.R")" with a working directory of the git rep (can be checked via:  "getwd()")
 ```
 
 
