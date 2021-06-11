@@ -80,9 +80,8 @@ row.col.cleaner <- function(X) {
 
 # extractor      NEED TO FIX, EXTRACT PANCAN FROM PRISM CORRECTLY WITH ASSOCIATED ROWNAMES, ROWNAMES PROBABLY TO BE TAKEN FROM PRISM, ISOLATION INSTRUCTION FROM PRISM.CL
 prism.extractor <- function(X, phrase = "Pancreatic Cancer") {
-  rn <- rownames(prism.cl)
+  rn <- prism.cl[which(prism.cl[, 20] == phrase), "DepMap_ID"]
   R <- X[rn, ]
-  rownames(R) <- rn
   return(R)
 }
 
@@ -94,7 +93,6 @@ l.prism.extractor <- function(X, phrase = "Pancreatic Cancer") {
   }
   return(R)
 }
-
 
 # make extractor also able to extracted from pre-cleaned prism data frames
 
@@ -113,8 +111,9 @@ rm(clean)
 ```{r}
 # extract pancreatic cancer cell line data
 
-pancan.clean <- prism.extractor(prism.clean)
-pancan.fin.clean <- prism.extractor(prism.fin.clean)
+clean <- row.col.cleaner(prism.extractor(prism))
+pancan.clean <- as.data.frame(clean[1])
+pancan.fin.clean <- as.data.frame(clean[2])
 ```
 
 
