@@ -78,20 +78,33 @@ row.col.cleaner <- function(X) {
   }
 }
 
-# extractor      NEED TO FIX, EXTRACT PANCAN FROM PRISM CORRECTLY WITH ASSOCIATED ROWNAMES, ROWNAMES PROBABLY TO BE TAKEN FROM PRISM, ISOLATION INSTRUCTION FROM PRISM.CL
+# extractor
 prism.extractor <- function(X, phrase = "Pancreatic Cancer") {
   rn <- prism.cl[which(prism.cl[, 20] == phrase), "DepMap_ID"]
   R <- X[rn, ]
   return(R)
 }
 
-#data frame list extractor
+# data frame list extractor
 l.prism.extractor <- function(X, phrase = "Pancreatic Cancer") {
   R <- list()
   for (i in 1:length(X)) {
     R <- append(R, prism.extractor(X[i]))
   }
   return(R)
+}
+
+# extraction veracity verification
+extraction.verifier <- function(X, phrase = "Pancreatic Cancer") {
+  r <- c()
+  for (i in 1:nrow(X)) {
+    r <- append(r, prism.cl[which(prism.cl[, "DepMap_ID"] == rownames(X)[1]), 20])
+  }
+  if (sum(which(r == phrase)) == nrow(X)) {
+    return(T)
+  } else {
+    return(F)
+  }
 }
 
 # make extractor also able to extracted from pre-cleaned prism data frames
@@ -125,7 +138,7 @@ pancan.fin.clean <- as.data.frame(clean[2])
 ```{r}
 tata <- c()
 for (i in 0:length(rownames(pancan.clean))) {
-    tata <- append(tata, which(rownames(prism.cl) == rownames(pancan.clean)[i]))
+    tata <- append(tata, prism.cl[which(prism.cl[, "DepMap_ID"] == rownames(pancan.clean)[i]), 20])
 }
 tata
 rownames(pancan.clean)
