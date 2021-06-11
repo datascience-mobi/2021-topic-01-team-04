@@ -23,8 +23,8 @@ globalobjectremover(T)
 
 
 ```{r}
-load("../../InformaticsProjectData/prism_datasets.rda")
-load("../../InformaticsProjectData/cellline_datasets.rda")
+load("Data/prism_datasets.rda")
+load("Data/cellline_datasets.rda")
 
 # equalising rownames
 rownames(prism.cl) <- prism.cl[, "DepMap_ID"]
