@@ -91,15 +91,11 @@ df.NA.to.val <- function(X, mar, fun) {
   if (fun == "Median" | fun == "median") {
     if (mar == 1) {
       for (a in 1:nrow(X)) {
-        X[a, which(is.na(t[a, ]))] <- median(X[a, ])
+        X[a, which(is.na(X[a, ]))] <- median(as.numeric(X[a, ]), na.rm = T)
       }
     } else if (mar == 2) {
-      for (b in 1:ncol(X)) {
-        for (a in 1:nrow(X)) {
-          if (is.na(X[a, b])) {
-            X[a, b] <- median(X[, b])
-          }
-        }
+      for (a in 1:ncol(X)) {
+        X[which(is.na(X[, a])), a] <- median(as.numeric(X[, a]), na.rm = T)
       }
     } else {
       stop("Please use 1 (rows) or 2 (cols) as parameters for 'mar'.")
@@ -107,19 +103,11 @@ df.NA.to.val <- function(X, mar, fun) {
   } else if (fun == "Mean" | fun == "mean") {
     if (mar == 1) {
       for (a in 1:nrow(X)) {
-        for (b in 1:ncol(X)) {
-          if (is.na(X[a, b])) {
-            X[a, b] <- mean(X[a, ])
-          }
-        }
+        X[a, which(is.na(X[a, ]))] <- mean(as.numeric(X[a, ]), na.rm = T)
       }
     } else if (mar == 2) {
-      for (b in 1:ncol(X)) {
-        for (a in 1:nrow(X)) {
-          if (is.na(X[a, b])) {
-            X[a, b] <- mean(X[, b])
-          }
-        }
+      for (a in 1:ncol(X)) {
+        X[which(is.na(X[, a])), a] <- mean(as.numeric(X[, a]), na.rm = T)
       }
     } else {
       stop("Please use 1 (rows) or 2 (cols) as parameters for 'mar'.")
@@ -127,19 +115,13 @@ df.NA.to.val <- function(X, mar, fun) {
   } else if (fun == "Normal" | fun == "normal") {
     if (mar == 1) {
       for (a in 1:nrow(X)) {
-        for (b in 1:ncol(X)) {
-          if (is.na(X[a, b])) {
-            X[a, b] <- rnorm(1, mean = mean(X[a, ]), sd = sd(x[a, ]))
-          }
-        }
+        wts <- which(is.na(X[a, ])) 
+        X[a, wts] <- rnorm(n = length(wts), mean = mean(as.numeric(X[a, ]), na.rm = T), sd = sd(as.numeric(X[a, ]), na.rm = T))
       }
     } else if (mar == 2) {
-      for (b in 1:ncol(X)) {
-        for (a in 1:nrow(X)) {
-          if (is.na(X[a, b])) {
-            X[a, b] <- rnorm(1, mean = mean(X[, b]), sd = sd(x[, b]))
-          }
-        }
+      for (a in 1:ncol(X)) {
+        wts <- which(is.na(X[, a])) 
+        X[wts, a] <- rnorm(n = length(wts), mean = mean(as.numeric(X[, a]), na.rm = T), sd = sd(as.numeric(X[, a]), na.rm = T))
       }
     } else {
       stop("Please use 1 (rows) or 2 (cols) as parameters for 'mar'.")
@@ -149,15 +131,6 @@ df.NA.to.val <- function(X, mar, fun) {
   }
   return(X)
 }
-
-
-
-
-
-
-
-
-
 
 
 

@@ -36,17 +36,15 @@ extraction.verifier(prism.pancan.clean); extraction.verifier(prism.pancan.fin.cl
 
 
 ```{r}
-View(df.NA.to.val(as.data.frame(matrix(c(1,2,NA,4,5,NA,7,8), 2)), 1, "mean"))
+View(df.NA.to.val(prism.pancan.clean, 2, "mean"))
 ```
 
 
 ```{r}
-t <- as.data.frame(matrix(c(1,2,NA,NA,5,NA,7,8), 2))
-t
+
 ```
 
 
 ```{r}
-t[which(is.na(t[, 2])), 2] <- c(0)
-t
+
 ```
