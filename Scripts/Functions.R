@@ -1,6 +1,6 @@
 # global object remover
 
-globalobjectremover <- function(incfuncs = F) {
+cleanslate <- function(incfuncs = F) {
   if (incfuncs == F) {
     rm(list = setdiff(ls(pos = ".GlobalEnv"), lsf.str(pos = ".GlobalEnv")), pos = ".GlobalEnv")
   } else if (incfuncs == T) {
