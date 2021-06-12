@@ -83,7 +83,7 @@ extraction.verifier <- function(X, phrase = "Pancreatic Cancer") {
   }
 }
 
-# whole data frame NA to values         NEEDS FIXES REGARDING THE CORRECT POSITIONING OF NEW DATA POINTS IN DATA FRAME
+# whole data frame NA to values
 df.NA.to.val <- function(X, mar, fun) {
   if (typeof(X) != "list") {
     stop("Please use data frame type for 'X'.")
