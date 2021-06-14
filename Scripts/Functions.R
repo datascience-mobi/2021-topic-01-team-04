@@ -209,4 +209,35 @@ st.splitter <- function(X, disease = "Pancreatic Cancer") {
   
 }
 
+# efficacious drug identifier             UNDER CONSTRUCTION
+ef.dr.identifier <- function(X, threshold, natov = "norm") {
+  return(unique(prism.treat[factor(names(which(apply(df.NA.to.val(X, 2, natov), 2, mean) < threshold))), "name"]))
+}
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
