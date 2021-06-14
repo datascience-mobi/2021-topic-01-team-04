@@ -56,8 +56,7 @@ row.col.cleaner <- function(X) {
 
 # extractor
 prism.extractor <- function(X, phrase = "Pancreatic Cancer") {
-  rn <- prism.cl[which(prism.cl[, 20] == phrase), "DepMap_ID"]
-  R <- X[rn, ]
+  R <- X[prism.cl[which(prism.cl[, "disease"] == phrase), "DepMap_ID"], ]
   return(R)
 }
 
@@ -112,7 +111,7 @@ df.NA.to.val <- function(X, mar, fun) {
     } else {
       stop("Please use 1 (rows) or 2 (cols) as parameters for 'mar'.")
     }
-  } else if (fun == "Normal" | fun == "normal") {
+  } else if (fun == "Normal" | fun == "normal" | fun == "norm" | fun == "Norm") {
     if (mar == 1) {
       for (a in 1:nrow(X)) {
         wts <- which(is.na(X[a, ])) 
@@ -133,9 +132,67 @@ df.NA.to.val <- function(X, mar, fun) {
 }
 
 
+# whole data frame NA to values operation verifier
+df.NA.to.val.ver <- function(X, Y, mar, fun, tol = 10^-10, m.tol = .1, sd.tol = .1) {
+  r <- c()
+  if (fun == "median" | fun == "Median") {
+    if (mar == 1) {
+      for (i in 1:nrow(X)) {
+        r <- append(r, median(X[i, ], na.rm = T) == median(Y[i, ], na.rm = T))
+      }
+    } else if (mar == 2) {
+      for (i in 1:ncol(X)) {
+        r <- append(r, median(X[, i], na.rm = T) == median(Y[, i], na.rm = T))
+      }
+    } 
+    return (list(sum(r) == length(r), r))
+  } else if (fun == "mean" | fun == "Mean") {
+    if (mar == 1) {
+      for (i in 1:nrow(X)) {
+        r <- append(r, abs(mean(X[i, ], na.rm = T) - mean(Y[i, ], na.rm = T)) < tol)
+      }
+    } else if (mar == 2) {
+      for (i in 1:ncol(X)) {
+        r <- append(r, abs(mean(X[, i], na.rm = T) - mean(Y[, i], na.rm = T)) < tol)
+      }
+    } 
+    return (list(sum(r) == length(r), r))
+  } else if (fun == "norm" | fun == "Norm" | fun == "normal" | fun == "Normal") { # still under construction
+    r.m <- c()
+    r.sd <- c()
+    if (mar == 1) {
+      for (i in 1:nrow(X)) {
+        m <- mean(unlist(X[i, ]), na.rm = T)
+        sd <- sd(X[i, ], na.rm = T)
+        r.m <- append(r.m, abs(m - mean(unlist(Y[i, ]), na.rm = T)) < m * m.tol)
+        r.sd <- append(r.sd, abs(sd - sd(Y[i, ], na.rm = T)) < sd * sd.tol)
+      }
+    } else if (mar == 2) {
+      for (i in 1:ncol(X)) {
+        m <- mean(unlist(X[, i]), na.rm = T)
+        sd <- sd(X[, i], na.rm = T)
+        r.m <- append(r.m, abs(m - mean(unlist(Y[, i]), na.rm = T)) < m * m.tol)
+        r.sd <- append(r.sd, abs(sd - sd(Y[, i], na.rm = T)) < sd * sd.tol)
+      }
+    } 
+    return (list(sum(r.m) == length(r.m), sum(r.sd) == length(r.sd), r.m, r.sd))
+  }
+}
 
 
-
-
+# subtype splitter
+st.splitter <- function(X, disease = "Pancreatic Cancer") {
+  w.st <- which(prism.cl[, "disease"] == disease)
+  p.cl.st <- prism.cl[w.st, ]
+  st <- as.factor(p.cl.st[, "disease_subtype"])
+  l.st <- levels(st)
+  r <- list()
+  for (i in length(l.st)) {
+    w.ex <- which(p.cl.st[ , "disease_subtype"] == l.st[i])
+    w.dmid <- p.cl.st[w.ex, "DepMap_ID"]
+    r <- list(r, X[w.dmid, ])
+  }
+  return(r)
+}
 
 
