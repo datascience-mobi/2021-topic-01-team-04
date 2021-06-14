@@ -7,8 +7,6 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-library(knitr)
-library(tibble)
 source("Scripts/Presets.R")
 source("Scripts/Functions.R")
 ```
@@ -39,34 +37,49 @@ extraction.verifier(pancan.clean); extraction.verifier(pancan.fin.clean)
 ```{r}
 # getting pancreatic cancer disease subtypes
 
-pancan.subtypes <- levels(as.factor(prism.cl[which(prism.cl[, "disease"] == "Pancreatic Cancer"), "disease_subtype"]))
-pancan.subtypes
+pancan.sts <- levels(factor(prism.cl[which(prism.cl[, "disease"] == "Pancreatic Cancer"), "disease_subtype"]))
+pancan.sts
 
 # splitting pancreatic cancer in divergent subtype dfs 
 
-pancan.da.e <- pancan.clean[which(rownames(pancan.clean) == prism.cl[which(prism.cl[, "disease_subtype"] == pancan.subtypes[1]), "DepMap_ID"]), ]
-pancan.dac <- pancan.clean[which(rownames(pancan.clean) == prism.cl[which(prism.cl[, "disease_subtype"] == pancan.subtypes[2]), "DepMap_ID"]), ]
-pancan.dac.e <- pancan.clean[which(rownames(pancan.clean) == prism.cl[which(prism.cl[, "disease_subtype"] == pancan.subtypes[3]), "DepMap_ID"]), ]
-pancan.s <- pancan.clean[which(rownames(pancan.clean) == prism.cl[which(prism.cl[, "disease_subtype"] == pancan.subtypes[4]), "DepMap_ID"]), ]
 
-pancan.da.e
-pancan.dac
-pancan.dac.e
-pancan.s
-```
-
-
-```{r}
-pancan.subtypes <- st.splitter(pancan.clean)
-View(pancan.subtypes)
-```
-
-
-```{r}
 
 ```
 
 
 ```{r}
+st.splitter(pancan.clean)
+```
+
+
+```{r}
+hist(apply(df.NA.to.val(pancan.clean, 2, "norm"), 2, mean), breaks = 10, main = "Histogram of Drug Efficacy across Pancreatic Cancer Cell Lines", xlab = "Mean Drug Effect")
+```
+
+
+Which drugs have a negative impact on general cell growth?
+
+```{r}
+unique(prism.treat[factor(names(which(apply(df.NA.to.val(prism.clean, 2, "norm"), 2, mean) < 0))), "name"])
+```
+
+
+Which drugs have a negative impact on pancreatic cancer cell growth?
+
+```{r}
+unique(prism.treat[factor(names(which(apply(df.NA.to.val(pancan.clean, 2, "norm"), 2, mean) < 0))), "name"])
+#p <- apply(df.NA.to.val(pancan.clean, 2, "norm"), 2, mean)
+#p.o <- p[order(p)]
+#unique(prism.treat[factor(names(p.o)), "name"])
+#prism.treat[which(paste(prism.treat[, "broad_id"]) == names(p.o)[1]), "name"]
+#names(p.o)
+#which(paste(prism.treat[, "broad_id"]) == "BRD.K60348325.065.09.9..10..HTS002")
+```
+
+
+Which drugs have a negative impact on cell growth of pancreatic cancer subtypes?
+
+```{r}
 
 ```
+

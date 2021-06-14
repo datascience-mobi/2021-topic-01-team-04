@@ -180,19 +180,33 @@ df.NA.to.val.ver <- function(X, Y, mar, fun, tol = 10^-10, m.tol = .1, sd.tol = 
 }
 
 
+#subtype extractor
+st.ex <- function(disease = "Pancreatic Cancer") {
+  return(levels(factor(prism.cl[which(prism.cl[, "disease"] == disease), "disease_subtype"])))
+}
+
+
+# Dep Map ID extractor
+dmid.ex <- function(target, targetcol = "disease_subtype") {
+  return(prism.cl[which(prism.cl[, targetcol] == target), "DepMap_ID"])
+}
+
+
 # subtype splitter
 st.splitter <- function(X, disease = "Pancreatic Cancer") {
-  w.st <- which(prism.cl[, "disease"] == disease)
-  p.cl.st <- prism.cl[w.st, ]
-  st <- as.factor(p.cl.st[, "disease_subtype"])
-  l.st <- levels(st)
-  r <- list()
-  for (i in length(l.st)) {
-    w.ex <- which(p.cl.st[ , "disease_subtype"] == l.st[i])
-    w.dmid <- p.cl.st[w.ex, "DepMap_ID"]
-    r <- list(r, X[w.dmid, ])
+  # get subtypes for disease
+  sts <- st.ex(disease)
+  
+  # extract DepMap IDs for subtypes
+  for (i in 1:length(sts)) {
+    assign(paste("dmid.", i, sep = ""), dmid.ex(sts[i], targetcol = "disease_subtype"))
   }
-  return(r)
+  
+  # assign sub data frames to global environment
+  for (i in 1:length(sts)) {
+    assign(paste(disease, "Subtype:", sts[i]), X[get(paste("dmid.", i, sep = "")), ], pos = .GlobalEnv)
+  }
+  
 }
 
 
