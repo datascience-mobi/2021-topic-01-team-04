@@ -53,7 +53,7 @@ st.splitter(pancan.clean)
 
 
 ```{r}
-hist(apply(df.NA.to.val(pancan.clean, 2, "norm"), 2, mean), breaks = 10, main = "Histogram of Drug Efficacy across Pancreatic Cancer Cell Lines", xlab = "Mean Drug Effect")
+hist(apply(df.NA.to.val(pancan.clean, 2, "norm"), 2, mean), breaks = 20, main = "Drug Efficacy across Pancreatic Cancer Cell Lines", xlab = "Mean Logfold Drug Effect on Cell Growth", ylab = "Number of Drugs")
 ```
 
 
@@ -88,4 +88,17 @@ ef.dr.identifier(`Pancreatic Cancer Subtype: Ductal Adenosquamous Carcinoma, exo
 ```{r}
 ef.dr.identifier(`Pancreatic Cancer Subtype: Somatostatinoma`, -6)
 ```
+
+```{r}
+hist(apply(df.NA.to.val(`Pancreatic Cancer Subtype: Ductal Adenocarcinoma, exocrine`, 2, "norm"), 2, mean), breaks = 20, main = "Drug Efficacy across Exocrine Ductal Adenocarcinoma Cell Lines", xlab = "Mean Logfold Drug Effect on Cell Growth", ylab = "Number of Drugs")
+```
+
+
+
+
+
+
+
+
+
 
