@@ -60,38 +60,32 @@ hist(apply(df.NA.to.val(pancan.clean, 2, "norm"), 2, mean), breaks = 10, main = 
 Which drugs have a negative impact on general cell growth?
 
 ```{r}
-unique(prism.treat[factor(names(which(apply(df.NA.to.val(prism.clean, 2, "norm"), 2, mean) < -6))), "name"])
+ef.dr.identifier(prism.clean, -6)
 ```
 
 
 Which drugs have a negative impact on pancreatic cancer cell growth?
 
 ```{r}
-unique(prism.treat[factor(names(which(apply(df.NA.to.val(pancan.clean, 2, "norm"), 2, mean) < -6))), "name"])
-#p <- apply(df.NA.to.val(pancan.clean, 2, "norm"), 2, mean)
-#p.o <- p[order(p)]
-#unique(prism.treat[factor(names(p.o)), "name"])
-#prism.treat[which(paste(prism.treat[, "broad_id"]) == names(p.o)[1]), "name"]
-#names(p.o)
-#which(paste(prism.treat[, "broad_id"]) == "BRD.K60348325.065.09.9..10..HTS002")
+ef.dr.identifier(pancan.clean, -6)
 ```
 
 
 Which drugs have a negative impact on cell growth of pancreatic cancer subtypes?
 
 ```{r}
-unique(prism.treat[factor(names(which(apply(df.NA.to.val(`Pancreatic Cancer Subtype: Ductal Adenocarcinoma, exocrine`, 2, "norm"), 2, mean) < -6))), "name"])
+ef.dr.identifier(`Pancreatic Cancer Subtype: Ductal Adenocarcinoma, exocrine`, -6)
 ```
 
 ```{r}
-unique(prism.treat[factor(names(which(apply(`Pancreatic Cancer Subtype: Ductal Adenosquamous Carcinoma`[-which(is.na(`Pancreatic Cancer Subtype: Ductal Adenosquamous Carcinoma`))], 2, mean) < -6))), "name"])
+ef.dr.identifier(`Pancreatic Cancer Subtype: Ductal Adenosquamous Carcinoma`, -6)
 ```
 
 ```{r}
-unique(prism.treat[factor(names(which(apply(`Pancreatic Cancer Subtype: Ductal Adenosquamous Carcinoma, exocrine`[-which(is.na(`Pancreatic Cancer Subtype: Ductal Adenosquamous Carcinoma, exocrine`))], 2, mean) < -6))), "name"])
+ef.dr.identifier(`Pancreatic Cancer Subtype: Ductal Adenosquamous Carcinoma, exocrine`, -6)
 ```
 
 ```{r}
-unique(prism.treat[factor(names(which(apply(`Pancreatic Cancer Subtype: Somatostatinoma`[-which(is.na(`Pancreatic Cancer Subtype: Somatostatinoma`))], 2, mean) < -6))), "name"])
+ef.dr.identifier(`Pancreatic Cancer Subtype: Somatostatinoma`, -6)
 ```
 
