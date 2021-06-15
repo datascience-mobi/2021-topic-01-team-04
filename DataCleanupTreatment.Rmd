@@ -37,12 +37,7 @@ extraction.verifier(pancan.clean); extraction.verifier(pancan.fin.clean)
 ```{r}
 # getting pancreatic cancer disease subtypes
 
-pancan.sts <- levels(factor(prism.cl[which(prism.cl[, "disease"] == "Pancreatic Cancer"), "disease_subtype"]))
-pancan.sts
-
 # splitting pancreatic cancer in divergent subtype dfs 
-
-
 
 ```
 
@@ -60,37 +55,37 @@ hist(apply(df.NA.to.val(pancan.clean, 2, "norm"), 2, mean), breaks = 20, main = 
 Which drugs have a negative impact on general cell growth?
 
 ```{r}
-ef.dr.identifier(prism.clean, -6)
+ef.dr.identifier(prism.clean, -6.5)
 ```
 
 
 Which drugs have a negative impact on pancreatic cancer cell growth?
 
 ```{r}
-ef.dr.identifier(pancan.clean, -6)
+ef.dr.identifier(pancan.clean, -6.5)
 ```
 
 
 Which drugs have a negative impact on cell growth of pancreatic cancer subtypes?
 
 ```{r}
-ef.dr.identifier(`Pancreatic Cancer Subtype: Ductal Adenocarcinoma, exocrine`, -6)
+ef.dr.identifier(PanCanSub.DucAdeexo, -6.5)
 ```
 
 ```{r}
-ef.dr.identifier(`Pancreatic Cancer Subtype: Ductal Adenosquamous Carcinoma`, -6)
+ef.dr.identifier(PanCanSub.DucAdeCar, -6.5)
 ```
 
 ```{r}
-ef.dr.identifier(`Pancreatic Cancer Subtype: Ductal Adenosquamous Carcinoma, exocrine`, -6)
+ef.dr.identifier(PanCanSub.DucAdeCarexo, -6.5)
 ```
 
 ```{r}
-ef.dr.identifier(`Pancreatic Cancer Subtype: Somatostatinoma`, -6)
+ef.dr.identifier(PanCanSub.Som, -6.5)
 ```
 
 ```{r}
-hist(apply(df.NA.to.val(`Pancreatic Cancer Subtype: Ductal Adenocarcinoma, exocrine`, 2, "norm"), 2, mean), breaks = 20, main = "Drug Efficacy across Exocrine Ductal Adenocarcinoma Cell Lines", xlab = "Mean Logfold Drug Effect on Cell Growth", ylab = "Number of Drugs")
+
 ```
 
 

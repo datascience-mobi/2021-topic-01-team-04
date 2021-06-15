@@ -192,24 +192,56 @@ dmid.ex <- function(target, targetcol = "disease_subtype") {
 }
 
 
-# subtype splitter
-st.splitter <- function(X, disease = "Pancreatic Cancer") {
-  # get subtypes for disease
-  sts <- st.ex(disease)
-  
-  # extract DepMap IDs for subtypes
-  for (i in 1:length(sts)) {
-    assign(paste("dmid.", i, sep = ""), dmid.ex(sts[i], targetcol = "disease_subtype"))
+# short hander 
+short.hander <- function(s, mode = "initials", n = 1, p.ignore = T) {
+  if (typeof(s) != "character") {
+    stop("Typeof argument s not character.")
+  } 
+  if (mode == "none") {
+    return(s)
   }
-  
-  # assign sub data frames to global environment
-  for (i in 1:length(sts)) {
-    assign(paste(disease, "Subtype:", sts[i]), X[get(paste("dmid.", i, sep = "")), ], pos = .GlobalEnv)
+  if (!is.numeric(n)) {
+    stop("Argument n not coercible as numeric.")
   }
-  
+  if (p.ignore) {
+    s.sep <- gsub("[[:punct:]]", "", unlist(strsplit(s, " ")))
+  } else if (!p.ignore) {
+    s.sep <- unlist(strsplit(s, " "))
+  }
+  if (mode == "initials") {
+    r <- ""
+    for (i in 1:length(s.sep)) {
+      r <- paste(r, substr(s.sep[i], 1, n), sep = "")
+    }
+    return(r)
+  } else if (mode == "-vowels") {
+    stop("Not yet ready")
+  } else if (mode == "initials-vowels") {
+    stop("Not yet ready")
+  } else {
+    stop("Argument mode not recognised.")
+  }
 }
 
-# efficacious drug identifier             UNDER CONSTRUCTION
+
+# subtype splitter            IMPROVE FOR SHORTHANDING OF VARIABLE NAMES
+st.splitter <- function(X, disease = "Pancreatic Cancer", sh.mode = "initials", sh.n = 3, sh.p.ignore = T) {
+  sts <- st.ex(disease)
+  for (i in 1:length(sts)) {
+    assign(paste("dmid.", i, sep = ""), dmid.ex(sts[i], targetcol = "disease_subtype"))
+  } 
+  for (i in 1:length(sts)) {
+    assign(paste(
+        short.hander(paste(disease, "Subtype"), mode = sh.mode, n = sh.n, p.ignore = sh.p.ignore), 
+        ".", 
+        short.hander(sts[i], mode = sh.mode, n = sh.n, p.ignore = sh.p.ignore), 
+        sep = ""), 
+      X[get(paste("dmid.", i, sep = "")), ], 
+      pos = .GlobalEnv)
+  }
+}
+
+# efficacious drug identifier            
 ef.dr.identifier <- function(X, threshold = 0, p.thresh = F, natov = "norm") {
   if (typeof(X) != "list") {
     stop("Typeof argument X not list.")
