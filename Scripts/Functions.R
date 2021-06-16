@@ -50,7 +50,7 @@ row.col.cleaner <- function(X) {
       return(list(X, fin))
     }
   } else {
-    return("ERROR! Please refer to the source code.")
+    stop("Please refer to the source code!")
   }
 }
 
@@ -131,7 +131,6 @@ df.NA.to.val <- function(X, mar, fun) {
   return(X)
 }
 
-
 # whole data frame NA to values operation verifier
 df.NA.to.val.ver <- function(X, Y, mar, fun, tol = 10^-10, m.tol = .1, sd.tol = .1) {
   r <- c()
@@ -179,18 +178,15 @@ df.NA.to.val.ver <- function(X, Y, mar, fun, tol = 10^-10, m.tol = .1, sd.tol = 
   }
 }
 
-
 #subtype extractor
 st.ex <- function(disease = "Pancreatic Cancer") {
   return(levels(factor(prism.cl[which(prism.cl[, "disease"] == disease), "disease_subtype"])))
 }
 
-
 # Dep Map ID extractor
 dmid.ex <- function(target, targetcol = "disease_subtype") {
   return(prism.cl[which(prism.cl[, targetcol] == target), "DepMap_ID"])
 }
-
 
 # short hander 
 short.hander <- function(s, mode = "initials", n = 1, p.ignore = T) {
@@ -222,7 +218,6 @@ short.hander <- function(s, mode = "initials", n = 1, p.ignore = T) {
     stop("Argument mode not recognised.")
   }
 }
-
 
 # subtype splitter            IMPROVE FOR SHORTHANDING OF VARIABLE NAMES
 st.splitter <- function(X, disease = "Pancreatic Cancer", sh.mode = "initials", sh.n = 3, sh.p.ignore = T) {

@@ -35,9 +35,6 @@ extraction.verifier(pancan.clean); extraction.verifier(pancan.fin.clean)
 
 
 ```{r}
-# getting pancreatic cancer disease subtypes
-
-# splitting pancreatic cancer in divergent subtype dfs 
 
 ```
 
@@ -48,7 +45,7 @@ st.splitter(pancan.clean)
 
 
 ```{r}
-hist(apply(df.NA.to.val(pancan.clean, 2, "norm"), 2, mean), breaks = 20, main = "Drug Efficacy across Pancreatic Cancer Cell Lines", xlab = "Mean Logfold Drug Effect on Cell Growth", ylab = "Number of Drugs")
+hist(apply(df.NA.to.val(pancan.clean, 2, "median"), 2, mean), breaks = 20, main = "Drug Efficacy across Pancreatic Cancer Cell Lines", xlab = "Mean Logfold Drug Effect on Cell Growth", ylab = "Number of Drugs")
 ```
 
 
