@@ -35,11 +35,6 @@ extraction.verifier(pancan.clean); extraction.verifier(pancan.fin.clean)
 
 
 ```{r}
-
-```
-
-
-```{r}
 st.splitter(pancan.clean)
 ```
 
