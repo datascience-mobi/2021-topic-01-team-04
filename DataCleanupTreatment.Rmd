@@ -9,33 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 source("Scripts/Presets.R")
 source("Scripts/Functions.R")
-```
-
-
-```{r}
-# removing void rows and columns from prism
-
-clean <- row.col.cleaner(prism)
-prism.clean <- as.data.frame(clean[1])
-prism.fin.clean <- as.data.frame(clean[2])
-rm(clean)
-```
-
-
-```{r}
-# extract pancreatic cancer cell line data and remove void rows and columns 
-
-clean <- row.col.cleaner(prism.extractor(prism))
-pancan.clean <- as.data.frame(clean[1])
-pancan.fin.clean <- as.data.frame(clean[2])
-rm(clean)
-
-extraction.verifier(pancan.clean); extraction.verifier(pancan.fin.clean)
-```
-
-
-```{r}
-st.splitter(pancan.clean)
+source("Scripts/Preloader.R")
 ```
 
 
