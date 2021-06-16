@@ -1,6 +1,6 @@
 # global object remover
 
-cleanslate <- function(incfuncs = F) {
+cleanslate <- function(incfuncs=F) {
   if (incfuncs == F) {
     rm(list = setdiff(ls(pos = ".GlobalEnv"), lsf.str(pos = ".GlobalEnv")), pos = ".GlobalEnv")
   } else if (incfuncs == T) {
@@ -11,7 +11,7 @@ cleanslate <- function(incfuncs = F) {
 }
 
 # lateral is.na
-lat.is.na <- function(x, TF = F) {
+lat.is.na <- function(x, TF=F) {
   r <- as.vector(sapply(x, is.na))
   if (TF) {
     return(r)
@@ -23,7 +23,7 @@ lat.is.na <- function(x, TF = F) {
 }
 
 # frame is.na
-frame.is.na <- function(X, TF = F) {
+frame.is.na <- function(X, TF=F) {
   R <- as.data.frame(matrix(nrow = nrow(X), ncol = ncol(X)))
   rownames(R) <- rownames(X); colnames(R) <- colnames(X)
   for (i in 1:nrow(X)) {
@@ -55,13 +55,13 @@ row.col.cleaner <- function(X) {
 }
 
 # extractor
-prism.extractor <- function(X, phrase = "Pancreatic Cancer") {
+prism.extractor <- function(X, phrase="Pancreatic Cancer") {
   R <- X[prism.cl[which(prism.cl[, "disease"] == phrase), "DepMap_ID"], ]
   return(R)
 }
 
 # data frame list extractor
-l.prism.extractor <- function(X, phrase = "Pancreatic Cancer") {
+l.prism.extractor <- function(X, phrase="Pancreatic Cancer") {
   R <- list()
   for (i in 1:length(X)) {
     R <- append(R, prism.extractor(X[i]))
@@ -70,7 +70,7 @@ l.prism.extractor <- function(X, phrase = "Pancreatic Cancer") {
 }
 
 # extraction veracity verification
-extraction.verifier <- function(X, phrase = "Pancreatic Cancer") {
+extraction.verifier <- function(X, phrase="Pancreatic Cancer") {
   r <- c()
   for (i in 1:nrow(X)) {
     r <- append(r, prism.cl[which(prism.cl[, "DepMap_ID"] == rownames(X)[i]), 20])
@@ -132,7 +132,7 @@ df.NA.to.val <- function(X, mar, fun) {
 }
 
 # whole data frame NA to values operation verifier
-df.NA.to.val.ver <- function(X, Y, mar, fun, tol = 10^-10, m.tol = .1, sd.tol = .1) {
+df.NA.to.val.ver <- function(X, Y, mar, fun, tol=10^-10, m.tol=.1, sd.tol=.1) {
   r <- c()
   if (fun == "median" | fun == "Median") {
     if (mar == 1) {
@@ -179,7 +179,7 @@ df.NA.to.val.ver <- function(X, Y, mar, fun, tol = 10^-10, m.tol = .1, sd.tol = 
 }
 
 #subtype extractor
-st.ex <- function(disease = "Pancreatic Cancer") {
+st.ex <- function(disease="Pancreatic Cancer") {
   return(levels(factor(prism.cl[which(prism.cl[, "disease"] == disease), "disease_subtype"])))
 }
 
@@ -189,7 +189,7 @@ dmid.ex <- function(target, targetcol = "disease_subtype") {
 }
 
 # short hander 
-short.hander <- function(s, mode = "initials", n = 1, p.ignore = T) {
+short.hander <- function(s, mode="initials", n=1, p.ignore=T) {
   if (typeof(s) != "character") {
     stop("Typeof argument s not character.")
   } 
@@ -220,7 +220,7 @@ short.hander <- function(s, mode = "initials", n = 1, p.ignore = T) {
 }
 
 # subtype splitter            
-st.splitter <- function(X, disease = "Pancreatic Cancer", sh.mode = "initials", sh.n = 3, sh.p.ignore = T) {
+st.splitter <- function(X, disease="Pancreatic Cancer", sh.mode="initials", sh.n=3, sh.p.ignore=T) {
   sts <- st.ex(disease)
   for (i in 1:length(sts)) {
     assign(paste("dmid.", i, sep = ""), dmid.ex(sts[i], targetcol = "disease_subtype"))
@@ -237,7 +237,7 @@ st.splitter <- function(X, disease = "Pancreatic Cancer", sh.mode = "initials", 
 }
 
 # efficacious drug identifier            
-ef.dr.identifier <- function(X, threshold = 0, p.thresh = F, natov = "norm") {
+ef.dr.identifier <- function(X, threshold=0, p.thresh=F, natov="norm") {
   if (typeof(X) != "list") {
     stop("Typeof argument X not list.")
   } else if (dim(X)[1] > 1) {
