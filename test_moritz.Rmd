@@ -129,13 +129,9 @@ rownames(prism.achilles[(which(is.na(prism.achilles[,1:100]))),])
 
 
 ```{r}
-prism.achilles.pancan.numeric <- apply(prism.achilles.pancan, 2, function(x){as.numeric(x)})
+prism.achilles.pancan.numeric <- apply(prism.achilles.pancan, 2, as.numeric)
 ```
 
-```{r pressure, echo=FALSE}
-prism.achilles.pancan.numeric <- prism.achilles.pancan
-for (z in 1:25) (prism.achilles.pancan.numeric[z,1:18119] <- as.numeric(prism.achilles.pancan[z,1:18119]))
-```
 ```{r}
 is.numeric(prism.achilles.pancan.numeric[1:2,2])
 hist(prism.achilles.pancan.numeric[1,])
