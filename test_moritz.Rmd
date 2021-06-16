@@ -119,6 +119,7 @@ which(is.na(prism.achilles[b,1]))
 c <- c(2,5,9,10,13,19,24,25)
 d <- b[-(c)]
 prism.achilles.pancan <- prism.achilles[d,]
+sum(is.na(prism.achilles.pancan))
 which(is.na(prism.achilles.pancan))
 which(is.na(prism.achilles[,1:100]))
 rownames(prism.achilles[(which(is.na(prism.achilles[,1:100]))),])
@@ -129,5 +130,13 @@ rownames(prism.achilles[(which(is.na(prism.achilles[,1:100]))),])
 
 
 ```{r pressure, echo=FALSE}
-plot(pressure)
+prism.achilles.pancan.numeric <- prism.achilles.pancan
+for (z in 1:25) (prism.achilles.pancan.numeric[z,1:18119] <- as.numeric(prism.achilles.pancan[z,1:18119]))
 ```
+```{r}
+is.numeric(prism.achilles.pancan.numeric[1:2,2])
+is.numeric(as.numeric(prism.achilles.pancan[1,1:18119]))
+hist(prism.achilles.pancan.numeric[1,])
+
+```
+
