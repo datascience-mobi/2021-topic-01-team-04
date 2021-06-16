@@ -128,6 +128,9 @@ rownames(prism.achilles[(which(is.na(prism.achilles[,1:100]))),])
 ## Including Plots for prism.achilles.pancan
 
 
+```{r}
+prism.achilles.pancan.numeric <- numeric(prism.achilles.pancan)
+```
 
 ```{r pressure, echo=FALSE}
 prism.achilles.pancan.numeric <- prism.achilles.pancan
