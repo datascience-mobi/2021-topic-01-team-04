@@ -6,10 +6,15 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
-load("/Users/moritzcarlonaeumann/Library/Mobile Documents/com~apple~CloudDocs/Studium/Semester/Semester 4 alles/Bioinfo 4/prism_datasets.rda")
-load("/Users/moritzcarlonaeumann/Library/Mobile Documents/com~apple~CloudDocs/Studium/Semester/Semester 4 alles/Bioinfo 4/cellline_datasets.rda")
+source("Scripts/Presets.R")
+source("Scripts/Functions.R")
 
 ```
+
+```{r}
+getwd()
+```
+
 
 ### Lets explore and understand our dataset more
 
@@ -135,7 +140,7 @@ prism.achilles.pancan.numeric <- apply(prism.achilles.pancan, 2, as.numeric)
 ```{r}
 is.numeric(prism.achilles.pancan.numeric[1:2,2])
 hist(prism.achilles.pancan.numeric[1,])
-prism.achilles.pancan.numeric.mean = 
+quantile(prism.achilles.pancan.numeric,probs=seq(0,1,.1))
 ```
 ```{r}
 # calculate mean values of each gene in achilles dataset
