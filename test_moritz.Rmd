@@ -137,6 +137,17 @@ for (z in 1:25) (prism.achilles.pancan.numeric[z,1:18119] <- as.numeric(prism.ac
 is.numeric(prism.achilles.pancan.numeric[1:2,2])
 is.numeric(as.numeric(prism.achilles.pancan[1,1:18119]))
 hist(prism.achilles.pancan.numeric[1,])
-
+prism.achilles.pancan.numeric.mean = 
 ```
-
+```{r}
+# calculate mean values of each gene in achilles dataset
+mean.achilles.genes = apply(pa_new, 2, mean)
+# plot mean values of each gene
+hist(mean.achilles.genes,
+     freq = TRUE,
+     main = "Summary of Mean Achilles Values",
+     xlab = "Mean Achilles Values",
+     ylab = "Counts of Mean Achilles Values",
+     plot = TRUE,
+     breaks = 10000)
+```
