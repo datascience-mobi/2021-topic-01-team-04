@@ -143,7 +143,7 @@ df.NA.to.val.ver <- function(X, Y, mar, fun, tol=10^-10, m.tol=.1, sd.tol=.1) {
       for (i in 1:ncol(X)) {
         r <- append(r, median(X[, i], na.rm = T) == median(Y[, i], na.rm = T))
       }
-    } 
+    }
     return (list(sum(r) == length(r), r))
   } else if (fun == "mean" | fun == "Mean") {
     if (mar == 1) {
@@ -154,7 +154,7 @@ df.NA.to.val.ver <- function(X, Y, mar, fun, tol=10^-10, m.tol=.1, sd.tol=.1) {
       for (i in 1:ncol(X)) {
         r <- append(r, abs(mean(X[, i], na.rm = T) - mean(Y[, i], na.rm = T)) < tol)
       }
-    } 
+    }
     return (list(sum(r) == length(r), r))
   } else if (fun == "norm" | fun == "Norm" | fun == "normal" | fun == "Normal") { # still under construction
     r.m <- c()
@@ -173,7 +173,7 @@ df.NA.to.val.ver <- function(X, Y, mar, fun, tol=10^-10, m.tol=.1, sd.tol=.1) {
         r.m <- append(r.m, abs(m - mean(unlist(Y[, i]), na.rm = T)) < m * m.tol)
         r.sd <- append(r.sd, abs(sd - sd(Y[, i], na.rm = T)) < sd * sd.tol)
       }
-    } 
+    }
     return (list(sum(r.m) == length(r.m), sum(r.sd) == length(r.sd), r.m, r.sd))
   }
 }
@@ -192,7 +192,7 @@ dmid.ex <- function(target, targetcol = "disease_subtype") {
 short.hander <- function(s, mode="initials", n=1, p.ignore=T) {
   if (typeof(s) != "character") {
     stop("Typeof argument s not character.")
-  } 
+  }
   if (mode == "none") {
     return(s)
   }
@@ -224,7 +224,7 @@ st.splitter <- function(X, disease="Pancreatic Cancer", sh.mode="initials", sh.n
   sts <- st.ex(disease)
   for (i in 1:length(sts)) {
     assign(paste("dmid.", i, sep = ""), dmid.ex(sts[i], targetcol = "disease_subtype"))
-  } 
+  }
   for (i in 1:length(sts)) {
     assign(paste(
         short.hander(paste(disease, "Subtype"), mode = sh.mode, n = sh.n, p.ignore = sh.p.ignore), 
@@ -254,31 +254,3 @@ ef.dr.identifier <- function(X, threshold=0, p.thresh=F, natov="median") {
     }
   }
 }
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
