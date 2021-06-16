@@ -129,7 +129,7 @@ rownames(prism.achilles[(which(is.na(prism.achilles[,1:100]))),])
 
 
 ```{r}
-prism.achilles.pancan.numeric <- numeric(prism.achilles.pancan)
+prism.achilles.pancan.numeric <- apply(prism.achilles.pancan, 2, function(x){as.numeric(x)})
 ```
 
 ```{r pressure, echo=FALSE}
@@ -138,7 +138,6 @@ for (z in 1:25) (prism.achilles.pancan.numeric[z,1:18119] <- as.numeric(prism.ac
 ```
 ```{r}
 is.numeric(prism.achilles.pancan.numeric[1:2,2])
-is.numeric(as.numeric(prism.achilles.pancan[1,1:18119]))
 hist(prism.achilles.pancan.numeric[1,])
 prism.achilles.pancan.numeric.mean = 
 ```
