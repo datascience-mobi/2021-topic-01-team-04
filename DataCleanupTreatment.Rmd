@@ -68,19 +68,15 @@ Which drugs have a negative impact on cell growth of pancreatic cancer subtypes?
 ```{r}
 ef.dr.identifier(PanCanSub.DucAdeexo, -6.5)
 ```
-
 ```{r}
 ef.dr.identifier(PanCanSub.DucAdeCar, -6.5)
 ```
-
 ```{r}
 ef.dr.identifier(PanCanSub.DucAdeCarexo, -6.5)
 ```
-
 ```{r}
 ef.dr.identifier(PanCanSub.Som, -6.5)
 ```
-
 ```{r}
 
 ```

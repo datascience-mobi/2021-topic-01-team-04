@@ -219,7 +219,7 @@ short.hander <- function(s, mode = "initials", n = 1, p.ignore = T) {
   }
 }
 
-# subtype splitter            IMPROVE FOR SHORTHANDING OF VARIABLE NAMES
+# subtype splitter            
 st.splitter <- function(X, disease = "Pancreatic Cancer", sh.mode = "initials", sh.n = 3, sh.p.ignore = T) {
   sts <- st.ex(disease)
   for (i in 1:length(sts)) {
