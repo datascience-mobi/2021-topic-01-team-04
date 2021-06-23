@@ -2,7 +2,9 @@
 title: "DataCleanupExpression"
 author: "Spring"
 date: "06 6 2021"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 ```{r}
@@ -47,16 +49,9 @@ Check for NAs
 ```{r}
 expressionNAcheck = is.na(prism.exp.pan)
 sum(expressionNAcheck)
-
+rm(expressionNAcheck)
 ```
 There are no NAs.
-
-
-Performing a Z-Transformation
-```{r}
-prism.exp.pan.Z = scale(prism.exp.pan)
-```
-
 
 
 
@@ -66,22 +61,94 @@ Sorting the genes by Expression level
 
 ```{r setup, include=FALSE}
 
-# mean value for every column of prism.exp.ppancreatic
+# mean value for every column of prism.exp.pancreatic
 meanval.prism.exp.pan = apply(prism.exp.pan, 2, function(x){mean(x)})
 
+# standard deviation value for every column of prism.exp.pancreatic
+sd.prism.exp.pan = apply(prism.exp.pan, 2, function(x){sd(x)})
+
+
+var.prism.exp.pan = apply(prism.exp.pan, 2, function(x){var(x)})
 
 #sort and order
 
 #welche gene am haeufigsten
 sorted.meanval.exp.pan = sort(meanval.prism.exp.pan, decreasing = TRUE, na.last = TRUE)
 
-#prism.exp.pancreatic neu sortiert
+#prism.exp.pancreatic neu nach mean sortiert
 ordered.meanval.prism.exp.pan = order(meanval.prism.exp.pan, decreasing = TRUE, na.last = TRUE)
-sorted.prism.exp.pan = prism.exp.pan[,ordered.meanval.prism.exp.pan]
+meansorted.prism.exp.pan = prism.exp.pan[,ordered.meanval.prism.exp.pan]
 
-
+#prism.exp.pancreatic neu nach sd sortiert
+ordered.sd.prism.exp.pan = order(sd.prism.exp.pan, decreasing = TRUE, na.last = TRUE)
+sdsorted.prism.exp.pan = prism.exp.pan[,ordered.sd.prism.exp.pan]
 
 ```
+
+
+
+
+```{r}
+
+hist(meanval.prism.exp.pan,
+     freq = TRUE,
+     main = "Summary mean expression Values",
+     xlab = "Mean expression Values",
+     ylab = "Counts of Mean expression Values",
+     plot = TRUE,
+     breaks = "fd")
+
+
+hist(sd.prism.exp.pan,
+     freq = TRUE,
+     main = "Summary sd expression Values",
+     xlab = "Sd expression Values",
+     ylab = "Counts of sd expression Values",
+     plot = TRUE,
+     breaks = "fd")
+
+hist(var.prism.exp.pan,
+     freq = TRUE,
+     main = "Summary var expression Values",
+     xlab = "var expression Values",
+     ylab = "Counts of var expression Values",
+     plot = TRUE,
+     breaks = "fd")
+```
+
+
+
+Performing a Z-Transformation
+```{r}
+prism.exp.pan.Z = scale(prism.exp.pan)
+
+# mean value for every column of prism.exp.pancreatic
+meanval.prism.exp.pan.Z = apply(prism.exp.pan.Z, 2, function(x){mean(x)})
+
+# standard deviation value for every column of prism.exp.pancreatic
+sd.prism.exp.pan.Z = apply(prism.exp.pan.Z, 2, function(x){sd(x)})
+
+
+hist(meanval.prism.exp.pan.Z,
+     freq = TRUE,
+     main = "Summary mean expression Values",
+     xlab = "Mean expression Values",
+     ylab = "Counts of Mean expression Values",
+     plot = TRUE,
+     breaks = "fd")
+
+
+hist(sd.prism.exp.pan.Z,
+     freq = TRUE,
+     main = "Summary sd expression Values",
+     xlab = "Sd expression Values",
+     ylab = "Counts of sd expression Values",
+     plot = TRUE,
+     breaks = "FD")
+```
+
+
+
 
 
 Destinction between primary and metastasis celllines
