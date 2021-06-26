@@ -8,130 +8,59 @@ knitr::opts_chunk$set(echo = TRUE)
 
 load("/Users/moritzcarlonaeumann/Documents/GitHub/2021-topic-01-team-04/Data/cellline_datasets.rda")
 load("/Users/moritzcarlonaeumann/Documents/GitHub/2021-topic-01-team-04/Data/prism_datasets.rda")
-source("Scripts/Presets.R")
-source("Scripts/Functions.R")
-
-
 ```
-
+Remove Cellines that dont show up in achilles
 ```{r}
-getwd()
-```
+which(prism.cl[,20] %in% rownames(prism.achilles))
+a <- c(1:481)
+for(n in 1:481) {a[n] <- (prism.cl[n,1] %in% rownames(prism.achilles))}
 
-
-### Lets explore and understand our dataset more
-
-1. prism_datasets.rda: this object contains three data frames:
-
-1.1 The data.frame prism represents the effect of the treatment (columns) on cell growth of cell lines (rows). 
-
-What are the column names of our dataset
-The treatment names (columns names) represent the drug, the dose and the assay.
-
-```{r}
-dim(prism)
-colnames(prism[,1:3]) 
-rownames(prism[1:3,])
-```
-For example, BRD-A00077618-236-07-6::0.0024414::HTS002 indicates treatment with the drug BRD-A00077618-236-07-6, with a dose of 2.4 nM, in assay HTS002. Values represent log fold changes with respect to a control DMSO experiment.
-
-1.2 The data.frame prism.treat gives, for each treatment (row) the information about the treatment and the drug used.
-
-```{r}
-summary(prism.treat)
-dim(prism.treat)
-colnames(prism.treat) 
-rownames(prism.treat[1:3,])
-```
-```{r}
-prism.treat[1,1:11] 
-```
-
-1.3 The data.frame prism.cl gives information regarding the cell lines. The DepMap_ID provides the uniform cell line identifiers used in all the data sets below. The CCLE_Name is encoded as cell line name _ Tissue of origin. The columns lineage and disease refers to the tissue/tumor of origin.
-
-```{r}
-dim(prism.cl)
-colnames(prism.cl[,1:41]) 
-rownames(prism.cl[1:3,])
-summary(prism.cl)
-```
-```{r}
-prism.cl[1,1:41] 
-
-prism.cl[1:3,20] 
-prism.cl[1:3,6]
-a <- c(which(prism.cl[,20] == 'Pancreatic Cancer'))
-which(prism.cl[,6] == 'Pancreatic Cancer')
+prism.cl.achilles <- prism.cl[rownames(prism.achilles),1 ] 
+dim(prism.cl.achilles)
 a
-length(a)
-b <- prism.cl[a,1]
-b
-```
-
-2 cellline_datasets.rda: this object contains data frames related to the cell line expression and genetic alterations, as well as the CRISPR/Cas9 knock-out data
-
-2.1 The data frame prism.exp consists of gene TPM (transcripts per million) values. These values reflect the level of gene expression, higher values suggests over expression of genes and vice versa. The rows of this matrix are the cell lines and the columns are the genes.
-
-```{r}
-dim(prism.exp)
-colnames(prism.exp[1:3])
-rownames(prism.exp[1:3,])
-
-prism.exp[1:3,1:3]
-prism.exp[1:20,2]
-```
-
-2.2 The data frame prism.cnv consist of gene copy number (CN) values. In absolute terms, CN = 2, since there are two alleles per genes. In cancer, genes might be amplified CN > 2 or deleted CN < 2. These values reflect the copy number level per gene, higher values means amplification of genes and vice versa. The rows of this matrix are the gene names and the columns are the cancer cell line identifiers.
-
-```{r}
-dim(prism.cnv)
-
-prism.cnv[1:3,1:3]
-prism.cnv[1:5,1:1010]
+prism.cl[3,20]
 ```
 ```{r}
-c <- c(prism.cnv[1,1:1010])
-d <- as.vector(c)
-
-
-hist(c)
-
+for(n in 1:481) {prism.cl[n,20] %in% rownames(prism.achilles)}
 ```
 
-
-2.3 The data frame prism.snv is the annotation file for the various mutations observed in a sample. The is Deleterious flag specifies if mutation has a functional effect or not.
-
+Find PanCan Cellines in prism.cl.achilles
 ```{r}
-dim(prism.snv)
-colnames(prism.snv) 
-rownames(prism.snv[1:3,])
+prism.cl.pancan <- c(which(prism.cl.achilles[,20] == 'Pancreatic Cancer'))
+pancan.cl.names <- prism.cl[prism.cl.pancan,1]
+pancan.cl.names
+which(prism.cl.achilles[,20] == 'Pancreatic Cancer')
 ```
 
-```{r}
-summary(prism.snv)
-```
-
-
-2.4 The data frame prism.achilles consists of gene knockdown scores. The score is a measure of how essential/important is a particular gene for the cell survival. This score reflects whether upon knocking down that genes does the cell reduce its proliferation or increases it or has no change. Smaller values refers to higher essentiality. The rows of this matrix are the gene names and the columns are the cancer cell line identifiers.
+The data frame prism.achilles consists of gene knockdown scores. The score is a measure of how essential/important is a particular gene for the cell survival. This score reflects whether upon knocking down that genes does the cell reduce its proliferation or increases it or has no change. Smaller values refers to higher essentiality. The rows of this matrix are the gene names and the columns are the cancer cell line identifiers.
 
 Exploration
 ```{r}
 dim(prism.achilles)
-colnames(prism.achilles[1:3])
-rownames(prism.achilles[1:3,])
-
 prism.achilles[1:3,1:4]
-prism.achilles[b,]
-which(is.na(prism.achilles[b,1]))
 ```
+Na Cleanup
+```{r}
+prism.achilles.clean <- na.omit(prism.achilles)
+dim(prism.achilles.clean)
+which(is.na(prism.achilles.clean[,3]))
+is.na(prism.achilles.clean[1:3,3:10])
+
+```
+
+
+```{r}
+prism.achilles[pancan.cl.names,]
+which(is.na(prism.achilles[pancan.cl.names,1]))
+```
+
 Cleanup
 ```{r}
-c <- c(2,5,9,10,13,19,24,25)
-d <- b[-(c)]
+
 prism.achilles.pancan <- prism.achilles[d,]
 sum(is.na(prism.achilles.pancan))
 which(is.na(prism.achilles.pancan))
-which(is.na(prism.achilles[,1:100]))
+which(is.na(prism.achilles[,1:350]))
 rownames(prism.achilles[(which(is.na(prism.achilles[,1:100]))),])
 ```
 
@@ -158,5 +87,8 @@ prism.achilles.numeric.no.na <- rbind(prism.achilles.numeric.no.na, apply(prism.
 dim(prism.achilles.numeric.no.na)
 prism.achilles.numeric.no.na[345:348,1:5]
 rownames(prism.achilles.numeric.no.na) <- rownames(prism.achilles)
+```
+```{r}
+summary()
 ```
 
