@@ -9,19 +9,27 @@ knitr::opts_chunk$set(echo = TRUE)
 load("/Users/moritzcarlonaeumann/Documents/GitHub/2021-topic-01-team-04/Data/cellline_datasets.rda")
 load("/Users/moritzcarlonaeumann/Documents/GitHub/2021-topic-01-team-04/Data/prism_datasets.rda")
 ```
-Remove Cellines that dont show up in achilles
+
 ```{r}
 which(prism.cl[,20] %in% rownames(prism.achilles))
+```
+
+```{r}
 a <- c(1:481)
 for(n in 1:481) {a[n] <- (prism.cl[n,1] %in% rownames(prism.achilles))}
-
-prism.cl.achilles <- prism.cl[rownames(prism.achilles),1 ] 
 dim(prism.cl.achilles)
 a
 prism.cl[3,20]
+b <- which(a == 0)
+prism.cl.achilles <- prism.cl[-b, ]
+dim(prism.cl.achilles)
 ```
 ```{r}
 for(n in 1:481) {prism.cl[n,20] %in% rownames(prism.achilles)}
+```
+```{r}
+keep.rows = apply(prism.cl,1,function(x){prism.cl[x,1] %in% rownames(prism.achilles) })
+keep.rows
 ```
 
 Find PanCan Cellines in prism.cl.achilles
