@@ -10,33 +10,23 @@ cleanslate <- function(incfuncs=F) {
   }
 }
 
-# lateral is.na
-lat.is.na <- function(x, TF=F) {
-  r <- as.vector(sapply(x, is.na))
-  if (TF) {
-    return(r)
-  } else if (!TF) {
-    return(!r)
-  } else {
-    return("ERROR!")
-  }
-}
-
 # frame is.na
-frame.is.na <- function(X, TF=F) {
-  R <- as.data.frame(matrix(nrow = nrow(X), ncol = ncol(X)))
-  rownames(R) <- rownames(X); colnames(R) <- colnames(X)
-  for (i in 1:nrow(X)) {
-    R[i, ] <- lat.is.na(X[i, ], TF)
+frame.is.na <- function(X, invert=F) {
+  R <- as.data.frame(apply(X, 1, is.na))
+  if (!invert) {
+    return(R)
+  } else if (invert) {
+    return(!R)
+  } else {
+    stop ("Argument 'invert' has wrong type. Boolean expected.")
   }
-  return(R)
-}
+}  
 
 # cleaner
 row.col.cleaner <- function(X) {
   fin <- frame.is.na(X)
-  fin1 <- as.vector(rev(which(apply(fin, 1, function(a) {sum(!a)}) == ncol(X))))
-  fin2 <- as.vector(rev(which(apply(fin, 2, function(b) {sum(!b)}) == nrow(X))))
+  fin1 <- as.vector(rev(which(apply(fin, 1, function(a) {sum(a)}) == ncol(X))))
+  fin2 <- as.vector(rev(which(apply(fin, 2, function(b) {sum(b)}) == nrow(X))))
   if (length(fin1) > 0) {
     if (length(fin2) > 0) {
       return(list(X[-fin1, -fin2], fin[-fin1, -fin2]))
@@ -62,11 +52,7 @@ prism.extractor <- function(X, phrase="Pancreatic Cancer") {
 
 # data frame list extractor
 l.prism.extractor <- function(X, phrase="Pancreatic Cancer") {
-  R <- list()
-  for (i in 1:length(X)) {
-    R <- append(R, prism.extractor(X[i]))
-  }
-  return(R)
+  return(as.list(lapply(X, function(x) {prism.extractor(x, phrase = phrase)})))
 }
 
 # extraction veracity verification
@@ -88,39 +74,44 @@ df.NA.to.val <- function(X, mar, fun) {
     stop("Please use data frame type for 'X'.")
   }
   if (fun == "Median" | fun == "median") {
+    s <- apply(X, mar, function(x) {median(as.numeric(x), na.rm = T)})
     if (mar == 1) {
       for (a in 1:nrow(X)) {
-        X[a, which(is.na(X[a, ]))] <- median(as.numeric(X[a, ]), na.rm = T)
+        X[a, which(is.na(X[a, ]))] <- s[a]
       }
     } else if (mar == 2) {
       for (a in 1:ncol(X)) {
-        X[which(is.na(X[, a])), a] <- median(as.numeric(X[, a]), na.rm = T)
+        X[which(is.na(X[, a])), a] <- s[a]
       }
     } else {
       stop("Please use 1 (rows) or 2 (cols) as parameters for 'mar'.")
     }
   } else if (fun == "Mean" | fun == "mean") {
+    s <- apply(X, mar, function(x) {mean(as.numeric(x), na.rm = T)})
     if (mar == 1) {
       for (a in 1:nrow(X)) {
-        X[a, which(is.na(X[a, ]))] <- mean(as.numeric(X[a, ]), na.rm = T)
+        X[a, which(is.na(X[a, ]))] <- s[a]
       }
     } else if (mar == 2) {
       for (a in 1:ncol(X)) {
-        X[which(is.na(X[, a])), a] <- mean(as.numeric(X[, a]), na.rm = T)
+        X[which(is.na(X[, a])), a] <- s[a]
       }
     } else {
       stop("Please use 1 (rows) or 2 (cols) as parameters for 'mar'.")
     }
   } else if (fun == "Normal" | fun == "normal" | fun == "norm" | fun == "Norm") {
+    S <- data.frame(
+      c(apply(X, mar, function(x) {mean(as.numeric(x), na.rm = T)})), 
+      c(apply(X, mar, function(x) {sd(as.numeric(x), na.rm = T)})))
     if (mar == 1) {
       for (a in 1:nrow(X)) {
         wts <- which(is.na(X[a, ])) 
-        X[a, wts] <- rnorm(n = length(wts), mean = mean(as.numeric(X[a, ]), na.rm = T), sd = sd(as.numeric(X[a, ]), na.rm = T))
+        X[a, wts] <- rnorm(n = length(wts), mean = S[a, 1], sd = S[a, 2])
       }
     } else if (mar == 2) {
       for (a in 1:ncol(X)) {
         wts <- which(is.na(X[, a])) 
-        X[wts, a] <- rnorm(n = length(wts), mean = mean(as.numeric(X[, a]), na.rm = T), sd = sd(as.numeric(X[, a]), na.rm = T))
+        X[wts, a] <- rnorm(n = length(wts), mean = S[a, 1], sd = S[a, 2])
       }
     } else {
       stop("Please use 1 (rows) or 2 (cols) as parameters for 'mar'.")
@@ -236,7 +227,7 @@ st.splitter <- function(X, disease="Pancreatic Cancer", sh.mode="initials", sh.n
   }
 }
 
-# efficacious drug identifier            
+# efficacious drug identifier            # this mofo is effed, needa fix
 ef.dr.identifier <- function(X, threshold=0, p.thresh=F, natov="median") {
   if (typeof(X) != "list") {
     stop("Typeof argument X not list.")
