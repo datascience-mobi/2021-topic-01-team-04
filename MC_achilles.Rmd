@@ -9,67 +9,103 @@ knitr::opts_chunk$set(echo = TRUE)
 load("/Users/moritzcarlonaeumann/Documents/GitHub/2021-topic-01-team-04/Data/cellline_datasets.rda")
 load("/Users/moritzcarlonaeumann/Documents/GitHub/2021-topic-01-team-04/Data/prism_datasets.rda")
 ```
-
+Junk
 ```{r}
 which(prism.cl[,20] %in% rownames(prism.achilles))
+for(n in 1:481) {prism.cl[n,20] %in% rownames(prism.achilles)}
+keep.rows = apply(prism.cl,1,function(x){prism.cl[x,1] %in% rownames(prism.achilles) })
 ```
+Sort Prism.cl by depmap_id resulting in prism.cl.ordered
+```{r}
+prism.cl[1:3,1:3]
+
+order(prism.cl$DepMap_ID)
+prism.cl.ordered <- prism.cl[order(prism.cl$DepMap_ID),]
+dim(prism.cl.ordered)
+
+rownames(prism.cl.ordered) <- 1:481
+rownames(prism.cl.ordered)[1:30]
+prism.cl.ordered[1:30,1:3]
+
+```
+
+
 
 ```{r}
 a <- c(1:481)
-for(n in 1:481) {a[n] <- (prism.cl[n,1] %in% rownames(prism.achilles))}
-dim(prism.cl.achilles)
-a
-prism.cl[3,20]
+
+for(n in 1:481) {a[n] <- (prism.cl.ordered[n,1] %in% rownames(prism.achilles))}
+prism.cl.ordered[1:3,]
 b <- which(a == 0)
-prism.cl.achilles <- prism.cl[-b, ]
-dim(prism.cl.achilles)
-```
-```{r}
-for(n in 1:481) {prism.cl[n,20] %in% rownames(prism.achilles)}
-```
-```{r}
-keep.rows = apply(prism.cl,1,function(x){prism.cl[x,1] %in% rownames(prism.achilles) })
-keep.rows
+prism.cl.ordered.achilles <- prism.cl.ordered[-b, ]
+rownames(prism.cl.ordered.achilles) <- 1:350
+
+dim(prism.cl.ordered.achilles)
+prism.cl.ordered.achilles
+dim(prism.cl.ordered)
+prism.cl.ordered.achilles[1:10,1]
+rownames(prism.achilles)[1:10]
 ```
 
 Find PanCan Cellines in prism.cl.achilles
 ```{r}
-prism.cl.pancan <- c(which(prism.cl.achilles[,20] == 'Pancreatic Cancer'))
-pancan.cl.names <- prism.cl[prism.cl.pancan,1]
+prism.cl.pancan.rownumbers <- c(which(prism.cl.ordered.achilles[,20] == 'Pancreatic Cancer'))
+prism.cl.pancan.rownumbers
+pancan.cl.names <- prism.cl.ordered.achilles[prism.cl.pancan.rownumbers,1]
 pancan.cl.names
+
 which(prism.cl.achilles[,20] == 'Pancreatic Cancer')
+
+prism.cl.ordered.achilles[prism.cl.pancan.rownumbers,20]
+rownames(prism.achilles)[prism.cl.pancan.rownumbers]
 ```
+```{r}
+prism.cl.ordered.achilles[1:50,20]
+prism.cl.ordered.achilles[1:50,1]
+```
+
+
+
+```{r}
+rownames(prism.cl.ordered.achilles)[1:10]
+prism.cl.ordered.achilles[1:350,1]
+rownames(prism.achilles)[1:350]
+```
+
 
 The data frame prism.achilles consists of gene knockdown scores. The score is a measure of how essential/important is a particular gene for the cell survival. This score reflects whether upon knocking down that genes does the cell reduce its proliferation or increases it or has no change. Smaller values refers to higher essentiality. The rows of this matrix are the gene names and the columns are the cancer cell line identifiers.
 
 Exploration
 ```{r}
 dim(prism.achilles)
-prism.achilles[1:3,1:4]
-```
-Na Cleanup
-```{r}
-prism.achilles.clean <- na.omit(prism.achilles)
-dim(prism.achilles.clean)
-which(is.na(prism.achilles.clean[,3]))
-is.na(prism.achilles.clean[1:3,3:10])
-
+prism.achilles[1:10,]
 ```
 
 
 ```{r}
-prism.achilles[pancan.cl.names,]
-which(is.na(prism.achilles[pancan.cl.names,1]))
+prism.cl.pancan
+prism.achilles.pancan <- prism.achilles[prism.cl.pancan,]
+prism.achilles.pancan[1:10,]
 ```
 
-Cleanup
+Cleanup of prism.achilles 
+na removal
 ```{r}
 
-prism.achilles.pancan <- prism.achilles[d,]
-sum(is.na(prism.achilles.pancan))
-which(is.na(prism.achilles.pancan))
-which(is.na(prism.achilles[,1:350]))
-rownames(prism.achilles[(which(is.na(prism.achilles[,1:100]))),])
+which(is.na(prism.achilles[,14]))
+prism.achilles[275:280,14]
+prism.achilles[320:325,14]
+which(is.na(prism.achilles))
+```
+```{r}
+z <- c(1:350)
+for(n in 1:350) {z[n] <- sum(is.na(prism.achilles[n,]))}
+z
+```
+```{r}
+sum(is.na(prism.achilles[277,]))
+sum(is.na(prism.achilles[309,]))
+sum(is.na(prism.achilles[323,]))
 ```
 
 ## Including Plots for prism.achilles.pancan
