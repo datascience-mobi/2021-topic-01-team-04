@@ -35,16 +35,16 @@ ef.dr.identifier(pancan.clean, -6)
 Which drugs have a negative impact on cell growth of pancreatic cancer subtypes?
 
 ```{r}
-ef.dr.identifier(PanCanSub.DucAdeexo, -6)
+ef.dr.identifier(PanCan.DucAdeexo, -6)
 ```
 ```{r}
-ef.dr.identifier(PanCanSub.DucAdeCar, -6)
+ef.dr.identifier(PanCan.DucAdeCar, -6)
 ```
 ```{r}
-ef.dr.identifier(PanCanSub.DucAdeCarexo, -6)
+ef.dr.identifier(PanCan.DucAdeCarexo, -6)
 ```
 ```{r}
-ef.dr.identifier(PanCanSub.Som, -6)
+ef.dr.identifier(PanCan.Som, -6)
 ```
 ```{r}
 

@@ -6,7 +6,7 @@ cleanslate <- function(incfuncs=F) {
   } else if (incfuncs == T) {
     rm(list = ls(pos = ".GlobalEnv"), pos = ".GlobalEnv")
   } else {
-    print("Error>> incfuncs has wrong variable type. Use a boolean value.")
+    stop("Argument incfuncs has wrong variable type. Use a boolean value.")
   }
 }
 
@@ -18,7 +18,7 @@ frame.is.na <- function(X, invert=F) {
   } else if (invert) {
     return(!R)
   } else {
-    stop ("Argument 'invert' has wrong type. Boolean expected.")
+    stop("Argument 'invert' has wrong type. Boolean expected.")
   }
 }  
 
@@ -68,12 +68,29 @@ extraction.verifier <- function(X, phrase="Pancreatic Cancer") {
   }
 }
 
-# whole data frame NA to values
-df.NA.to.val <- function(X, mar, fun) {
+# vector imputation             not functional 
+lat.NA.to.val <- function(x, fun, ...) {
+  fun <- match.fun(fun)
+  a <- which(unlist(lapply(x, is.na)))
+  arg <- if(as.character(fun) == "mean" | as.character(fun) == "median") {list(x, ...)} 
+  else if (names(fun) == "rnorm") {list(n = length(a), mean, sd, ...)} 
+  else {stop("Unsupported function called.")}
+  x[a] <- forceAndCall(length(formalArgs(fun)), fun, arg)
+  return(x)
+}
+
+# whole data frame imputation           not functional
+df.NA.to.val <- function(X, mar, fun, ...) {
+  fun <- match.fun(fun)
   if (typeof(X) != "list") {
     stop("Please use data frame type for 'X'.")
   }
   if (fun == "Median" | fun == "median") {
+    R <- apply(X, mar, function(x) {
+      
+    })
+    
+    
     s <- apply(X, mar, function(x) {median(as.numeric(x), na.rm = T)})
     if (mar == 1) {
       for (a in 1:nrow(X)) {
@@ -213,16 +230,14 @@ short.hander <- function(s, mode="initials", n=1, p.ignore=T) {
 # subtype splitter            
 st.splitter <- function(X, disease="Pancreatic Cancer", sh.mode="initials", sh.n=3, sh.p.ignore=T) {
   sts <- st.ex(disease)
-  for (i in 1:length(sts)) {
-    assign(paste("dmid.", i, sep = ""), dmid.ex(sts[i], targetcol = "disease_subtype"))
-  }
+  dmids <- lapply(sts, function(x) {dmid.ex(x, targetcol = "disease_subtype")})
   for (i in 1:length(sts)) {
     assign(paste(
-        short.hander(paste(disease, "Subtype"), mode = sh.mode, n = sh.n, p.ignore = sh.p.ignore), 
+        short.hander(disease, mode = sh.mode, n = sh.n, p.ignore = sh.p.ignore), 
         ".", 
         short.hander(sts[i], mode = sh.mode, n = sh.n, p.ignore = sh.p.ignore), 
         sep = ""), 
-      X[get(paste("dmid.", i, sep = "")), ], 
+      X[unlist(dmids[i]), ], 
       pos = .GlobalEnv)
   }
 }
