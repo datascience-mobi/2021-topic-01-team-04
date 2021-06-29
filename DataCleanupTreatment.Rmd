@@ -47,7 +47,7 @@ ef.dr.identifier(PanCan.DucAdeCarexo, -6)
 ef.dr.identifier(PanCan.Som, -6)
 ```
 ```{r}
-
+View(df.NA.to.val(pancan.clean, 2, "median"))
 ```
 
 

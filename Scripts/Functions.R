@@ -69,74 +69,32 @@ extraction.verifier <- function(X, phrase="Pancreatic Cancer") {
 }
 
 # vector imputation             not functional 
-lat.NA.to.val <- function(x, fun, ...) {
-  fun <- match.fun(fun)
-  a <- which(unlist(lapply(x, is.na)))
-  arg <- if(as.character(fun) == "mean" | as.character(fun) == "median") {list(x, ...)} 
-  else if (names(fun) == "rnorm") {list(n = length(a), mean, sd, ...)} 
-  else {stop("Unsupported function called.")}
-  x[a] <- forceAndCall(length(formalArgs(fun)), fun, arg)
-  return(x)
-}
+lat.NA.to.val <- function(x, fun) {}
 
-# whole data frame imputation           not functional
-df.NA.to.val <- function(X, mar, fun, ...) {
-  fun <- match.fun(fun)
+# whole data frame imputation
+df.NA.to.val <- function(X, mar, fun) {
   if (typeof(X) != "list") {
     stop("Please use data frame type for 'X'.")
   }
   if (fun == "Median" | fun == "median") {
-    R <- apply(X, mar, function(x) {
-      
-    })
-    
-    
-    s <- apply(X, mar, function(x) {median(as.numeric(x), na.rm = T)})
-    if (mar == 1) {
-      for (a in 1:nrow(X)) {
-        X[a, which(is.na(X[a, ]))] <- s[a]
-      }
-    } else if (mar == 2) {
-      for (a in 1:ncol(X)) {
-        X[which(is.na(X[, a])), a] <- s[a]
-      }
-    } else {
-      stop("Please use 1 (rows) or 2 (cols) as parameters for 'mar'.")
-    }
+    return(apply(X, mar, function(x) {
+      x[which(is.na(x))] <- median(as.numeric(x), na.rm = T)
+      return(x)
+    }))
   } else if (fun == "Mean" | fun == "mean") {
-    s <- apply(X, mar, function(x) {mean(as.numeric(x), na.rm = T)})
-    if (mar == 1) {
-      for (a in 1:nrow(X)) {
-        X[a, which(is.na(X[a, ]))] <- s[a]
-      }
-    } else if (mar == 2) {
-      for (a in 1:ncol(X)) {
-        X[which(is.na(X[, a])), a] <- s[a]
-      }
-    } else {
-      stop("Please use 1 (rows) or 2 (cols) as parameters for 'mar'.")
-    }
+    return(apply(X, mar, function(x) {
+      x[which(is.na(x))] <- mean(as.numeric(x), na.rm = T)
+      return(x)
+    }))
   } else if (fun == "Normal" | fun == "normal" | fun == "norm" | fun == "Norm") {
-    S <- data.frame(
-      c(apply(X, mar, function(x) {mean(as.numeric(x), na.rm = T)})), 
-      c(apply(X, mar, function(x) {sd(as.numeric(x), na.rm = T)})))
-    if (mar == 1) {
-      for (a in 1:nrow(X)) {
-        wts <- which(is.na(X[a, ])) 
-        X[a, wts] <- rnorm(n = length(wts), mean = S[a, 1], sd = S[a, 2])
-      }
-    } else if (mar == 2) {
-      for (a in 1:ncol(X)) {
-        wts <- which(is.na(X[, a])) 
-        X[wts, a] <- rnorm(n = length(wts), mean = S[a, 1], sd = S[a, 2])
-      }
-    } else {
-      stop("Please use 1 (rows) or 2 (cols) as parameters for 'mar'.")
-    }
+    return(apply(X, mar, function(x) {
+      w <- which(is.na(x))
+      x[w] <- rnorm(n = sum(w), mean = mean(x, na.rm = T), sd = sd(x,))
+      return(x)
+    })) 
   } else {
     stop("Please use mean, median or normal as parameters for 'fun'.")
   }
-  return(X)
 }
 
 # whole data frame NA to values operation verifier
