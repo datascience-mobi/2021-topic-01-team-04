@@ -19,6 +19,11 @@ hist(apply(df.NA.to.val(prism.clean, 2, "median"), 2, mean), breaks=20, main="Dr
 Which drugs have a negative impact on general cell growth?
 
 ```{r}
+#ef.caller(threshold = c(-7.3, -7, -7, -8, -7.5, -7.5), greaterthan = F, addat = c("prism.clean", "pancan.clean"))
+```
+
+
+```{r}
 ef.dr.identifier(prism.clean, -7.3, F)
 ```
 

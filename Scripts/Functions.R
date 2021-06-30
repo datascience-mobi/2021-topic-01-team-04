@@ -1,15 +1,3 @@
-##  global object remover
-#   Removes all objects including (incfuncs=T) or excluding functions (incfuncs=F) from the global environment.
-cleanslate <- function(incfuncs=F) {
-  if (incfuncs == F) {
-    rm(list = setdiff(ls(pos = ".GlobalEnv"), lsf.str(pos = ".GlobalEnv")), pos = ".GlobalEnv")
-  } else if (incfuncs == T) {
-    rm(list = ls(pos = ".GlobalEnv"), pos = ".GlobalEnv")
-  } else {
-    stop("Argument incfuncs has wrong variable type. Use a boolean value.")
-  }
-}
-
 ##  frame is.na
 #   Gives out a data frame of the same dimensions and orientations as the input data frame with TRUE (invert=F) or FALSE (invert=T) for each NA in the input data frame.
 frame.is.na <- cmpfun(function(X, invert=F) {
@@ -204,16 +192,15 @@ st.splitter <- cmpfun(function(X, disease="Pancreatic Cancer", custom.sh=F, sh.m
       r <- append(r, dlg_input(message = paste("Please enter a custom short hand for ", disease, " subtype: ", sts[i], sep = ""))$res)
       assign(r[i], X[unlist(dmids[i]), ], pos = .GlobalEnv)
     }
-    assign("st.split.vars", r, pos = .GlobalEnv)
   }
+  assign("st.split.vars", r, pos = .GlobalEnv)
 })
 
 ##  efficacious drug identifier         DOSCOR YET TO BE IMPLEMENTED
 #   
-
 ef.dr.identifier <- cmpfun(function(X, threshold, greaterthan, impmeth="i", doscor = F) {
   if (!is.data.frame(X)) {
-    stop("Argument X is not a data frame.", domain = "r-pkg")
+    stop("Argument X is not a data frame. It is a ", typeof(X), ".", domain = "r-pkg")
   } 
   if (impmeth == "ignore" | impmeth == "i" | impmeth == "ign") {
     if (greaterthan) {
@@ -233,3 +220,34 @@ ef.dr.identifier <- cmpfun(function(X, threshold, greaterthan, impmeth="i", dosc
     return(unique(prism.treat[w, "name"]))
   }
 })
+
+
+##  ef caller                 INOPERABLE
+ef.caller <- cmpfun(function(threshold, greaterthan, ..., addat=c()){
+  if (!exists("st.split.vars", envir = .GlobalEnv)) {
+    call("st.splitter", disease = "Pancreatic Cancer", custom.sh = T)
+  }
+  ssv <- append(addat, st.split.vars)
+  r <- list()
+  if (threshold == F) {
+    threshold <- as.double(dlg_input(message = "Enter custom threshold for all datasets.")$res)
+    for (i in 1:length(ssv)) {
+      r <- append(r, ef.dr.identifier(list(..., X = as.data.frame(get(ssv[i], pos = .GlobalEnv)), threshold = threshold, greaterthan = greaterthan)))
+    }
+  } else if (threshold == T) {
+    for (i in 1:length(ssv)) {
+      r <- append(r, ef.dr.identifier(list(..., X = as.data.frame(get(ssv[i], pos = .GlobalEnv)), threshold = as.double(dlg_input(message = paste("Enter custom threshold for dataset ", ssv[i],".", sep = ""))$res), greaterthan = greaterthan)))
+    }
+  } else if (length(threshold) == length(ssv)) {
+    for (i in 1:length(ssv)) {
+      r <- append(r, ef.dr.identifier(list(..., X = as.data.frame(get(ssv[i], pos = .GlobalEnv)), threshold = threshold[i], greaterthan = greaterthan)))
+    }
+  } else if (is.double(threshold)) {
+    for (i in 1:length(ssv)) {
+      r <- append(r, ef.dr.identifier(list(..., X = as.data.frame(get(ssv[i], pos = .GlobalEnv)), threshold = threshold, greaterthan = greaterthan)))
+    }
+  } else {
+    stop(paste("Argument 'threshold' has unexpected value at ", threshold, ". Please refer to the code.", sep = ""))
+  }
+  return(unlist(r))
+}) 
