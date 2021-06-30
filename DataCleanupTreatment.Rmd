@@ -21,33 +21,29 @@ hist(apply(df.NA.to.val(prism.clean, 2, "median"), 2, mean), breaks=20, main="Dr
 Which drugs have a negative impact on general cell growth?
 
 ```{r}
-ef.dr.identifier(prism.clean, -6)
+ef.dr.identifier(prism.clean, -7.3, F)
 ```
 
 
 Which drugs have a negative impact on pancreatic cancer cell growth?
 
 ```{r}
-ef.dr.identifier(pancan.clean, -6)
+ef.dr.identifier(pancan.clean, -7, F)
 ```
 
 
 Which drugs have a negative impact on cell growth of pancreatic cancer subtypes?
 ```{r}
-hist(apply(df.NA.to.val(PanCan.DucAdeexo, 2, "median"), 2, mean), breaks=20, main="Drug Efficacy across Pancreatic Cancer Cell Lines", xlab="Mean Logfold Drug Effect on Cell Growth", ylab="Number of Drugs")
-```
-
-```{r}
-ef.dr.identifier(PanCan.DucAdeexo, -6)
+ef.dr.identifier(PanCan.DucAdeexo, -7, F)
 ```
 ```{r}
-ef.dr.identifier(PanCan.DucAdeCar, -6)
+ef.dr.identifier(PanCan.DucAdeCar, -8, F)
 ```
 ```{r}
-ef.dr.identifier(PanCan.DucAdeCarexo, -6)
+ef.dr.identifier(PanCan.DucAdeCarexo, -7.5, F)
 ```
 ```{r}
-ef.dr.identifier(PanCan.Som, -6)
+ef.dr.identifier(PanCan.Som, -7.5, F)
 ```
 ```{r}
 
