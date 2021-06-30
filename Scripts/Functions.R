@@ -41,30 +41,32 @@ row.col.cleaner <- cmpfun(function(X, ex=T) {
 })
 
 ##  extractor
-prism.extractor <- cmpfun(function(X, phrase="Pancreatic Cancer") {
-  R <- X[prism.cl[which(prism.cl[, "disease"] == phrase), "DepMap_ID"], ]
+#   Gives out a data frame with the subset of the input data frame which matches the disease type specified with the argument 'disease'.
+prism.extractor <- cmpfun(function(X, disease="Pancreatic Cancer") {
+  R <- X[prism.cl[which(prism.cl[, "disease"] == disease), "DepMap_ID"], ]
   return(R)
 })
 
 ##  data frame list extractor
-l.prism.extractor <- cmpfun(function(X, phrase="Pancreatic Cancer") {
-  return(as.list(lapply(X, function(x) {prism.extractor(x, phrase = phrase)})))
+#   Iterates the above extractor over a list of data frames. Gives out a list of extracted data frames.
+l.prism.extractor <- cmpfun(function(X, disease="Pancreatic Cancer") {
+  return(as.list(lapply(X, prism.extractor, disease = disease)))
 })
 
-##  extraction veracity verification
-extraction.verifier <- cmpfun(function(X, phrase="Pancreatic Cancer") {
+##  extraction veracity verification              NOT FUNCTIONAL!!!
+extraction.verifier <- cmpfun(function(X, disease="Pancreatic Cancer") {
   r <- c()
   for (i in 1:nrow(X)) {
     r <- append(r, prism.cl[which(prism.cl[, "DepMap_ID"] == rownames(X)[i]), 20])
   }
-  if (sum(r == phrase) == nrow(X)) {
+  if (sum(r == disease) == nrow(X)) {
     return(T)
   } else {
     return(F)
   }
 })
 
-##  vector imputation             not functional 
+##  vector imputation             NOT FUNCTIONAL!!!
 lat.NA.to.val <- function(x, fun) {}
 
 ##  whole data frame imputation
@@ -189,22 +191,24 @@ short.hander <- cmpfun(function(s, mode="initials", n=1, p.ignore=T) {
 
 ##  subtype splitter   
 #
-
-st.splitter <- cmpfun(function(X, disease="Pancreatic Cancer", sh.mode="initials", sh.n=3, sh.p.ignore=T) {
+st.splitter <- cmpfun(function(X, disease="Pancreatic Cancer", custom.sh=F, sh.mode="initials", sh.n=3, sh.p.ignore=T) {
   sts <- st.ex(disease)
-  dmids <- lapply(sts, function(x) {dmid.ex(x, targetcol = "disease_subtype")})
-  for (i in 1:length(sts)) {
-    assign(paste(
-        short.hander(disease, mode = sh.mode, n = sh.n, p.ignore = sh.p.ignore), 
-        ".", 
-        short.hander(sts[i], mode = sh.mode, n = sh.n, p.ignore = sh.p.ignore), 
-        sep = ""), 
-      X[unlist(dmids[i]), ], 
-      pos = .GlobalEnv)
+  dmids <- lapply(sts, dmid.ex, targetcol = "disease_subtype")
+  if (!custom.sh) {
+    for (i in 1:length(sts)) {
+      assign(paste(short.hander(disease, mode = sh.mode, n = sh.n, p.ignore = sh.p.ignore), ".", short.hander(sts[i], mode = sh.mode, n = sh.n, p.ignore = sh.p.ignore), sep = ""), X[unlist(dmids[i]), ], pos = .GlobalEnv)
+    }
+  } else if (custom.sh) {
+    r <- c()
+    for (i in 1:length(sts)) {
+      r <- append(r, dlg_input(message = paste("Please enter a custom short hand for ", disease, " subtype: ", sts[i], sep = ""))$res)
+      assign(r[i], X[unlist(dmids[i]), ], pos = .GlobalEnv)
+    }
+    assign("st.split.vars", r, pos = .GlobalEnv)
   }
 })
 
-##  efficacious drug identifier         #doscor still unused
+##  efficacious drug identifier         DOSCOR YET TO BE IMPLEMENTED
 #   
 
 ef.dr.identifier <- cmpfun(function(X, threshold, greaterthan, impmeth="i", doscor = F) {

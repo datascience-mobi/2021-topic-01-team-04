@@ -7,9 +7,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-source("Scripts/Presets.R")
-source("Scripts/Functions.R")
-source("Scripts/Preloader.R")
+source("Scripts/Initiator.R")
 ```
 
 
@@ -34,16 +32,16 @@ ef.dr.identifier(pancan.clean, -7, F)
 
 Which drugs have a negative impact on cell growth of pancreatic cancer subtypes?
 ```{r}
-ef.dr.identifier(PanCan.DucAdeexo, -7, F)
+ef.dr.identifier(get(st.split.vars[1]), -7, F)
 ```
 ```{r}
-ef.dr.identifier(PanCan.DucAdeCar, -8, F)
+ef.dr.identifier(get(st.split.vars[2]), -8, F)
 ```
 ```{r}
-ef.dr.identifier(PanCan.DucAdeCarexo, -7.5, F)
+ef.dr.identifier(get(st.split.vars[3]), -7.5, F)
 ```
 ```{r}
-ef.dr.identifier(PanCan.Som, -7.5, F)
+ef.dr.identifier(get(st.split.vars[4]), -7.5, F)
 ```
 ```{r}
 
