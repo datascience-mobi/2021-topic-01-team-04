@@ -188,7 +188,9 @@ for(i in 1:ncol(prism.exp.pan))
   wil = c(wilcox.test(prism.exp.pan[,i], random.prism.exp[,i], exact = FALSE)$p.value)
   p.vector = append(p.vector, wil)
   
-  }
+}
+
+
 
 
 ```
@@ -202,10 +204,50 @@ Removing NAs in boolean.p.vector. By replacing it with FALSE. Now we can create 
 ```{r}
 boolean.p.vector[is.na(boolean.p.vector)] = FALSE
 summary(boolean.p.vector)
-interesting.genes = colnames(prism.exp.pan[,boolean.p.vector])
+test.interesting.genes = colnames(prism.exp.pan[,boolean.p.vector])
 ```
 
+Executing a lot of times to find out, which genes are really interesting.
+```{r}
 
+#interesting.genes = vector()
+q = 90
+alpha = 0.05
+for(g in 1:q)
+  {
+    p.vector = vector()
+    random.prism.exp = prism.exp.nopan[(sample(nrow(prism.exp.nopan), 33)),]
+
+
+    for(i in 1:ncol(prism.exp.pan))
+      {
+  
+        wil = c(wilcox.test(prism.exp.pan[,i], random.prism.exp[,i], exact = FALSE)$p.value)
+        p.vector = append(p.vector, wil)
+  
+    }
+    
+    boolean.p.vector = p.vector <= alpha
+    boolean.p.vector[is.na(boolean.p.vector)] = FALSE
+    interesting.genes = append(interesting.genes, colnames(prism.exp.pan[,boolean.p.vector]))
+  }
+```
+```{r}
+hundred.table.interesting.genes = table(interesting.genes)
+hundred.df.interesting.genes = as.data.frame(hundred.table.interesting.genes)
+```
+
+```{r}
+hist(hundred.table.interesting.genes,
+     freq = TRUE,
+     main = "Frequency of genes with significant difference",
+     xlab = "Genes",
+     ylab = "Frequency",
+     plot = TRUE,
+     breaks = "FD")
+
+dim(hundred.df.interesting.genes)
+```
 
 
 
