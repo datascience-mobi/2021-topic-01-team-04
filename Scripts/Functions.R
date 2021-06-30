@@ -76,24 +76,31 @@ df.NA.to.val <- function(X, mar, fun) {
   if (typeof(X) != "list") {
     stop("Please use data frame type for 'X'.")
   }
-  if (fun == "Median" | fun == "median") {
-    return(apply(X, mar, function(x) {
-      x[which(is.na(x))] <- median(as.numeric(x), na.rm = T)
-      return(x)
-    }))
-  } else if (fun == "Mean" | fun == "mean") {
-    return(apply(X, mar, function(x) {
-      x[which(is.na(x))] <- mean(as.numeric(x), na.rm = T)
-      return(x)
-    }))
-  } else if (fun == "Normal" | fun == "normal" | fun == "norm" | fun == "Norm") {
-    return(apply(X, mar, function(x) {
-      w <- which(is.na(x))
-      x[w] <- rnorm(n = sum(w), mean = mean(x, na.rm = T), sd = sd(x,))
-      return(x)
-    })) 
+  if (dim(X)[mar] == 1) {
+    print(paste("dim(X)[", mar, "] is not of sufficient size to enact imputation. NAs are instead removed.", sep = ""))
+    return(X[-which(is.na(X))])
+  } else if (dim(X)[mar] > 1) {
+    if (fun == "Median" | fun == "median") {
+      return(apply(X, mar, function(x) {
+        x[which(is.na(x))] <- median(as.numeric(x), na.rm = T)
+        return(x)
+      }))
+    } else if (fun == "Mean" | fun == "mean") {
+      return(apply(X, mar, function(x) {
+        x[which(is.na(x))] <- mean(as.numeric(x), na.rm = T)
+        return(x)
+      }))
+    } else if (fun == "Normal" | fun == "normal" | fun == "norm" | fun == "Norm") {
+      return(apply(X, mar, function(x) {
+        w <- which(is.na(x))
+        x[w] <- rnorm(n = sum(w), mean = mean(x, na.rm = T), sd = sd(x,))
+        return(x)
+      })) 
+    } else {
+      stop("Please use mean, median or normal as parameters for 'fun'.")
+    }
   } else {
-    stop("Please use mean, median or normal as parameters for 'fun'.")
+    stop(paste("dim(X)[", mar, "] is not positive."))
   }
 }
 
@@ -200,21 +207,12 @@ st.splitter <- function(X, disease="Pancreatic Cancer", sh.mode="initials", sh.n
   }
 }
 
-# efficacious drug identifier            # this mofo is effed, needa fix
-ef.dr.identifier <- function(X, threshold=0, p.thresh=F, natov="median") {
+# efficacious drug identifier
+ef.dr.identifier <- function(X, threshold=0, greaterthan=T, natov="median") {
   if (typeof(X) != "list") {
     stop("Typeof argument X not list.")
-  } else if (dim(X)[1] > 1) {
-    if (p.thresh) {
-      return(unique(prism.treat[factor(names(which(apply(df.NA.to.val(X, 1, natov), 2, mean) > threshold))), "name"]))
-    } else if (!p.thresh) {
-      return(unique(prism.treat[factor(names(which(apply(df.NA.to.val(X, 1, natov), 2, mean) < threshold))), "name"]))
-    }
-  } else if(dim(X)[1] == 1) {
-    if (p.thresh) {
-      return(unique(prism.treat[factor(names(which(apply(X[-which(is.na(X))], 1, mean) > threshold))), "name"]))
-    } else if (!p.thresh) {
-      return(unique(prism.treat[factor(names(which(apply(X[-which(is.na(X))], 1, mean) < threshold))), "name"]))
-    }
+  } 
+  if (greaterthan) {
+    
   }
 }

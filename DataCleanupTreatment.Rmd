@@ -33,6 +33,9 @@ ef.dr.identifier(pancan.clean, -6)
 
 
 Which drugs have a negative impact on cell growth of pancreatic cancer subtypes?
+```{r}
+hist(apply(df.NA.to.val(PanCan.DucAdeexo, 2, "median"), 2, mean), breaks=20, main="Drug Efficacy across Pancreatic Cancer Cell Lines", xlab="Mean Logfold Drug Effect on Cell Growth", ylab="Number of Drugs")
+```
 
 ```{r}
 ef.dr.identifier(PanCan.DucAdeexo, -6)
@@ -47,7 +50,7 @@ ef.dr.identifier(PanCan.DucAdeCarexo, -6)
 ef.dr.identifier(PanCan.Som, -6)
 ```
 ```{r}
-View(df.NA.to.val(pancan.clean, 2, "median"))
+
 ```
 
 
