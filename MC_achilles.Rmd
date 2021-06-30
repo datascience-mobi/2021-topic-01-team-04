@@ -175,8 +175,17 @@ achilles.research.dataframe[1:7,which(achilles.research.dataframe[6,] == 1)]
 
 
 ```{r}
-cor.mat.achilles <- cor(prism.achilles.numeric.pancan[,1:100])
-which(cor.mat.achilles > 0.85 & cor.mat.achilles < 1) 
-cor.mat.achilles[which(cor.mat.achilles > 0.85 & cor.mat.achilles < 1)]
+
+```
+```{r}
+cor.mat.achilles[779,782]
+```
+```{r}
+merlinsvariable <- 10000
+cor.mat.achilles <- cor(prism.achilles.numeric.pancan[,1:merlinsvariable])
+interesting.cor.values <- which(cor.mat.achilles > 0.90 & cor.mat.achilles < 1 ) 
+interesting.cor.rows <- (((interesting.cor.values - (interesting.cor.values %% merlinsvariable)) /merlinsvariable) +1)
+interesting.cor.cols <- (interesting.cor.values %% merlinsvariable)
+cor.mat.achilles[interesting.cor.rows,  interesting.cor.cols]
 ```
 
