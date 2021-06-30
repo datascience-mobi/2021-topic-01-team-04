@@ -6,7 +6,7 @@ cleanslate <- function(incfuncs=F) {
   } else if (incfuncs == T) {
     rm(list = ls(pos = ".GlobalEnv"), pos = ".GlobalEnv")
   } else {
-    print("Error>> incfuncs has wrong variable type. Use a boolean value.")
+    stop("Argument incfuncs has wrong variable type. Use a boolean value.")
   }
 }
 
@@ -18,7 +18,7 @@ frame.is.na <- function(X, invert=F) {
   } else if (invert) {
     return(!R)
   } else {
-    stop ("Argument 'invert' has wrong type. Boolean expected.")
+    stop("Argument 'invert' has wrong type. Boolean expected.")
   }
 }  
 
@@ -68,58 +68,40 @@ extraction.verifier <- function(X, phrase="Pancreatic Cancer") {
   }
 }
 
-# whole data frame NA to values
+# vector imputation             not functional 
+lat.NA.to.val <- function(x, fun) {}
+
+# whole data frame imputation
 df.NA.to.val <- function(X, mar, fun) {
   if (typeof(X) != "list") {
     stop("Please use data frame type for 'X'.")
   }
-  if (fun == "Median" | fun == "median") {
-    s <- apply(X, mar, function(x) {median(as.numeric(x), na.rm = T)})
-    if (mar == 1) {
-      for (a in 1:nrow(X)) {
-        X[a, which(is.na(X[a, ]))] <- s[a]
-      }
-    } else if (mar == 2) {
-      for (a in 1:ncol(X)) {
-        X[which(is.na(X[, a])), a] <- s[a]
-      }
+  if (dim(X)[mar] == 1) {
+    print(paste("dim(X)[", mar, "] is not of sufficient size to enact imputation. NAs are instead removed.", sep = ""))
+    return(X[-which(is.na(X))])
+  } else if (dim(X)[mar] > 1) {
+    if (fun == "Median" | fun == "median") {
+      return(apply(X, mar, function(x) {
+        x[which(is.na(x))] <- median(as.numeric(x), na.rm = T)
+        return(x)
+      }))
+    } else if (fun == "Mean" | fun == "mean") {
+      return(apply(X, mar, function(x) {
+        x[which(is.na(x))] <- mean(as.numeric(x), na.rm = T)
+        return(x)
+      }))
+    } else if (fun == "Normal" | fun == "normal" | fun == "norm" | fun == "Norm") {
+      return(apply(X, mar, function(x) {
+        w <- which(is.na(x))
+        x[w] <- rnorm(n = sum(w), mean = mean(x, na.rm = T), sd = sd(x,))
+        return(x)
+      })) 
     } else {
-      stop("Please use 1 (rows) or 2 (cols) as parameters for 'mar'.")
-    }
-  } else if (fun == "Mean" | fun == "mean") {
-    s <- apply(X, mar, function(x) {mean(as.numeric(x), na.rm = T)})
-    if (mar == 1) {
-      for (a in 1:nrow(X)) {
-        X[a, which(is.na(X[a, ]))] <- s[a]
-      }
-    } else if (mar == 2) {
-      for (a in 1:ncol(X)) {
-        X[which(is.na(X[, a])), a] <- s[a]
-      }
-    } else {
-      stop("Please use 1 (rows) or 2 (cols) as parameters for 'mar'.")
-    }
-  } else if (fun == "Normal" | fun == "normal" | fun == "norm" | fun == "Norm") {
-    S <- data.frame(
-      c(apply(X, mar, function(x) {mean(as.numeric(x), na.rm = T)})), 
-      c(apply(X, mar, function(x) {sd(as.numeric(x), na.rm = T)})))
-    if (mar == 1) {
-      for (a in 1:nrow(X)) {
-        wts <- which(is.na(X[a, ])) 
-        X[a, wts] <- rnorm(n = length(wts), mean = S[a, 1], sd = S[a, 2])
-      }
-    } else if (mar == 2) {
-      for (a in 1:ncol(X)) {
-        wts <- which(is.na(X[, a])) 
-        X[wts, a] <- rnorm(n = length(wts), mean = S[a, 1], sd = S[a, 2])
-      }
-    } else {
-      stop("Please use 1 (rows) or 2 (cols) as parameters for 'mar'.")
+      stop("Please use mean, median or normal as parameters for 'fun'.")
     }
   } else {
-    stop("Please use mean, median or normal as parameters for 'fun'.")
+    stop(paste("dim(X)[", mar, "] is not positive."))
   }
-  return(X)
 }
 
 # whole data frame NA to values operation verifier
@@ -213,35 +195,24 @@ short.hander <- function(s, mode="initials", n=1, p.ignore=T) {
 # subtype splitter            
 st.splitter <- function(X, disease="Pancreatic Cancer", sh.mode="initials", sh.n=3, sh.p.ignore=T) {
   sts <- st.ex(disease)
-  for (i in 1:length(sts)) {
-    assign(paste("dmid.", i, sep = ""), dmid.ex(sts[i], targetcol = "disease_subtype"))
-  }
+  dmids <- lapply(sts, function(x) {dmid.ex(x, targetcol = "disease_subtype")})
   for (i in 1:length(sts)) {
     assign(paste(
-        short.hander(paste(disease, "Subtype"), mode = sh.mode, n = sh.n, p.ignore = sh.p.ignore), 
+        short.hander(disease, mode = sh.mode, n = sh.n, p.ignore = sh.p.ignore), 
         ".", 
         short.hander(sts[i], mode = sh.mode, n = sh.n, p.ignore = sh.p.ignore), 
         sep = ""), 
-      X[get(paste("dmid.", i, sep = "")), ], 
+      X[unlist(dmids[i]), ], 
       pos = .GlobalEnv)
   }
 }
 
-# efficacious drug identifier            # this mofo is effed, needa fix
-ef.dr.identifier <- function(X, threshold=0, p.thresh=F, natov="median") {
+# efficacious drug identifier
+ef.dr.identifier <- function(X, threshold=0, greaterthan=T, natov="median") {
   if (typeof(X) != "list") {
     stop("Typeof argument X not list.")
-  } else if (dim(X)[1] > 1) {
-    if (p.thresh) {
-      return(unique(prism.treat[factor(names(which(apply(df.NA.to.val(X, 1, natov), 2, mean) > threshold))), "name"]))
-    } else if (!p.thresh) {
-      return(unique(prism.treat[factor(names(which(apply(df.NA.to.val(X, 1, natov), 2, mean) < threshold))), "name"]))
-    }
-  } else if(dim(X)[1] == 1) {
-    if (p.thresh) {
-      return(unique(prism.treat[factor(names(which(apply(X[-which(is.na(X))], 1, mean) > threshold))), "name"]))
-    } else if (!p.thresh) {
-      return(unique(prism.treat[factor(names(which(apply(X[-which(is.na(X))], 1, mean) < threshold))), "name"]))
-    }
+  } 
+  if (greaterthan) {
+    
   }
 }

@@ -47,9 +47,10 @@ prism.exp.pan = prism.exp[pan.cl.Vector,]
 Check for NAs
 
 ```{r}
-expressionNAcheck = is.na(prism.exp.pan)
+expressionNAcheck = is.na(prism.exp)
 sum(expressionNAcheck)
-rm(expressionNAcheck)
+
+sum(apply(expressionNAcheck, 2, sum))
 ```
 There are no NAs.
 
@@ -147,7 +148,106 @@ hist(sd.prism.exp.pan.Z,
      breaks = "FD")
 ```
 
+Which genes are especially interesting for us?
 
+Generating a data frame, which contains randomly chosen cell lines
+
+```{r}
+## Creating a prism.exp data frame without pancreatic cell lines
+#zuerst umständlich mit einer selbst geschriebenen Funktion versucht. Gemerkt, dass der Operator %in% genau diesselbe Aufgabe bewältigt.
+prism.exp.nopan = prism.exp[!row.names(prism.exp)%in%pan.cl.Vector,]
+
+## selecting 33 cell lines radomly and putting them in a new data frame
+# (zuerst mit rownames vektor versucht, sample function erlaubte allerdings keine Vektoren, welche aus character bestanden)
+random.prism.exp = prism.exp.nopan[(sample(nrow(prism.exp.nopan), 33)),]
+
+
+```
+
+A comparison between a group of 33 Pancreatic cell lines (prism.exp.pan) and a group of 33 non Pancreatic cell lines
+Comparison between prism.exp.pan and random.prism.exp genes. 
+using the Wilcoxon Rank Sum Test (a.k.a, Mann-Whitney U test)
+
+Is there a significant difference in expression of gene X between pancreatic cancer cell lines and non pancreatic cancer cell lines?
+
+H0: “The mean expression of gene X between pancreatic cancer cell lines and non pancreatic cancer cell lines is equal”
+H1: “The mean expression of gene X between pancreatic cancer cell lines and non pancreatic cancer cell lines is different”
+```{r}
+#for(i in 3)
+#{
+#  p.vector = numeric()
+#  new.val = wilcox.test(prism.exp.pan[,i], random.prism.exp[,i], exact = FALSE)$p.value
+#  p.vector = c(p.vector, new.val)
+#  }
+#print(p.vector)
+
+p.vector = vector()
+for(i in 1:ncol(prism.exp.pan))
+{
+  
+  wil = c(wilcox.test(prism.exp.pan[,i], random.prism.exp[,i], exact = FALSE)$p.value)
+  p.vector = append(p.vector, wil)
+  
+}
+
+
+
+
+```
+
+```{r}
+alpha = 0.05
+boolean.p.vector = p.vector <= alpha
+summary(boolean.p.vector)
+```
+Removing NAs in boolean.p.vector. By replacing it with FALSE. Now we can create a vector containing the genes.
+```{r}
+boolean.p.vector[is.na(boolean.p.vector)] = FALSE
+summary(boolean.p.vector)
+test.interesting.genes = colnames(prism.exp.pan[,boolean.p.vector])
+```
+
+Executing a lot of times to find out, which genes are really interesting.
+```{r}
+
+#interesting.genes = vector()
+q = 90
+alpha = 0.05
+for(g in 1:q)
+  {
+    p.vector = vector()
+    random.prism.exp = prism.exp.nopan[(sample(nrow(prism.exp.nopan), 33)),]
+
+
+    for(i in 1:ncol(prism.exp.pan))
+      {
+  
+        wil = c(wilcox.test(prism.exp.pan[,i], random.prism.exp[,i], exact = FALSE)$p.value)
+        p.vector = append(p.vector, wil)
+  
+    }
+    
+    boolean.p.vector = p.vector <= alpha
+    boolean.p.vector[is.na(boolean.p.vector)] = FALSE
+    interesting.genes = append(interesting.genes, colnames(prism.exp.pan[,boolean.p.vector]))
+  }
+```
+```{r}
+hundred.table.interesting.genes = table(interesting.genes)
+hundred.df.interesting.genes = as.data.frame(hundred.table.interesting.genes)
+```
+
+```{r}
+hist(hundred.table.interesting.genes,
+     freq = TRUE,
+     main = "Frequency of genes with significant difference",
+     xlab = "Genes",
+     ylab = "Frequency",
+     plot = TRUE,
+     breaks = "FD")
+
+dim(hundred.df.interesting.genes)
+```
 
 
 
