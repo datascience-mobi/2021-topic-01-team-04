@@ -140,8 +140,6 @@ quantile(prism.achilles.numeric.pancan,probs=seq(0,1,.1))
 ```{r}
 quantile(prism.achilles.numeric,probs=seq(0,1,.1))
 quantile(prism.achilles.numeric,prob=0.1)
-quanten <- function(x){quantile(x,prob=0.1)}
-quanten(prism.achilles.numeric)
 ```
 ```{r}
 
@@ -156,15 +154,29 @@ Neuen Dataframe für Untersuchungen an prism.achilles.numeric
 ```{r}
 achilles.research.dataframe <- prism.achilles[1:10,]
 achilles.research.dataframe[1:10,1:18119] <- 0
-rownames(achilles.research.dataframe) <- c('max','mean','min','10%quantile','Pancanmean','empty6','empty7','empty8','empty9','empty10')
+rownames(achilles.research.dataframe) <- c('max','mean','min','10%quantile','Pancanmean','is(r5<r4)','stdev','empty8','empty9','empty10')
 
 achilles.research.dataframe[1,] <- apply(prism.achilles.numeric, 2, max)
 achilles.research.dataframe[2,] <- apply(prism.achilles.numeric, 2, mean)
 achilles.research.dataframe[3,] <- apply(prism.achilles.numeric, 2, min)
-achilles.research.dataframe[4,] <- apply(prism.achilles.numeric, 2, quanten)
+achilles.research.dataframe[4,] <- apply(prism.achilles.numeric, 2, function(x){quantile(x,prob=0.1)})
 achilles.research.dataframe[5,] <- apply(prism.achilles.numeric.pancan, 2, mean)
-achilles.research.dataframe[6,] <- apply(prism.achilles.numeric.pancan, 2, mean)
+achilles.research.dataframe[6,] <- apply(achilles.research.dataframe, 2, function(x) {return(x[4] > x[5])})
+achilles.research.dataframe[7,] <- apply(prism.achilles.numeric, 2, var)
 
-achilles.research.dataframe[1:5,1:10]
+```
+
+
+```{r}
+achilles.research.dataframe[1:6,1:100]
+which(achilles.research.dataframe[6,] == 1)
+achilles.research.dataframe[1:7,which(achilles.research.dataframe[6,] == 1)]
+```
+
+
+```{r}
+cor.mat.achilles <- cor(prism.achilles.numeric.pancan[,1:100])
+which(cor.mat.achilles > 0.85 & cor.mat.achilles < 1) 
+cor.mat.achilles[which(cor.mat.achilles > 0.85 & cor.mat.achilles < 1)]
 ```
 
