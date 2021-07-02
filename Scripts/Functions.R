@@ -182,12 +182,13 @@ short.hander <- cmpfun(function(s, mode="initials", n=1, p.ignore=T) {
 st.splitter <- cmpfun(function(X, disease="Pancreatic Cancer", custom.sh=F, sh.mode="initials", sh.n=3, sh.p.ignore=T) {
   sts <- st.ex(disease)
   dmids <- lapply(sts, dmid.ex, targetcol = "disease_subtype")
+  r <- c()
   if (!custom.sh) {
     for (i in 1:length(sts)) {
-      assign(paste(short.hander(disease, mode = sh.mode, n = sh.n, p.ignore = sh.p.ignore), ".", short.hander(sts[i], mode = sh.mode, n = sh.n, p.ignore = sh.p.ignore), sep = ""), X[unlist(dmids[i]), ], pos = .GlobalEnv)
+      r <- append(r, paste(short.hander(disease, mode = sh.mode, n = sh.n, p.ignore = sh.p.ignore), ".", short.hander(sts[i], mode = sh.mode, n = sh.n, p.ignore = sh.p.ignore), sep = ""))
+      assign(r[i], X[unlist(dmids[i]), ], pos = .GlobalEnv)
     }
   } else if (custom.sh) {
-    r <- c()
     for (i in 1:length(sts)) {
       r <- append(r, dlg_input(message = paste("Please enter a custom short hand for ", disease, " subtype: ", sts[i], sep = ""))$res)
       assign(r[i], X[unlist(dmids[i]), ], pos = .GlobalEnv)
