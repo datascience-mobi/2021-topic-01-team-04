@@ -7,9 +7,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-source("Scripts/Presets.R")
-source("Scripts/Functions.R")
-source("Scripts/Preloader.R")
+source("Scripts/Initiator.R")
 ```
 
 
@@ -21,33 +19,34 @@ hist(apply(df.NA.to.val(prism.clean, 2, "median"), 2, mean), breaks=20, main="Dr
 Which drugs have a negative impact on general cell growth?
 
 ```{r}
-ef.dr.identifier(prism.clean, -6)
+#ef.caller(threshold = c(-7.3, -7, -7, -8, -7.5, -7.5), greaterthan = F, addat = c("prism.clean", "pancan.clean"))
+```
+
+
+```{r}
+ef.dr.identifier(prism.clean, -7.3, F)
 ```
 
 
 Which drugs have a negative impact on pancreatic cancer cell growth?
 
 ```{r}
-ef.dr.identifier(pancan.clean, -6)
+ef.dr.identifier(pancan.clean, -7, F)
 ```
 
 
 Which drugs have a negative impact on cell growth of pancreatic cancer subtypes?
 ```{r}
-hist(apply(df.NA.to.val(PanCan.DucAdeexo, 2, "median"), 2, mean), breaks=20, main="Drug Efficacy across Pancreatic Cancer Cell Lines", xlab="Mean Logfold Drug Effect on Cell Growth", ylab="Number of Drugs")
-```
-
-```{r}
-ef.dr.identifier(PanCan.DucAdeexo, -6)
+ef.dr.identifier(get(st.split.vars[1]), -7, F)
 ```
 ```{r}
-ef.dr.identifier(PanCan.DucAdeCar, -6)
+ef.dr.identifier(get(st.split.vars[2]), -8, F)
 ```
 ```{r}
-ef.dr.identifier(PanCan.DucAdeCarexo, -6)
+ef.dr.identifier(get(st.split.vars[3]), -7.5, F)
 ```
 ```{r}
-ef.dr.identifier(PanCan.Som, -6)
+ef.dr.identifier(get(st.split.vars[4]), -7.5, F)
 ```
 ```{r}
 

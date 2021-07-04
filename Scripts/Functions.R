@@ -1,111 +1,96 @@
-# global object remover
-
-cleanslate <- function(incfuncs=F) {
-  if (incfuncs == F) {
-    rm(list = setdiff(ls(pos = ".GlobalEnv"), lsf.str(pos = ".GlobalEnv")), pos = ".GlobalEnv")
-  } else if (incfuncs == T) {
-    rm(list = ls(pos = ".GlobalEnv"), pos = ".GlobalEnv")
-  } else {
-    stop("Argument incfuncs has wrong variable type. Use a boolean value.")
-  }
-}
-
-# frame is.na
-frame.is.na <- function(X, invert=F) {
-  R <- as.data.frame(apply(X, 1, is.na))
+##  frame is.na
+#   Gives out a data frame of the same dimensions and orientations as the input data frame with TRUE (invert=F) or FALSE (invert=T) for each NA in the input data frame.
+frame.is.na <- cmpfun(function(X, invert=F) {
+  R <- as.data.frame(apply(X, 2, is.na))
   if (!invert) {
     return(R)
   } else if (invert) {
     return(!R)
   } else {
-    stop("Argument 'invert' has wrong type. Boolean expected.")
+    stop("Argument 'invert' has wrong type. Boolean expected.", domain = "r-pkg")
   }
-}  
+})  
 
-# cleaner
-row.col.cleaner <- function(X) {
+##  cleaner
+#   Removes all columns and rows of a data frame that ONLY (ex=T) or AT ALL (ex=F) contain NA.
+row.col.cleaner <- cmpfun(function(X, ex=T) {
   fin <- frame.is.na(X)
-  fin1 <- as.vector(rev(which(apply(fin, 1, function(a) {sum(a)}) == ncol(X))))
-  fin2 <- as.vector(rev(which(apply(fin, 2, function(b) {sum(b)}) == nrow(X))))
-  if (length(fin1) > 0) {
-    if (length(fin2) > 0) {
-      return(list(X[-fin1, -fin2], fin[-fin1, -fin2]))
-    } else if (length(fin2) == 0) {
-      return(list(X[-fin1, ], fin[-fin1, ]))
-    }
-  } else if (length(fin1) == 0) {
-    if (length(fin2) > 0) {
-      return(list(X[, -fin2], fin[, -fin2]))
-    } else if (length(fin2) == 0) {
-      return(list(X, fin))
-    }
+  if (ex) {
+    fin1 <- apply(fin, 1, sum) != ncol(X)
+    fin2 <- apply(fin, 2, sum) != nrow(X)
+    return(X[fin1, fin2])
+  } else if (!ex) {
+    fin1 <- apply(fin, 1, sum) == 0
+    fin2 <- apply(fin, 2, sum) == 0
+    return(X[fin1, fin2])
   } else {
-    stop("Please refer to the source code!")
+    stop("Unexpected format of argument 'ex'. 'ex' is a boolean---TRUE to remove data-void columns and rows, FALSE to remove NA-containing columns and rows.", domain = "r-pkg")
   }
-}
+})
 
-# extractor
-prism.extractor <- function(X, phrase="Pancreatic Cancer") {
-  R <- X[prism.cl[which(prism.cl[, "disease"] == phrase), "DepMap_ID"], ]
+##  extractor
+#   Gives out a data frame with the subset of the input data frame which matches the disease type specified with the argument 'disease'.
+prism.extractor <- cmpfun(function(X, disease="Pancreatic Cancer") {
+  R <- X[prism.cl[which(prism.cl[, "disease"] == disease), "DepMap_ID"], ]
   return(R)
-}
+})
 
-# data frame list extractor
-l.prism.extractor <- function(X, phrase="Pancreatic Cancer") {
-  return(as.list(lapply(X, function(x) {prism.extractor(x, phrase = phrase)})))
-}
+##  data frame list extractor
+#   Iterates the above extractor over a list of data frames. Gives out a list of extracted data frames.
+l.prism.extractor <- cmpfun(function(X, disease="Pancreatic Cancer") {
+  return(as.list(lapply(X, prism.extractor, disease = disease)))
+})
 
-# extraction veracity verification
-extraction.verifier <- function(X, phrase="Pancreatic Cancer") {
+##  extraction veracity verification              NOT FUNCTIONAL!!!
+extraction.verifier <- cmpfun(function(X, disease="Pancreatic Cancer") {
   r <- c()
   for (i in 1:nrow(X)) {
     r <- append(r, prism.cl[which(prism.cl[, "DepMap_ID"] == rownames(X)[i]), 20])
   }
-  if (sum(r == phrase) == nrow(X)) {
+  if (sum(r == disease) == nrow(X)) {
     return(T)
   } else {
     return(F)
   }
-}
+})
 
-# vector imputation             not functional 
+##  vector imputation             NOT FUNCTIONAL!!!
 lat.NA.to.val <- function(x, fun) {}
 
-# whole data frame imputation
-df.NA.to.val <- function(X, mar, fun) {
-  if (typeof(X) != "list") {
-    stop("Please use data frame type for 'X'.")
+##  whole data frame imputation
+df.NA.to.val <- cmpfun(function(X, mar, fun) {
+  if (!is.data.frame(X)) {
+    stop("Please use data frame type for 'X'.", domain = "r-pkg")
   }
-  if (dim(X)[mar] == 1) {
-    print(paste("dim(X)[", mar, "] is not of sufficient size to enact imputation. NAs are instead removed.", sep = ""))
+  imar <- if(mar==1){2}else if(mar==2){1}
+  if (dim(X)[imar] == 1) {
+    warning(paste("'dim(X)[", imar, "]' is not of sufficient size at dim(X)[", imar, "]==", dim(X)[imar], " to enact imputation along the chosen margin ", mar, ". NAs are instead removed.", sep = ""), domain = "r-pkg")
     return(X[-which(is.na(X))])
-  } else if (dim(X)[mar] > 1) {
-    if (fun == "Median" | fun == "median") {
-      return(apply(X, mar, function(x) {
-        x[which(is.na(x))] <- median(as.numeric(x), na.rm = T)
-        return(x)
-      }))
-    } else if (fun == "Mean" | fun == "mean") {
-      return(apply(X, mar, function(x) {
-        x[which(is.na(x))] <- mean(as.numeric(x), na.rm = T)
-        return(x)
-      }))
-    } else if (fun == "Normal" | fun == "normal" | fun == "norm" | fun == "Norm") {
-      return(apply(X, mar, function(x) {
-        w <- which(is.na(x))
-        x[w] <- rnorm(n = sum(w), mean = mean(x, na.rm = T), sd = sd(x,))
-        return(x)
-      })) 
-    } else {
-      stop("Please use mean, median or normal as parameters for 'fun'.")
-    }
-  } else {
-    stop(paste("dim(X)[", mar, "] is not positive."))
   }
-}
+  if (dim(X)[imar] <= 50) {
+    warning(paste("'dim(X)[", imar, "]' is relatively small at dim(X)[", imar, "]==", dim(X)[imar], ". Please ensure that imputation along the chosen margin ", mar, " is robust.", sep = ""), domain = "r-pkg")
+  } 
+  if (fun %in% c("Median", "median", "Med", "med", "Medi", "medi")) {
+    r <- apply(X, mar, function(x) {x[which(is.na(x))] <- median(as.numeric(x), na.rm = T); return(x)})
+  } else if (fun %in% c("Mean", "mean", "M", "m")) {
+    r <- apply(X, mar, function(x) {x[which(is.na(x))] <- mean(as.numeric(x), na.rm = T); return(x)})
+  } else if (fun %in% c("Normal", "normal", "Norm", "norm", "Nor", "nor", "N", "n")) {
+    r <- apply(X, mar, function(x) {w <- which(is.na(x)); x[w] <- rnorm(n = sum(w), mean = mean(x, na.rm = T), sd = sd(x, na.rm = T)); return(x)})
+  } else {
+    stop("Please use 'mean', 'median' or 'normal' as parameters for 'fun'.", domain = "r-pkg")
+  }
+  if(ncol(r) != ncol(X) & nrow(r) != nrow(X)) {
+    return(t(r))
+  } else if (ncol(r) == ncol(X) & nrow(r) == nrow(X)) {
+    return(r)
+  } else {
+    stop("Unexpected result. Imputated data frame is not congruent with argument data frame.", domain = "r-pkg")
+  }
+  stop(paste("'dim(X)[", mar, "]' is not positive."), domain = "r-pkg")
+})
 
-# whole data frame NA to values operation verifier
-df.NA.to.val.ver <- function(X, Y, mar, fun, tol=10^-10, m.tol=.1, sd.tol=.1) {
+##  whole data frame NA to values operation verifier
+df.NA.to.val.ver <- cmpfun(function(X, Y, mar, fun, tol=10^-10, m.tol=.1, sd.tol=.1) {
   r <- c()
   if (fun == "median" | fun == "Median") {
     if (mar == 1) {
@@ -149,28 +134,28 @@ df.NA.to.val.ver <- function(X, Y, mar, fun, tol=10^-10, m.tol=.1, sd.tol=.1) {
     }
     return (list(sum(r.m) == length(r.m), sum(r.sd) == length(r.sd), r.m, r.sd))
   }
-}
+})
 
-#subtype extractor
-st.ex <- function(disease="Pancreatic Cancer") {
+##  subtype extractor
+st.ex <- cmpfun(function(disease="Pancreatic Cancer") {
   return(levels(factor(prism.cl[which(prism.cl[, "disease"] == disease), "disease_subtype"])))
-}
+})
 
-# Dep Map ID extractor
-dmid.ex <- function(target, targetcol = "disease_subtype") {
+##  Dep Map ID extractor
+dmid.ex <- cmpfun(function(target, targetcol = "disease_subtype") {
   return(prism.cl[which(prism.cl[, targetcol] == target), "DepMap_ID"])
-}
+})
 
-# short hander 
-short.hander <- function(s, mode="initials", n=1, p.ignore=T) {
+##  short hander 
+short.hander <- cmpfun(function(s, mode="initials", n=1, p.ignore=T) {
   if (typeof(s) != "character") {
-    stop("Typeof argument s not character.")
+    stop("Typeof argument s not character.", domain = "r-pkg")
   }
   if (mode == "none") {
     return(s)
   }
   if (!is.numeric(n)) {
-    stop("Argument n not coercible as numeric.")
+    stop("Argument n not coercible as numeric.", domain = "r-pkg")
   }
   if (p.ignore) {
     s.sep <- gsub("[[:punct:]]", "", unlist(strsplit(s, " ")))
@@ -184,35 +169,86 @@ short.hander <- function(s, mode="initials", n=1, p.ignore=T) {
     }
     return(r)
   } else if (mode == "-vowels") {
-    stop("Not yet ready")
+    stop("Not yet ready", domain = "r-pkg")
   } else if (mode == "initials-vowels") {
-    stop("Not yet ready")
+    stop("Not yet ready", domain = "r-pkg")
   } else {
-    stop("Argument mode not recognised.")
+    stop("Argument 'mode' not recognised.", domain = "r-pkg")
   }
-}
+})
 
-# subtype splitter            
-st.splitter <- function(X, disease="Pancreatic Cancer", sh.mode="initials", sh.n=3, sh.p.ignore=T) {
+##  subtype splitter   
+#
+st.splitter <- cmpfun(function(X, disease="Pancreatic Cancer", custom.sh=F, sh.mode="initials", sh.n=3, sh.p.ignore=T) {
   sts <- st.ex(disease)
-  dmids <- lapply(sts, function(x) {dmid.ex(x, targetcol = "disease_subtype")})
-  for (i in 1:length(sts)) {
-    assign(paste(
-        short.hander(disease, mode = sh.mode, n = sh.n, p.ignore = sh.p.ignore), 
-        ".", 
-        short.hander(sts[i], mode = sh.mode, n = sh.n, p.ignore = sh.p.ignore), 
-        sep = ""), 
-      X[unlist(dmids[i]), ], 
-      pos = .GlobalEnv)
+  dmids <- lapply(sts, dmid.ex, targetcol = "disease_subtype")
+  r <- c()
+  if (!custom.sh) {
+    for (i in 1:length(sts)) {
+      r <- append(r, paste(short.hander(disease, mode = sh.mode, n = sh.n, p.ignore = sh.p.ignore), ".", short.hander(sts[i], mode = sh.mode, n = sh.n, p.ignore = sh.p.ignore), sep = ""))
+      assign(r[i], X[unlist(dmids[i]), ], pos = .GlobalEnv)
+    }
+  } else if (custom.sh) {
+    for (i in 1:length(sts)) {
+      r <- append(r, dlg_input(message = paste("Please enter a custom short hand for ", disease, " subtype: ", sts[i], sep = ""))$res)
+      assign(r[i], X[unlist(dmids[i]), ], pos = .GlobalEnv)
+    }
   }
-}
+  assign("st.split.vars", r, pos = .GlobalEnv)
+})
 
-# efficacious drug identifier
-ef.dr.identifier <- function(X, threshold=0, greaterthan=T, natov="median") {
-  if (typeof(X) != "list") {
-    stop("Typeof argument X not list.")
+##  efficacious drug identifier         DOSCOR YET TO BE IMPLEMENTED
+#   
+ef.dr.identifier <- cmpfun(function(X, threshold, greaterthan, impmeth="i", doscor = F) {
+  if (!is.data.frame(X)) {
+    stop("Argument X is not a data frame. It is a ", typeof(X), ".", domain = "r-pkg")
   } 
-  if (greaterthan) {
-    
+  if (impmeth == "ignore" | impmeth == "i" | impmeth == "ign") {
+    if (greaterthan) {
+      w <- names(which(apply(X, 2, mean, na.rm = T) > threshold))
+      return(unique(prism.treat[w, "name"]))
+    } else if (!greaterthan) {
+      w <- names(which(apply(X, 2, mean, na.rm = T) < threshold))
+      return(unique(prism.treat[w, "name"]))
+    }
   }
-}
+  warning("You are not ignoring NAs. This can impact the reliability of your results negatively. Please check if your method of imputation is robust in regards to your thresholding.", domain = "r-pkg")
+  if (greaterthan) {
+    w <- names(which(apply(df.NA.to.val(X, 2, impmeth), 2, mean) > threshold))
+    return(unique(prism.treat[w, "name"]))
+  } else if (!greaterthan) {
+    w <- names(which(apply(df.NA.to.val(X, 2, impmeth), 2, mean) < threshold))
+    return(unique(prism.treat[w, "name"]))
+  }
+})
+
+
+##  ef caller                 INOPERABLE
+ef.caller <- cmpfun(function(threshold, greaterthan, ..., addat=c()){
+  if (!exists("st.split.vars", envir = .GlobalEnv)) {
+    call("st.splitter", disease = "Pancreatic Cancer", custom.sh = T)
+  }
+  ssv <- append(addat, st.split.vars)
+  r <- list()
+  if (threshold == F) {
+    threshold <- as.double(dlg_input(message = "Enter custom threshold for all datasets.")$res)
+    for (i in 1:length(ssv)) {
+      r <- append(r, ef.dr.identifier(list(..., X = as.data.frame(get(ssv[i], pos = .GlobalEnv)), threshold = threshold, greaterthan = greaterthan)))
+    }
+  } else if (threshold == T) {
+    for (i in 1:length(ssv)) {
+      r <- append(r, ef.dr.identifier(list(..., X = as.data.frame(get(ssv[i], pos = .GlobalEnv)), threshold = as.double(dlg_input(message = paste("Enter custom threshold for dataset ", ssv[i],".", sep = ""))$res), greaterthan = greaterthan)))
+    }
+  } else if (length(threshold) == length(ssv)) {
+    for (i in 1:length(ssv)) {
+      r <- append(r, ef.dr.identifier(list(..., X = as.data.frame(get(ssv[i], pos = .GlobalEnv)), threshold = threshold[i], greaterthan = greaterthan)))
+    }
+  } else if (is.double(threshold)) {
+    for (i in 1:length(ssv)) {
+      r <- append(r, ef.dr.identifier(list(..., X = as.data.frame(get(ssv[i], pos = .GlobalEnv)), threshold = threshold, greaterthan = greaterthan)))
+    }
+  } else {
+    stop(paste("Argument 'threshold' has unexpected value at ", threshold, ". Please refer to the code.", sep = ""))
+  }
+  return(unlist(r))
+}) 
