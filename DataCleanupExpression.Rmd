@@ -194,9 +194,9 @@ for(i in 1:ncol(prism.exp.pan))
 
 
 ```
-
+Bonferroni korrektur muss durchgeführt werden
 ```{r}
-alpha = 0.05
+alpha = 0.05/ncol(prism.exp.pan)
 boolean.p.vector = p.vector <= alpha
 summary(boolean.p.vector)
 ```
@@ -205,14 +205,16 @@ Removing NAs in boolean.p.vector. By replacing it with FALSE. Now we can create 
 boolean.p.vector[is.na(boolean.p.vector)] = FALSE
 summary(boolean.p.vector)
 test.interesting.genes = colnames(prism.exp.pan[,boolean.p.vector])
+test.table.interesting.genes = table(test.interesting.genes)
+test.df.interesting.genes = as.data.frame(test.table.interesting.genes)
 ```
 
 Executing a lot of times to find out, which genes are really interesting.
 ```{r}
 
-#interesting.genes = vector()
-q = 90
-alpha = 0.05
+zweiinteresting.genes = vector()
+q = 100
+alpha = 0.05/ncol(prism.exp.pan)
 for(g in 1:q)
   {
     p.vector = vector()
@@ -229,13 +231,21 @@ for(g in 1:q)
     
     boolean.p.vector = p.vector <= alpha
     boolean.p.vector[is.na(boolean.p.vector)] = FALSE
-    interesting.genes = append(interesting.genes, colnames(prism.exp.pan[,boolean.p.vector]))
+    zweiinteresting.genes = append(zweiinteresting.genes, colnames(prism.exp.pan[,boolean.p.vector]))
   }
 ```
 ```{r}
-hundred.table.interesting.genes = table(interesting.genes)
-hundred.df.interesting.genes = as.data.frame(hundred.table.interesting.genes)
+zwei.table.interesting.genes = table(zweiinteresting.genes)
+zwei.df.interesting.genes = as.data.frame(zwei.table.interesting.genes)
 ```
+
+
+Nur als test zur Sortierung in Sachen Frequenz
+```{r}
+a = order(zwei.df.interesting.genes[,2], decreasing = TRUE, na.last = TRUE)
+b = zwei.df.interesting.genes[a,]
+```
+
 
 ```{r}
 hist(hundred.table.interesting.genes,
