@@ -224,7 +224,7 @@ st.splitter <- cmpfun(function(X, disease="Pancreatic Cancer", custom.sh=F, sh.m
 ##  efficacious drug identifier         doscor needs to be improved for relative effect per dose, not mean effect over all doses..., or both, cause both are interesting?
 
 
-####    doscor = 'dfd' needs to be made compatible to the rest, taking the mean of X initially.
+####    doscor = 'dfd' needs to be made compatible to the rest, taking the mean of X initially???
 #   
 ef.dr.identifier <- cmpfun(function(X, threshold = "q.001", greaterthan = F, impmeth="i", doscor = F, sinonco = F) {
   if (sinonco) {
