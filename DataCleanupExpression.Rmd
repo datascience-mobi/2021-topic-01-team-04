@@ -26,6 +26,9 @@ knitr::opts_chunk$set(echo = TRUE)
 # to get an approximate overview
 str(prism.exp)
 
+untersuche.gene = colnames(prism.exp)
+
+
 # In order to extract the desired cell lines, we need the Depmap IDs of the desired pancreatic cancer celllines. We get the desired Depmap ID's using the prism.cl data set and the subset function. The subset function returns rows of a data frame, which meet the desired condition. We save the reduced prism.cl data set as the cl.metadata.exp variable. 
 cl.metadata.exp = subset(prism.cl, Type_for_Manuscript == "Pancreatic" )
 
@@ -212,8 +215,8 @@ test.df.interesting.genes = as.data.frame(test.table.interesting.genes)
 Executing a lot of times to find out, which genes are really interesting.
 ```{r}
 
-zweiinteresting.genes = vector()
-q = 100
+test.interesting.genes = vector()
+q = 1
 alpha = 0.05/ncol(prism.exp.pan)
 for(g in 1:q)
   {
@@ -231,12 +234,13 @@ for(g in 1:q)
     
     boolean.p.vector = p.vector <= alpha
     boolean.p.vector[is.na(boolean.p.vector)] = FALSE
-    zweiinteresting.genes = append(zweiinteresting.genes, colnames(prism.exp.pan[,boolean.p.vector]))
+    # test.interesting.genes.pvector 
+    test.interesting.genes = append(test.interesting.genes, colnames(prism.exp.pan[,boolean.p.vector]))
   }
 ```
 ```{r}
-zwei.table.interesting.genes = table(zweiinteresting.genes)
-zwei.df.interesting.genes = as.data.frame(zwei.table.interesting.genes)
+test.table.interesting.genes = table(test.interesting.genes)
+test.df.interesting.genes = as.data.frame(test.table.interesting.genes)
 ```
 
 
