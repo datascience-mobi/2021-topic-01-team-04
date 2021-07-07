@@ -6,3 +6,5 @@ if (extraction.verifier(pancan.clean) == F) {
 }
 
 st.splitter(pancan.clean, custom.sh = as.logical(toupper(dlg_input(message = "Do you want to use customised variable names for your disease subtype data frames? This is to be preferred when it is unclear, whether automatically generated variable names are not unique. Input TRUE or FALSE.")$res)))
+
+prism.treat.sinonco <- prism.treat[grep("oncology", prism.treat[, "disease.area"], invert = T), ]

@@ -11,6 +11,8 @@ frame.is.na <- cmpfun(function(X, invert=F) {
   }
 })  
 
+
+
 ##  cleaner
 #   Removes all columns and rows of a data frame that ONLY (ex=T) or AT ALL (ex=F) contain NA.
 row.col.cleaner <- cmpfun(function(X, ex=T) {
@@ -28,6 +30,8 @@ row.col.cleaner <- cmpfun(function(X, ex=T) {
   }
 })
 
+
+
 ##  extractor
 #   Gives out a data frame with the subset of the input data frame which matches the disease type specified with the argument 'disease'.
 prism.extractor <- cmpfun(function(X, disease="Pancreatic Cancer") {
@@ -35,11 +39,15 @@ prism.extractor <- cmpfun(function(X, disease="Pancreatic Cancer") {
   return(R)
 })
 
+
+
 ##  data frame list extractor
 #   Iterates the above extractor over a list of data frames. Gives out a list of extracted data frames.
 l.prism.extractor <- cmpfun(function(X, disease="Pancreatic Cancer") {
   return(as.list(lapply(X, prism.extractor, disease = disease)))
 })
+
+
 
 ##  extraction veracity verification              NOT FUNCTIONAL!!!
 extraction.verifier <- cmpfun(function(X, disease="Pancreatic Cancer") {
@@ -54,8 +62,12 @@ extraction.verifier <- cmpfun(function(X, disease="Pancreatic Cancer") {
   }
 })
 
+
+
 ##  vector imputation             NOT FUNCTIONAL!!!
 lat.NA.to.val <- function(x, fun) {}
+
+
 
 ##  whole data frame imputation
 df.NA.to.val <- cmpfun(function(X, mar, fun) {
@@ -88,6 +100,8 @@ df.NA.to.val <- cmpfun(function(X, mar, fun) {
   }
   stop(paste("'dim(X)[", mar, "]' is not positive."), domain = "r-pkg")
 })
+
+
 
 ##  whole data frame NA to values operation verifier
 df.NA.to.val.ver <- cmpfun(function(X, Y, mar, fun, tol=10^-10, m.tol=.1, sd.tol=.1) {
@@ -136,15 +150,21 @@ df.NA.to.val.ver <- cmpfun(function(X, Y, mar, fun, tol=10^-10, m.tol=.1, sd.tol
   }
 })
 
+
+
 ##  subtype extractor
 st.ex <- cmpfun(function(disease="Pancreatic Cancer") {
   return(levels(factor(prism.cl[which(prism.cl[, "disease"] == disease), "disease_subtype"])))
 })
 
+
+
 ##  Dep Map ID extractor
 dmid.ex <- cmpfun(function(target, targetcol = "disease_subtype") {
   return(prism.cl[which(prism.cl[, targetcol] == target), "DepMap_ID"])
 })
+
+
 
 ##  short hander 
 short.hander <- cmpfun(function(s, mode="initials", n=1, p.ignore=T) {
@@ -177,6 +197,8 @@ short.hander <- cmpfun(function(s, mode="initials", n=1, p.ignore=T) {
   }
 })
 
+
+
 ##  subtype splitter   
 #
 st.splitter <- cmpfun(function(X, disease="Pancreatic Cancer", custom.sh=F, sh.mode="initials", sh.n=3, sh.p.ignore=T) {
@@ -197,30 +219,131 @@ st.splitter <- cmpfun(function(X, disease="Pancreatic Cancer", custom.sh=F, sh.m
   assign("st.split.vars", r, pos = .GlobalEnv)
 })
 
-##  efficacious drug identifier         DOSCOR YET TO BE IMPLEMENTED
+
+
+##  efficacious drug identifier         doscor needs to be improved for relative effect per dose, not mean effect over all doses..., or both, cause both are interesting?
 #   
-ef.dr.identifier <- cmpfun(function(X, threshold, greaterthan, impmeth="i", doscor = F) {
+ef.dr.identifier <- cmpfun(function(X, threshold = "q.001", greaterthan = F, impmeth="i", doscor = F, sinonco = F) {
+  if (sinonco) {
+    assign("prism.treat", get("prism.treat.sinonco", pos = .GlobalEnv), pos = -1)
+  }
+  
   if (!is.data.frame(X)) {
     stop("Argument X is not a data frame. It is a ", typeof(X), ".", domain = "r-pkg")
   } 
-  if (impmeth == "ignore" | impmeth == "i" | impmeth == "ign") {
+  
+  #   correlation of all dosages of each drug
+  
+  if (doscor) {
+    l.drugs <- unique(prism.treat[, "name"])
+    id <- sapply(l.drugs, function(x) rownames(prism.treat[which(prism.treat[, "name"] == x), ]))
+    X.names <- c()
+    for (i in 1:length(id)) {
+      n <- unlist(sapply(unlist(id[i]), function(u) which(colnames(X) == u)))
+      x <- X[, n]
+      X.names <- append(X.names, paste("X.doscor.", i, sep = ""))
+      assign(X.names[i], as.vector(apply(x, 1, mean, na.rm = T)))
+    }
+    X.doscor <- data.frame(mget(X.names))
+    colnames(X.doscor) <- sapply(id, function(x) unlist(x[1]))
+    X <- X.doscor
+  }
+  
+  #   which type of thresholding is to be used? static or quantile?
+  
+  if (is.double(threshold)) {
+    
+    #   static thresholding
+    
+    if (impmeth == "ignore" | impmeth == "i" | impmeth == "ign") {
+      
+      #   NAs are ignored 
+      
+      if (greaterthan) {
+        w <- names(which(apply(X, 2, mean, na.rm = T) > threshold))
+        return(unique(prism.treat[w, "name"]))
+      } else if (!greaterthan) {
+        w <- names(which(apply(X, 2, mean, na.rm = T) < threshold))
+        return(unique(prism.treat[w, "name"]))
+      }
+    }
+    
+    #   NAs are imputated 
+    
+    warning("You are not ignoring NAs. This can impact the reliability of your results negatively. Please check if your method of imputation is robust in regards to your thresholding.", domain = "r-pkg")
     if (greaterthan) {
-      w <- names(which(apply(X, 2, mean, na.rm = T) > threshold))
+      w <- names(which(apply(df.NA.to.val(X, 2, impmeth), 2, mean) > threshold))
       return(unique(prism.treat[w, "name"]))
     } else if (!greaterthan) {
-      w <- names(which(apply(X, 2, mean, na.rm = T) < threshold))
+      w <- names(which(apply(df.NA.to.val(X, 2, impmeth), 2, mean) < threshold))
       return(unique(prism.treat[w, "name"]))
     }
-  }
-  warning("You are not ignoring NAs. This can impact the reliability of your results negatively. Please check if your method of imputation is robust in regards to your thresholding.", domain = "r-pkg")
-  if (greaterthan) {
-    w <- names(which(apply(df.NA.to.val(X, 2, impmeth), 2, mean) > threshold))
-    return(unique(prism.treat[w, "name"]))
-  } else if (!greaterthan) {
-    w <- names(which(apply(df.NA.to.val(X, 2, impmeth), 2, mean) < threshold))
-    return(unique(prism.treat[w, "name"]))
+    
+  } else if (is.character(threshold)) {
+    
+    #   quantile thresholding
+    
+    if (substr(threshold, 1, 1) == "q" | substr(threshold, 1, 1)== "Q") {
+      threshold <- as.double(substr(threshold, 2, nchar(threshold)))
+      if (is.double(threshold)) {
+        
+        #   NAs are ignored
+        
+        if (impmeth == "ignore" | impmeth == "i" | impmeth == "ign") {
+          if (greaterthan) {
+            if (nrow(X) > 1) {
+              x <- apply(X, 2, mean, na.rm = T)
+            } else if (nrow(X) == 1) {
+              x <- as.vector(X)
+              names(x) <- colnames(X)
+            }
+            threshold <- quantile(x, probs = 1 - threshold, na.rm = T)
+            w <- names(which(x > threshold))
+            return(unique(prism.treat[w, "name"]))
+          } else if (!greaterthan) {
+            if (nrow(X) > 1) {
+              x <- apply(X, 2, mean, na.rm = T)
+            } else if (nrow(X) == 1) {
+              x <- as.double(X)
+              names(x) <- colnames(X)
+            }
+            threshold <- quantile(x, probs = threshold, na.rm = T)
+            w <- names(which(x < threshold))
+            return(unique(prism.treat[w, "name"]))
+          }
+        }
+        
+        #   NAs are imputated
+        
+        warning("You are not ignoring NAs. This can impact the reliability of your results negatively. Please check if your method of imputation is robust in regards to your thresholding.", domain = "r-pkg")
+        if (greaterthan) {
+          if (nrow(X) > 1) {
+            x <- apply(df.NA.to.val(X, 2, impmeth), 2, mean, na.rm = T)
+          } else if (nrow(X) == 1) {
+            x <- as.vector(df.NA.to.val(X, 2, impmeth))
+          }
+          threshold <- quantile(x, probs = 1 - threshold, na.rm = T)
+          w <- names(which(x > threshold))
+          return(unique(prism.treat[w, "name"]))
+        } else if (!greaterthan) {
+          if (nrow(X) > 1) {
+            x <- apply(df.NA.to.val(X, 2, impmeth), 2, mean, na.rm = T)
+          } else if (nrow(X) == 1) {
+            x <- as.vector(df.NA.to.val(X, 2, impmeth))
+          }
+          threshold <- quantile(x, probs = threshold, na.rm = T)
+          w <- names(which(x < threshold))
+          return(unique(prism.treat[w, "name"]))
+        }
+      } else {
+        stop("Unexpected format of argument 'threshold'.")
+      }
+    }
+  } else {
+    stop("Unexpected data type of argument 'threshold'.")
   }
 })
+
 
 
 ##  ef caller                 INOPERABLE
