@@ -24,29 +24,29 @@ Which drugs have a negative impact on general cell growth?
 
 
 ```{r}
-ef.dr.identifier(prism.clean, "q.005", F, doscor = T, sinonco = T)
+ef.dr.identifier(prism.clean, "q.01", F, doscor = T, sinonco = T)
 ```
 
 
 Which drugs have a negative impact on pancreatic cancer cell growth?
 
 ```{r}
-ef.dr.identifier(pancan.clean, "q.005", F, doscor = T, sinonco = T)
+ef.dr.identifier(pancan.clean, "q.01", F, doscor = T, sinonco = T)
 ```
 
 
 Which drugs have a negative impact on cell growth of pancreatic cancer subtypes?
 ```{r}
-ef.dr.identifier(get(st.split.vars[1]), "q.005", F, doscor = T, sinonco = T)
+ef.dr.identifier(get(st.split.vars[1]), "q.01", F, doscor = T, sinonco = T)
 ```
 ```{r}
-ef.dr.identifier(get(st.split.vars[2]), "q.005", F, doscor = T, sinonco = T)
+ef.dr.identifier(get(st.split.vars[2]), "q.01", F, doscor = T, sinonco = T)
 ```
 ```{r}
-ef.dr.identifier(get(st.split.vars[3]), "q.005", F, doscor = T, sinonco = T)
+ef.dr.identifier(get(st.split.vars[3]), "q.01", F, doscor = T, sinonco = T)
 ```
 ```{r}
-ef.dr.identifier(get(st.split.vars[4]), "q.005", F, doscor = T, sinonco = T)
+ef.dr.identifier(get(st.split.vars[4]), "q.01", F, doscor = T, sinonco = T)
 ```
 ```{r}
 

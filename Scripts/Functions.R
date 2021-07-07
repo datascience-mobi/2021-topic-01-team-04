@@ -222,6 +222,9 @@ st.splitter <- cmpfun(function(X, disease="Pancreatic Cancer", custom.sh=F, sh.m
 
 
 ##  efficacious drug identifier         doscor needs to be improved for relative effect per dose, not mean effect over all doses..., or both, cause both are interesting?
+
+
+####    doscor = 'dfd' needs to be made compatible to the rest, taking the mean of X initially.
 #   
 ef.dr.identifier <- cmpfun(function(X, threshold = "q.001", greaterthan = F, impmeth="i", doscor = F, sinonco = F) {
   if (sinonco) {
@@ -247,6 +250,26 @@ ef.dr.identifier <- cmpfun(function(X, threshold = "q.001", greaterthan = F, imp
     X.doscor <- data.frame(mget(X.names))
     colnames(X.doscor) <- sapply(id, function(x) unlist(x[1]))
     X <- X.doscor
+  } else if (is.character(doscor)) {
+    if (doscor %in% c("dfd", "efd", "dpd", "epd")) {
+      Y.doscor <- data.frame(as.vector(prism.treat[,"dose"]))
+      Y.doscor.n <- rownames(prism.treat)
+      rownames(Y.doscor) <- Y.doscor.n
+      add.Y <- c()
+      for (i in 1:nrow(Y.doscor)) {
+        n <- which(colnames(X) == Y.doscor.n[i])
+        add.Y <- append(add.Y, mean(as.double(X[, n]), na.rm = T))
+      }
+      Y.doscor <- data.frame(Y.doscor, add.Y)
+      del.Y <- which(is.na(Y.doscor), arr.ind = T)
+      Y.doscor <- Y.doscor[-del.Y[, 1], ]
+      res.Y <- as.vector(apply(Y.doscor, 1, function(x) {return(x[1]/x[2])}))
+      names(res.Y) <- rownames(Y.doscor)
+    } else {
+      warning("Unexpected format of doscor. Doscor has been ignored. Make sure to use 'TRUE', 'FALSE', or 'dfd'.")
+    }
+  } else if (doscor != F) {
+    warning("Unexpected data type of doscor. Doscor has been ignored. Make sure to use 'TRUE', 'FALSE', or 'dfd'.")
   }
   
   #   which type of thresholding is to be used? static or quantile?
