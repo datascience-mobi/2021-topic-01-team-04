@@ -1,0 +1,6 @@
+Merlin:
+
+Differences in ef.dr.identifier results during different doscor-protocols
+PCA / clustering / correlation of dose correlated data
+hematomological malignancy == cancerous tumor?
+find .01 percentile drugs of sinonco that occur also in .01 percentile of cononco
