@@ -122,34 +122,7 @@ hist(var.prism.exp.pan,
 
 
 
-Performing a Z-Transformation
-```{r}
-prism.exp.pan.Z = scale(prism.exp.pan)
 
-# mean value for every column of prism.exp.pancreatic
-meanval.prism.exp.pan.Z = apply(prism.exp.pan.Z, 2, function(x){mean(x)})
-
-# standard deviation value for every column of prism.exp.pancreatic
-sd.prism.exp.pan.Z = apply(prism.exp.pan.Z, 2, function(x){sd(x)})
-
-
-hist(meanval.prism.exp.pan.Z,
-     freq = TRUE,
-     main = "Summary mean expression Values",
-     xlab = "Mean expression Values",
-     ylab = "Counts of Mean expression Values",
-     plot = TRUE,
-     breaks = "fd")
-
-
-hist(sd.prism.exp.pan.Z,
-     freq = TRUE,
-     main = "Summary sd expression Values",
-     xlab = "Sd expression Values",
-     ylab = "Counts of sd expression Values",
-     plot = TRUE,
-     breaks = "FD")
-```
 
 Which genes are especially interesting for us?
 
@@ -263,6 +236,67 @@ hist(hundred.table.interesting.genes,
 dim(hundred.df.interesting.genes)
 ```
 
+
+Performing a Z-Transformation
+```{r}
+prism.exp.pan.Z = scale(prism.exp.pan)
+
+# mean value for every column of prism.exp.pancreatic
+meanval.prism.exp.pan.Z = apply(prism.exp.pan.Z, 2, function(x){mean(x)})
+
+# standard deviation value for every column of prism.exp.pancreatic
+sd.prism.exp.pan.Z = apply(prism.exp.pan.Z, 2, function(x){sd(x)})
+
+
+hist(meanval.prism.exp.pan.Z,
+     freq = TRUE,
+     main = "Summary mean expression Values",
+     xlab = "Mean expression Values",
+     ylab = "Counts of Mean expression Values",
+     plot = TRUE,
+     breaks = "fd")
+
+
+hist(sd.prism.exp.pan.Z,
+     freq = TRUE,
+     main = "Summary sd expression Values",
+     xlab = "Sd expression Values",
+     ylab = "Counts of sd expression Values",
+     plot = TRUE,
+     breaks = "FD")
+```
+
+Let's see if we can find something interesting via k-means clustering. First we use the elbow method
+```{r}
+#selecting the most informative genes
+var.prism.exp.pan = apply(prism.exp.pan, 2, function(x){var(x)})
+topvar.prism.exp.pan = prism.exp.pan[ ,var.prism.exp.pan > quantile(var.prism.exp.pan, probs = 0.75)]
+
+#performing k means
+wss = sapply(1:7,function(e) { 
+  kmeans(x=t(topvar.prism.exp.pan), centers =e)$tot.withinss
+})
+
+plot(1:7,wss,type='b',pch=19,xlab="Number of clusters K",
+     ylab="Total within-clusters sum of squares",main= "prism.exp gene clustering elbow method")
+```
+
+
+```{r}
+#selecting the most informative genes
+prism.exp.Z = scale(prism.exp)
+prism.exp.Z <- na.omit(prism.exp.Z)
+var.prism.exp.Z = apply(prism.exp.Z, 1, function(x){var(x)})
+#topvar.prism.exp.Z = prism.exp[var.prism.exp.Z > quantile(var.prism.exp.Z, probs = 0.75),]
+
+#performing k means
+wss = sapply(400:402,function(e) { 
+  kmeans(x=t(prism.exp.Z), centers =e)$tot.withinss
+})
+
+#plot(1:7,wss,type='b',pch=19,xlab="Number of clusters K",
+#     ylab="Total within-clusters sum of squares",main= "prism.exp cell line clustering elbow method")
+```
 
 
 Destinction between primary and metastasis celllines
