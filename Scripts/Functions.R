@@ -1,3 +1,6 @@
+message("Functions.R >>")
+
+message("   Loading in function 'frame.is.na()'.")
 ##  frame is.na
 #   Gives out a data frame of the same dimensions and orientations as the input data frame with TRUE (invert=F) or FALSE (invert=T) for each NA in the input data frame.
 frame.is.na <- cmpfun(function(X, invert=F) {
@@ -12,7 +15,7 @@ frame.is.na <- cmpfun(function(X, invert=F) {
 })  
 
 
-
+message("   Loading in function 'row.col.cleaner()'.")
 ##  cleaner
 #   Removes all columns and rows of a data frame that ONLY (ex=T) or AT ALL (ex=F) contain NA.
 row.col.cleaner <- cmpfun(function(X, ex=T) {
@@ -31,7 +34,7 @@ row.col.cleaner <- cmpfun(function(X, ex=T) {
 })
 
 
-
+message("   Loading in function 'prism.extractor()'.")
 ##  extractor
 #   Gives out a data frame with the subset of the input data frame which matches the disease type specified with the argument 'disease'.
 prism.extractor <- cmpfun(function(X, disease="Pancreatic Cancer") {
@@ -40,15 +43,14 @@ prism.extractor <- cmpfun(function(X, disease="Pancreatic Cancer") {
 })
 
 
-
-##  data frame list extractor
+##  data frame list extractor         non-operable
 #   Iterates the above extractor over a list of data frames. Gives out a list of extracted data frames.
 l.prism.extractor <- cmpfun(function(X, disease="Pancreatic Cancer") {
   return(as.list(lapply(X, prism.extractor, disease = disease)))
 })
 
 
-
+message("   Loading in function 'extraction.verifier()'.")
 ##  extraction veracity verification              NOT FUNCTIONAL!!!
 extraction.verifier <- cmpfun(function(X, disease="Pancreatic Cancer") {
   r <- c()
@@ -68,7 +70,7 @@ extraction.verifier <- cmpfun(function(X, disease="Pancreatic Cancer") {
 lat.NA.to.val <- function(x, fun) {}
 
 
-
+message("   Loading in function 'df.NA.to.val()'.")
 ##  whole data frame imputation
 df.NA.to.val <- cmpfun(function(X, mar, fun) {
   if (!is.data.frame(X)) {
@@ -151,21 +153,21 @@ df.NA.to.val.ver <- cmpfun(function(X, Y, mar, fun, tol=10^-10, m.tol=.1, sd.tol
 })
 
 
-
+message("   Loading in function 'st.ex()'.")
 ##  subtype extractor
 st.ex <- cmpfun(function(disease="Pancreatic Cancer") {
   return(levels(factor(prism.cl[which(prism.cl[, "disease"] == disease), "disease_subtype"])))
 })
 
 
-
+message("   Loading in function 'dmid.ex()'.")
 ##  Dep Map ID extractor
 dmid.ex <- cmpfun(function(target, targetcol = "disease_subtype") {
   return(prism.cl[which(prism.cl[, targetcol] == target), "DepMap_ID"])
 })
 
 
-
+message("   Loading in function 'short.hander()'.")
 ##  short hander 
 short.hander <- cmpfun(function(s, mode="initials", n=1, p.ignore=T) {
   if (typeof(s) != "character") {
@@ -198,35 +200,88 @@ short.hander <- cmpfun(function(s, mode="initials", n=1, p.ignore=T) {
 })
 
 
-
+message("   Loading in function 'st.splitter()'.")
 ##  subtype splitter   
 #
-st.splitter <- cmpfun(function(X, disease="Pancreatic Cancer", custom.sh=F, sh.mode="initials", sh.n=3, sh.p.ignore=T) {
+st.splitter <- cmpfun(function(X, disease="Pancreatic Cancer", custom.sh=F, sh.mode="initials", sh.n=3, sh.p.ignore=T, doscor = F) {
   sts <- st.ex(disease)
   dmids <- lapply(sts, dmid.ex, targetcol = "disease_subtype")
   r <- c()
   if (!custom.sh) {
     for (i in 1:length(sts)) {
-      r <- append(r, paste(short.hander(disease, mode = sh.mode, n = sh.n, p.ignore = sh.p.ignore), ".", short.hander(sts[i], mode = sh.mode, n = sh.n, p.ignore = sh.p.ignore), sep = ""))
+      r <- append(r, paste(short.hander(disease, mode = sh.mode, n = sh.n, p.ignore = sh.p.ignore), ".", short.hander(sts[i], mode = sh.mode, n = sh.n, p.ignore = sh.p.ignore), if (doscor) ".doscor", sep = ""))
       assign(r[i], X[unlist(dmids[i]), ], pos = .GlobalEnv)
     }
   } else if (custom.sh) {
     for (i in 1:length(sts)) {
-      r <- append(r, dlg_input(message = paste("Please enter a custom short hand for ", disease, " subtype: ", sts[i], sep = ""))$res)
+      r <- append(r, dlg_input(message = paste("Please enter a custom short hand for ", disease, " subtype: ", sts[i], ". Doscor is: ", doscor, sep = ""))$res)
       assign(r[i], X[unlist(dmids[i]), ], pos = .GlobalEnv)
     }
   }
-  assign("st.split.vars", r, pos = .GlobalEnv)
+  assign(paste("st.split.vars", if(doscor) ".doscor", sep = ""), r, pos = .GlobalEnv)
 })
 
 
+message("   Loading in function 'doscor()'.")
+##  dose correlator
+#
+doscor <- cmpfun(function(X, doscor = T, perdrug = T, PT = prism.treat) {
+  if (doscor == T) {
+    l.drugs <- unique(PT[, "name"])
+    id <- sapply(l.drugs, function(x) rownames(PT[which(PT[, "name"] == x), ]))
+    X.names <- c()
+    for (i in 1:length(id)) {
+      x <- X[, unlist(sapply(unlist(id[i]), function(u) which(colnames(X) == u)))]
+      X.names <- append(X.names, paste("X.doscor.", i, sep = ""))
+      assign(X.names[i], as.vector(apply(x, 1, mean, na.rm = T)))
+    }
+    X.doscor <- data.frame(mget(X.names))
+    colnames(X.doscor) <- sapply(id, function(x) unlist(x[1]))
+    return(X.doscor)
+  } else if (is.character(doscor)) {
+    if (doscor %in% c("dfd", "efd", "dpd", "epd")) {
+      Y.doscor <- as.vector(PT[,"dose"])
+      Y.doscor.n <- rownames(PT)
+      names(Y.doscor) <- Y.doscor.n
+      add.Y <- data.frame(row.names = rownames(X))
+      iti <- 0
+      ns <- c()
+      for (i in 1:length(Y.doscor.n)) {
+        n <- which(colnames(X) == Y.doscor.n[i])
+        if (length(n) == 0) next
+        ns <- append(ns, n)
+        iti <- iti + 1
+        add.Y <- data.frame(add.Y, sapply(X[, n], function(x, i) x/Y.doscor[i], i))
+      }
+      colnames(add.Y) <- colnames(X)[ns]
+      rownames(add.Y) <- rownames(X)
+      if (perdrug == T) {
+        d <- unique(PT[, "broad_id"])
+        add.Y <- sapply(d, function(x) {
+          uwu <- grep(x, colnames(add.Y), fixed = T)
+          return(apply(add.Y[, uwu], 1, function(y) if (sum(!is.na(y))==0) return(NA) else mean(y, na.rm = T)))
+        })
+        if (is.vector(add.Y)) add.Y <- t(data.frame(add.Y))
+        colnames(add.Y) <- d
+        rownames(add.Y) <- rownames(X)
+      }
+      return(add.Y)
+    } else {
+      warning("Unexpected format of doscor. Doscor operation has been ignored. Make sure to use 'TRUE', 'FALSE', or 'dfd'.")
+      return(X)
+    }
+  } else if (doscor != F) {
+    warning("Unexpected data type of doscor. Doscor operation has been ignored. Make sure to use 'TRUE', 'FALSE', or 'dfd'.")
+    return(X)
+  }
+})
 
-##  efficacious drug identifier         doscor needs to be improved for relative effect per dose, not mean effect over all doses..., or both, cause both are interesting?
 
-
-####    doscor = 'dfd' needs to be made compatible to the rest, taking the mean of X initially???
+message("   Loading in function 'ef.dr.identifier()'.")
+##  efficacious drug identifier         doscor = 'dfd' takes a fuck-ton of time, unsure how to optimise
+#   doscor = 'dfd' needs to be made compatible to the rest, taking the mean of X initially???
 #   
-ef.dr.identifier <- cmpfun(function(X, threshold = "q.001", greaterthan = F, impmeth="i", doscor = F, sinonco = F) {
+ef.dr.identifier <- cmpfun(function(X, threshold = "q.001", greaterthan = F, impmeth="i", doscor = F, sinonco = F, perdrug = T) {
   if (sinonco) {
     assign("prism.treat", get("prism.treat.sinonco", pos = .GlobalEnv), pos = -1)
   }
@@ -236,40 +291,8 @@ ef.dr.identifier <- cmpfun(function(X, threshold = "q.001", greaterthan = F, imp
   } 
   
   #   correlation of all dosages of each drug
-  
-  if (doscor) {
-    l.drugs <- unique(prism.treat[, "name"])
-    id <- sapply(l.drugs, function(x) rownames(prism.treat[which(prism.treat[, "name"] == x), ]))
-    X.names <- c()
-    for (i in 1:length(id)) {
-      n <- unlist(sapply(unlist(id[i]), function(u) which(colnames(X) == u)))
-      x <- X[, n]
-      X.names <- append(X.names, paste("X.doscor.", i, sep = ""))
-      assign(X.names[i], as.vector(apply(x, 1, mean, na.rm = T)))
-    }
-    X.doscor <- data.frame(mget(X.names))
-    colnames(X.doscor) <- sapply(id, function(x) unlist(x[1]))
-    X <- X.doscor
-  } else if (is.character(doscor)) {
-    if (doscor %in% c("dfd", "efd", "dpd", "epd")) {
-      Y.doscor <- data.frame(as.vector(prism.treat[,"dose"]))
-      Y.doscor.n <- rownames(prism.treat)
-      rownames(Y.doscor) <- Y.doscor.n
-      add.Y <- c()
-      for (i in 1:nrow(Y.doscor)) {
-        n <- which(colnames(X) == Y.doscor.n[i])
-        add.Y <- append(add.Y, mean(as.double(X[, n]), na.rm = T))
-      }
-      Y.doscor <- data.frame(Y.doscor, add.Y)
-      del.Y <- which(is.na(Y.doscor), arr.ind = T)
-      Y.doscor <- Y.doscor[-del.Y[, 1], ]
-      res.Y <- as.vector(apply(Y.doscor, 1, function(x) {return(x[1]/x[2])}))
-      names(res.Y) <- rownames(Y.doscor)
-    } else {
-      warning("Unexpected format of doscor. Doscor has been ignored. Make sure to use 'TRUE', 'FALSE', or 'dfd'.")
-    }
-  } else if (doscor != F) {
-    warning("Unexpected data type of doscor. Doscor has been ignored. Make sure to use 'TRUE', 'FALSE', or 'dfd'.")
+  if (doscor!=F) {
+    X <- doscor(X = X, doscor = doscor, perdrug = perdrug, PT = prism.treat)
   }
   
   #   which type of thresholding is to be used? static or quantile?
@@ -322,7 +345,10 @@ ef.dr.identifier <- cmpfun(function(X, threshold = "q.001", greaterthan = F, imp
             }
             threshold <- quantile(x, probs = 1 - threshold, na.rm = T)
             w <- names(which(x > threshold))
-            return(unique(prism.treat[w, "name"]))
+            if (length(grep("::", w, invert = T)) == 0) return(unique(prism.treat[w, "name"])) else {
+              w <- sapply(w, function(x) grep(x, prism.treat[, "broad_id"]))[1, ]
+              return(prism.treat[w, "name"])
+            }
           } else if (!greaterthan) {
             if (nrow(X) > 1) {
               x <- apply(X, 2, mean, na.rm = T)
@@ -332,7 +358,10 @@ ef.dr.identifier <- cmpfun(function(X, threshold = "q.001", greaterthan = F, imp
             }
             threshold <- quantile(x, probs = threshold, na.rm = T)
             w <- names(which(x < threshold))
-            return(unique(prism.treat[w, "name"]))
+            if (length(grep("::", w, invert = T)) == 0) return(unique(prism.treat[w, "name"])) else {
+              w <- sapply(w, function(x) grep(x, prism.treat[, "broad_id"]))[1, ]
+              return(prism.treat[w, "name"])
+            }
           }
         }
         
