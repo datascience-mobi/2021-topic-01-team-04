@@ -1,8 +1,15 @@
 message("Functions.R >>")
 
+message("   Loading in function 'ob.name.ex()'.")
+
+##  object name extractor
+#   SImple function that returns the name of the single argument 'ob' as a character sting.
+onex <- cmpfun(function(ob) return(deparse(substitute(ob))))
+
+
 message("   Loading in function 'frame.is.na()'.")
 ##  frame is.na
-#   Gives out a data frame of the same dimensions and orientations as the input data frame with TRUE (invert=F) or FALSE (invert=T) for each NA in the input data frame.
+#   Returns a data frame of the same dimensions and orientations as the input data frame with TRUE (invert=F) or FALSE (invert=T) for each NA in the input data frame.
 frame.is.na <- cmpfun(function(X, invert=F) {
   R <- as.data.frame(apply(X, 2, is.na))
   if (!invert) {
@@ -36,7 +43,7 @@ row.col.cleaner <- cmpfun(function(X, ex=T) {
 
 message("   Loading in function 'prism.extractor()'.")
 ##  extractor
-#   Gives out a data frame with the subset of the input data frame which matches the disease type specified with the argument 'disease'.
+#   Returns a data frame with the subset of the input data frame which matches the disease type specified with the argument 'disease'.
 prism.extractor <- cmpfun(function(X, disease="Pancreatic Cancer") {
   R <- X[prism.cl[which(prism.cl[, "disease"] == disease), "DepMap_ID"], ]
   return(R)
@@ -44,7 +51,7 @@ prism.extractor <- cmpfun(function(X, disease="Pancreatic Cancer") {
 
 
 ##  data frame list extractor         non-operable
-#   Iterates the above extractor over a list of data frames. Gives out a list of extracted data frames.
+#   Iterates the above extractor over a list of data frames. Returns a list of extracted data frames.
 l.prism.extractor <- cmpfun(function(X, disease="Pancreatic Cancer") {
   return(as.list(lapply(X, prism.extractor, disease = disease)))
 })
@@ -203,22 +210,22 @@ short.hander <- cmpfun(function(s, mode="initials", n=1, p.ignore=T) {
 message("   Loading in function 'st.splitter()'.")
 ##  subtype splitter   
 #
-st.splitter <- cmpfun(function(X, disease="Pancreatic Cancer", custom.sh=F, sh.mode="initials", sh.n=3, sh.p.ignore=T, doscor = F) {
+st.splitter <- cmpfun(function(X, disease="Pancreatic Cancer", custom.sh=F, sh.mode="initials", sh.n=3, sh.p.ignore=T, doscor =0) {
   sts <- st.ex(disease)
   dmids <- lapply(sts, dmid.ex, targetcol = "disease_subtype")
   r <- c()
   if (!custom.sh) {
     for (i in 1:length(sts)) {
-      r <- append(r, paste(short.hander(disease, mode = sh.mode, n = sh.n, p.ignore = sh.p.ignore), ".", short.hander(sts[i], mode = sh.mode, n = sh.n, p.ignore = sh.p.ignore), if (doscor) ".doscor", sep = ""))
+      r <- append(r, paste(short.hander(disease, mode = sh.mode, n = sh.n, p.ignore = sh.p.ignore), ".", short.hander(sts[i], mode = sh.mode, n = sh.n, p.ignore = sh.p.ignore), if (doscor == 1) ".doscor" else if (doscor == 2) ".perdrug", sep = ""))
       assign(r[i], X[unlist(dmids[i]), ], pos = .GlobalEnv)
     }
   } else if (custom.sh) {
     for (i in 1:length(sts)) {
-      r <- append(r, dlg_input(message = paste("Please enter a custom short hand for ", disease, " subtype: ", sts[i], ". Doscor is: ", doscor, sep = ""))$res)
+      r <- append(r, dlg_input(message = paste("Please enter a custom short hand for ", disease, " subtype: ", sts[i], ". Doscor is: ", if (doscor == 0) "FALSE" else if (doscor == 1) "TRUE" else if (doscor == 2) "perdrug", sep = ""))$res)
       assign(r[i], X[unlist(dmids[i]), ], pos = .GlobalEnv)
     }
   }
-  assign(paste("st.split.vars", if(doscor) ".doscor", sep = ""), r, pos = .GlobalEnv)
+  assign(paste("st.split.vars", if(doscor == 1) ".doscor" else if (doscor == 2) ".perdrug", sep = ""), r, pos = .GlobalEnv)
 })
 
 
@@ -256,11 +263,12 @@ doscor <- cmpfun(function(X, doscor = T, perdrug = T, PT = prism.treat) {
       colnames(add.Y) <- colnames(X)[ns]
       rownames(add.Y) <- rownames(X)
       if (perdrug == T) {
-        d <- unique(PT[, "broad_id"])
-        add.Y <- sapply(d, function(x) {
+        d <- droplevels(unique(PT[, "broad_id"]))
+        add.Y <- as.data.fram(sapply(d, function(x) {
           uwu <- grep(x, colnames(add.Y), fixed = T)
-          return(apply(add.Y[, uwu], 1, function(y) if (sum(!is.na(y))==0) return(NA) else mean(y, na.rm = T)))
-        })
+          res <- apply(add.Y[uwu], 1, function(y) if (length(y) == 1) return(y) else return(mean(y, na.rm = T)))
+          return(res)
+        }))
         if (is.vector(add.Y)) add.Y <- t(data.frame(add.Y))
         colnames(add.Y) <- d
         rownames(add.Y) <- rownames(X)
@@ -281,7 +289,7 @@ message("   Loading in function 'ef.dr.identifier()'.")
 ##  efficacious drug identifier         doscor = 'dfd' takes a fuck-ton of time, unsure how to optimise
 #   doscor = 'dfd' needs to be made compatible to the rest, taking the mean of X initially???
 #   
-ef.dr.identifier <- cmpfun(function(X, threshold = "q.001", greaterthan = F, impmeth="i", doscor = F, sinonco = F, perdrug = T) {
+ef.dr.identifier <- cmpfun(function(X, threshold = "q.001", greaterthan = F, impmeth="i", sinonco = F) {
   if (sinonco) {
     assign("prism.treat", get("prism.treat.sinonco", pos = .GlobalEnv), pos = -1)
   }
@@ -290,10 +298,8 @@ ef.dr.identifier <- cmpfun(function(X, threshold = "q.001", greaterthan = F, imp
     stop("Argument X is not a data frame. It is a ", typeof(X), ".", domain = "r-pkg")
   } 
   
-  #   correlation of all dosages of each drug
-  if (doscor!=F) {
-    X <- doscor(X = X, doscor = doscor, perdrug = perdrug, PT = prism.treat)
-  }
+  #   what doscor mode has been used on the data?
+  if (grepl(".doscor", onex(X))) doscor <- 1 else if (grepl(".perdrug", onex(X))) doscor <- 2 else doscor <- 0
   
   #   which type of thresholding is to be used? static or quantile?
   
@@ -306,10 +312,26 @@ ef.dr.identifier <- cmpfun(function(X, threshold = "q.001", greaterthan = F, imp
       #   NAs are ignored 
       
       if (greaterthan) {
-        w <- names(which(apply(X, 2, mean, na.rm = T) > threshold))
+        if (nrow(X) > 1) {
+          x <- apply(X, 2, mean, na.rm = T)
+        } else if (nrow(X) == 1) {
+          x <- as.vector(X)
+          names(x) <- colnames(X)
+        }
+        x <- sort(x, decreasing = T)
+        threshold <- quantile(x, probs = 1 - threshold, na.rm = T)
+        w <- names(which(x > threshold))
         return(unique(prism.treat[w, "name"]))
       } else if (!greaterthan) {
-        w <- names(which(apply(X, 2, mean, na.rm = T) < threshold))
+        if (nrow(X) > 1) {
+          x <- apply(X, 2, mean, na.rm = T)
+        } else if (nrow(X) == 1) {
+          x <- as.double(X)
+          names(x) <- colnames(X)
+        }
+        x <- sort(x, decreasing = F)
+        threshold <- quantile(x, probs = threshold, na.rm = T)
+        w <- names(which(x < threshold))
         return(unique(prism.treat[w, "name"]))
       }
     }
@@ -343,6 +365,7 @@ ef.dr.identifier <- cmpfun(function(X, threshold = "q.001", greaterthan = F, imp
               x <- as.vector(X)
               names(x) <- colnames(X)
             }
+            x <- sort(x, decreasing = T)
             threshold <- quantile(x, probs = 1 - threshold, na.rm = T)
             w <- names(which(x > threshold))
             if (length(grep("::", w, invert = T)) == 0) return(unique(prism.treat[w, "name"])) else {
@@ -356,6 +379,7 @@ ef.dr.identifier <- cmpfun(function(X, threshold = "q.001", greaterthan = F, imp
               x <- as.double(X)
               names(x) <- colnames(X)
             }
+            x <- sort(x, decreasing = F)
             threshold <- quantile(x, probs = threshold, na.rm = T)
             w <- names(which(x < threshold))
             if (length(grep("::", w, invert = T)) == 0) return(unique(prism.treat[w, "name"])) else {
@@ -374,6 +398,7 @@ ef.dr.identifier <- cmpfun(function(X, threshold = "q.001", greaterthan = F, imp
           } else if (nrow(X) == 1) {
             x <- as.vector(df.NA.to.val(X, 2, impmeth))
           }
+          x <- sort(x, decreasing = T)
           threshold <- quantile(x, probs = 1 - threshold, na.rm = T)
           w <- names(which(x > threshold))
           return(unique(prism.treat[w, "name"]))
@@ -383,6 +408,7 @@ ef.dr.identifier <- cmpfun(function(X, threshold = "q.001", greaterthan = F, imp
           } else if (nrow(X) == 1) {
             x <- as.vector(df.NA.to.val(X, 2, impmeth))
           }
+          x <- sort(x, decreasing = F)
           threshold <- quantile(x, probs = threshold, na.rm = T)
           w <- names(which(x < threshold))
           return(unique(prism.treat[w, "name"]))
