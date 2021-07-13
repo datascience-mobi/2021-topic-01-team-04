@@ -225,7 +225,7 @@ st.splitter <- cmpfun(function(X, disease="Pancreatic Cancer", custom.sh=F, sh.m
       assign(r[i], X[unlist(dmids[i]), ], pos = .GlobalEnv)
     }
   }
-  assign(paste("st.split.vars", if(doscor == 1) ".doscor" else if (doscor == 2) ".perdrug", sep = ""), r, pos = .GlobalEnv)
+  assign(paste("st.split.vars", if(doscor == 1) ".doscor" else if (doscor == 2) ".perdrug", sep = ""), data.frame(r, sts), pos = .GlobalEnv)
 })
 
 
@@ -386,6 +386,8 @@ ef.dr.identifier <- cmpfun(function(X, threshold = "q.001", greaterthan = F, imp
               w <- sapply(w, function(x) grep(x, prism.treat[, "broad_id"]))[1, ]
               return(prism.treat[w, "name"])
             }
+          } else {
+            stop("Unexpected format of argument 'threshold'.")
           }
         }
         
@@ -416,10 +418,12 @@ ef.dr.identifier <- cmpfun(function(X, threshold = "q.001", greaterthan = F, imp
       } else {
         stop("Unexpected format of argument 'threshold'.")
       }
+    } else {
+      stop("Unexpected first character of argument 'threshold'.")
     }
   } else {
     stop("Unexpected data type of argument 'threshold'.")
-  }
+  } 
 })
 
 
