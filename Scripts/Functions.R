@@ -210,7 +210,7 @@ short.hander <- cmpfun(function(s, mode="initials", n=1, p.ignore=T) {
 message("   Loading in function 'st.splitter()'.")
 ##  subtype splitter   
 #
-st.splitter <- cmpfun(function(X, disease="Pancreatic Cancer", custom.sh=F, sh.mode="initials", sh.n=3, sh.p.ignore=T, doscor =0) {
+st.splitter <- cmpfun(function(X, disease="Pancreatic Cancer", custom.sh=F, sh.mode="initials", sh.n=3, sh.p.ignore=T, doscor = 0) {
   sts <- st.ex(disease)
   dmids <- lapply(sts, dmid.ex, targetcol = "disease_subtype")
   r <- c()
@@ -264,7 +264,7 @@ doscor <- cmpfun(function(X, doscor = T, perdrug = T, PT = prism.treat) {
       rownames(add.Y) <- rownames(X)
       if (perdrug == T) {
         d <- droplevels(unique(PT[, "broad_id"]))
-        add.Y <- as.data.fram(sapply(d, function(x) {
+        add.Y <- as.data.frame(sapply(d, function(x) {
           uwu <- grep(x, colnames(add.Y), fixed = T)
           res <- apply(add.Y[uwu], 1, function(y) if (length(y) == 1) return(y) else return(mean(y, na.rm = T)))
           return(res)

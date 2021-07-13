@@ -1,6 +1,9 @@
 message("Preloader.R >>")
 
-custom <- as.logical(toupper(dlg_input(message = "Do you want to use customised variable names for your disease subtype data frames? This is to be preferred when it is unclear, whether automatically generated variable names are not unique. Input TRUE or FALSE.")$res))
+while (TRUE) {
+  custom <- as.logical(toupper(dlg_input(message = paste(if (!exists("custom")) "Do you want to use customised variable names for your disease subtype data frames? This is to be preferred when it is unclear, whether automatically generated variable names are not unique." else if (exists("custom")) "Your last input was of the wrong format, please repeat.", "Input TRUE or FALSE."))$res))
+  if (is.logical(custom) && !is.na(custom)) break
+}
 
 message("   Executing cleaning of prism and extraction and cleaning of pancan.")
 
@@ -30,12 +33,12 @@ message("   Executing dose correlation per drug for 'pancna.clean'.")
 pancan.perdrug <- doscor(pancan.clean, doscor = "dfd", perdrug = T, PT = prism.treat)
 
 message("   Executing subtype splitting for 'pancan.clean'.")
-st.splitter(pancan.clean, custom.sh = custom)
+st.splitter(pancan.clean, custom.sh = custom, doscor = 0)
 
 message("   Executing subtype splitting for 'pancan.doscor'.")
-st.splitter(pancan.doscor, custom.sh = custom)
+st.splitter(pancan.doscor, custom.sh = custom, doscor = 1)
 
 message("   Exectuing subtype splitting for 'pancan.perdrug'.")
-st.splitter(pancan.perdrug, custom.sh = custom)
+st.splitter(pancan.perdrug, custom.sh = custom, doscor = 2)
 
 rm(custom)
