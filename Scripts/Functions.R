@@ -239,9 +239,9 @@ ef.dr.identifier <- cmpfun(function(X, threshold = "q.001", greaterthan = F, imp
       #   NAs are ignored 
       if (greaterthan) {
         if (nrow(X) > 1) {
-          x <- apply(X, 2, mean, na.rm = T)
+          x <- as.double(apply(X, 2, mean, na.rm = T))
         } else if (nrow(X) == 1) {
-          x <- as.vector(X)
+          x <- as.double(X)
           names(x) <- colnames(X)
         }
         x <- sort(x, decreasing = T)
@@ -250,7 +250,7 @@ ef.dr.identifier <- cmpfun(function(X, threshold = "q.001", greaterthan = F, imp
         return(unique(prism.treat[w, "name"]))
       } else if (!greaterthan) {
         if (nrow(X) > 1) {
-          x <- apply(X, 2, mean, na.rm = T)
+          x <- as.double(apply(X, 2, mean, na.rm = T))
         } else if (nrow(X) == 1) {
           x <- as.double(X)
           names(x) <- colnames(X)
@@ -283,9 +283,9 @@ ef.dr.identifier <- cmpfun(function(X, threshold = "q.001", greaterthan = F, imp
         if (impmeth == "ignore" | impmeth == "i" | impmeth == "ign") {
           if (greaterthan) {
             if (nrow(X) > 1) {
-              x <- apply(X, 2, mean, na.rm = T)
+              x <- as.double(apply(X, 2, mean, na.rm = T))
             } else if (nrow(X) == 1) {
-              x <- as.vector(X)
+              x <- as.double(X)
               names(x) <- colnames(X)
             }
             x <- sort(x, decreasing = T)
@@ -297,7 +297,8 @@ ef.dr.identifier <- cmpfun(function(X, threshold = "q.001", greaterthan = F, imp
             }
           } else if (!greaterthan) {
             if (nrow(X) > 1) {
-              x <- apply(X, 2, mean, na.rm = T)
+              x <- as.double(apply(X, 2, mean, na.rm = T))
+              names(x) <- colnames(X)
             } else if (nrow(X) == 1) {
               x <- as.double(X)
               names(x) <- colnames(X)
@@ -318,9 +319,9 @@ ef.dr.identifier <- cmpfun(function(X, threshold = "q.001", greaterthan = F, imp
         warning("You are not ignoring NAs. This can impact the reliability of your results negatively. Please check if your method of imputation is robust in regards to your thresholding.", domain = "r-pkg")
         if (greaterthan) {
           if (nrow(X) > 1) {
-            x <- apply(df.NA.to.val(X, 2, impmeth), 2, mean, na.rm = T)
+            x <- as.double(apply(df.NA.to.val(X, 2, impmeth), 2, mean, na.rm = T))
           } else if (nrow(X) == 1) {
-            x <- as.vector(df.NA.to.val(X, 2, impmeth))
+            x <- as.double(df.NA.to.val(X, 2, impmeth))
           }
           x <- sort(x, decreasing = T)
           threshold <- quantile(x, probs = 1 - threshold, na.rm = T)
@@ -328,9 +329,9 @@ ef.dr.identifier <- cmpfun(function(X, threshold = "q.001", greaterthan = F, imp
           return(unique(prism.treat[w, "name"]))
         } else if (!greaterthan) {
           if (nrow(X) > 1) {
-            x <- apply(df.NA.to.val(X, 2, impmeth), 2, mean, na.rm = T)
+            x <- as.double(apply(df.NA.to.val(X, 2, impmeth), 2, mean, na.rm = T))
           } else if (nrow(X) == 1) {
-            x <- as.vector(df.NA.to.val(X, 2, impmeth))
+            x <- as.double(df.NA.to.val(X, 2, impmeth))
           }
           x <- sort(x, decreasing = F)
           threshold <- quantile(x, probs = threshold, na.rm = T)
@@ -346,6 +347,52 @@ ef.dr.identifier <- cmpfun(function(X, threshold = "q.001", greaterthan = F, imp
   } else {
     stop("Unexpected data type of argument 'threshold'.")
   } 
+})
+
+
+message("   Loading in function 'dr.to.effect()'.")
+##  drugs to effect 
+#   Returns the drug effect
+dr.to.effect <- cmpfun(function(n, doscor, sort = 1, output = "mean") {
+  if (!is.vector(n)) {if (is.character(n)) {n <- c(n)} else {stop("Argument 'n' needs to be a character vector or string!")}}
+  res <- list()
+  pt.rn <- rownames(prism.treat)
+  for (i in 1:length(n)) {
+    broadID <- as.character(unique(prism.treat[which(prism.treat[, "name"] == n[i]), "broad_id"]))
+    if (doscor == 2) {
+      if (output == "mean") {out <- mean(as.vector(prism.perdrug[, broadID]), na.rm = T)
+      } else if (output == "median") {out <- median(as.vector(prism.perdrug[, broadID]), na.rm = T)
+      } else if (output == "full") {out <- as.vector(prism.perdrug[, broadID]); names(out) <- rownames(prism.perdrug)
+      } else stop("Argument 'output' is of wrong fromat. It needs to be a character string of values {'mean', 'median', 'full'}!")
+    } else if (doscor == 1) {
+      ID <- pt.rn[grep(broadID), pt.rn]
+      if (output != "mean") warning("With doscor ∈ {0, 1} only a 'mean' output will be made.")
+      out <- apply(prism.doscor[, ID], 2, mean, na.rm = T)
+      names(out) <- ID
+    } else if (doscor == 0) {
+      ID <- pt.rn[grep(broadID), pt.rn]
+      if (output != "mean") warning("With doscor ∈ {0, 1} only a 'mean' output will be made.")
+      out <- apply(prism.clean[, ID], 2, mean, na.rm = T)
+      names(out) <- ID
+    } else stop("Argument 'doscor' is not ∈ {0, 1, 2}!")
+    res <- append(res, out)
+  }
+  if (sort == 1) {
+    res.u <- unlist(unname(res)); names(res.u) <- 1:length(res.u)
+    res.s <- names(sort(res.u, decreasing = F))
+    res.out <- res[as.double(res.s)]
+    names(res.out) <- unlist(n)[as.double(res.s)]
+  } else if (sort == 0) {
+    res.s <- 1:length(unlist(unname(res)))
+    res.out <- res
+    names(res.out) <- unlist(n)
+  } else if (sort == -1) {
+    res.u <- unlist(unname(res)); names(res.u) <- 1:length(res.u)
+    res.s <- names(sort(res.u, decreasing = T))
+    res.out <- res[as.double(res.s)]
+    names(res.out) <- unlist(n)[as.double(res.s)]
+  }
+  return(res.out)
 })
 
 

@@ -16,11 +16,7 @@ hist(apply(df.NA.to.val(prism.clean, 2, "median"), 2, mean), breaks=20, main="Dr
 ```
 
 
-Which drugs have a negative impact on general cell growth?
-
-```{r}
-#ef.caller(threshold = c(-7.3, -7, -7, -8, -7.5, -7.5), greaterthan = F, addat = c("prism.clean", "pancan.clean"))
-```
+Which drugs have the most negative impact on cell growth?
 
 
 ```{r}
@@ -30,7 +26,11 @@ source("./Scripts/EfDrIdentifier.R")
 ```
 
 ```{r}
-
+message("ef.prism.perdrug")
+print(dr.to.effect(as.vector(ef.prism.perdrug), doscor = 2))
+message("ef.pancan.perdrug")
+print(dr.to.effect(as.vector(ef.pancan.perdrug), doscor = 2))
+for (i in 1:4) {message(paste("ef.pancan.", i, ".perdrug", sep = ""));print(dr.to.effect(as.vector(get(paste("ef.pancan.", i, ".perdrug", sep = ""))), doscor = 2))}; rm(i)
 ```
 
 

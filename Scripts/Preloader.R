@@ -12,10 +12,6 @@ message("   Executing cleaning of prism and extraction and cleaning of pancan.")
 prism.clean <- row.col.cleaner(prism)
 pancan.clean <- row.col.cleaner(prism.extractor(prism))
 
-if (extraction.verifier(pancan.clean) == F) {
-  warning("Extraction could not be verified!")
-}
-
 message("   Setting up sinonco data frame.")
 
 prism.treat.sinonco <- prism.treat[-unique(c(grep("oncology", prism.treat[, "disease.area"]), grep("malignancy", prism.treat[, "disease.area"]))), ]
