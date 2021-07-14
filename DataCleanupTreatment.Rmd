@@ -24,7 +24,7 @@ Which drugs have a negative impact on general cell growth?
 
 
 ```{r}
-th <- " "
+th <- "q.001, q.005"    # first is for doscor, second for perdrug
 source("./Scripts/EfDrIdentifier.R")
 ```
 
