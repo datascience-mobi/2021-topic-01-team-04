@@ -2,8 +2,8 @@ message("Executing 'Functions.R'.", domain = "r-pkg")
 
 message("Functions.R >>")
 
-message("   Loading in function 'ob.name.ex()'.")
 
+message("   Loading in function 'ob.name.ex()'.")
 ##  object name extractor
 #   SImple function that returns the name of the single argument 'ob' as a character sting.
 onex <- cmpfun(function(ob) return(deparse(substitute(ob))))
@@ -52,35 +52,6 @@ prism.extractor <- cmpfun(function(X, disease="Pancreatic Cancer") {
 })
 
 
-##  data frame list extractor         non-operable
-#   Iterates the above extractor over a list of data frames. Returns a list of extracted data frames.
-l.prism.extractor <- cmpfun(function(X, disease="Pancreatic Cancer") {
-  return(as.list(lapply(X, prism.extractor, disease = disease)))
-})
-
-
-message("   Loading in function 'extraction.verifier()'.")
-##  extraction veracity verification              NOT FUNCTIONAL!!!
-#   
-extraction.verifier <- cmpfun(function(X, disease="Pancreatic Cancer") {
-  r <- c()
-  for (i in 1:nrow(X)) {
-    r <- append(r, prism.cl[which(prism.cl[, "DepMap_ID"] == rownames(X)[i]), 20])
-  }
-  if (sum(r == disease) == nrow(X)) {
-    return(T)
-  } else {
-    return(F)
-  }
-})
-
-
-
-##  vector imputation             NOT FUNCTIONAL!!!
-#   
-lat.NA.to.val <- function(x, fun) {}
-
-
 message("   Loading in function 'df.NA.to.val()'.")
 ##  whole data frame imputation
 #   Imputates NAs with mean, median or norm values over a whole data frame, using column or row data.
@@ -113,56 +84,6 @@ df.NA.to.val <- cmpfun(function(X, mar, fun) {
     stop("Unexpected result. Imputated data frame is not congruent with argument data frame.", domain = "r-pkg")
   }
   stop(paste("'dim(X)[", mar, "]' is not positive."), domain = "r-pkg")
-})
-
-
-
-##  whole data frame NA to values operation verifier
-#   Verifies the df.NA.to.val operation.
-df.NA.to.val.ver <- cmpfun(function(X, Y, mar, fun, tol=10^-10, m.tol=.1, sd.tol=.1) {
-  r <- c()
-  if (fun == "median" | fun == "Median") {
-    if (mar == 1) {
-      for (i in 1:nrow(X)) {
-        r <- append(r, median(X[i, ], na.rm = T) == median(Y[i, ], na.rm = T))
-      }
-    } else if (mar == 2) {
-      for (i in 1:ncol(X)) {
-        r <- append(r, median(X[, i], na.rm = T) == median(Y[, i], na.rm = T))
-      }
-    }
-    return (list(sum(r) == length(r), r))
-  } else if (fun == "mean" | fun == "Mean") {
-    if (mar == 1) {
-      for (i in 1:nrow(X)) {
-        r <- append(r, abs(mean(X[i, ], na.rm = T) - mean(Y[i, ], na.rm = T)) < tol)
-      }
-    } else if (mar == 2) {
-      for (i in 1:ncol(X)) {
-        r <- append(r, abs(mean(X[, i], na.rm = T) - mean(Y[, i], na.rm = T)) < tol)
-      }
-    }
-    return (list(sum(r) == length(r), r))
-  } else if (fun == "norm" | fun == "Norm" | fun == "normal" | fun == "Normal") { # still under construction
-    r.m <- c()
-    r.sd <- c()
-    if (mar == 1) {
-      for (i in 1:nrow(X)) {
-        m <- mean(unlist(X[i, ]), na.rm = T)
-        sd <- sd(X[i, ], na.rm = T)
-        r.m <- append(r.m, abs(m - mean(unlist(Y[i, ]), na.rm = T)) < m * m.tol)
-        r.sd <- append(r.sd, abs(sd - sd(Y[i, ], na.rm = T)) < sd * sd.tol)
-      }
-    } else if (mar == 2) {
-      for (i in 1:ncol(X)) {
-        m <- mean(unlist(X[, i]), na.rm = T)
-        sd <- sd(X[, i], na.rm = T)
-        r.m <- append(r.m, abs(m - mean(unlist(Y[, i]), na.rm = T)) < m * m.tol)
-        r.sd <- append(r.sd, abs(sd - sd(Y[, i], na.rm = T)) < sd * sd.tol)
-      }
-    }
-    return (list(sum(r.m) == length(r.m), sum(r.sd) == length(r.sd), r.m, r.sd))
-  }
 })
 
 
@@ -427,36 +348,5 @@ ef.dr.identifier <- cmpfun(function(X, threshold = "q.001", greaterthan = F, imp
   } 
 })
 
-
-
-##  ef caller                 INOPERABLE
-ef.caller <- cmpfun(function(threshold, greaterthan, ..., addat=c()){
-  if (!exists("st.split.vars", envir = .GlobalEnv)) {
-    call("st.splitter", disease = "Pancreatic Cancer", custom.sh = T)
-  }
-  ssv <- append(addat, st.split.vars)
-  r <- list()
-  if (threshold == F) {
-    threshold <- as.double(dlg_input(message = "Enter custom threshold for all datasets.")$res)
-    for (i in 1:length(ssv)) {
-      r <- append(r, ef.dr.identifier(list(..., X = as.data.frame(get(ssv[i], pos = .GlobalEnv)), threshold = threshold, greaterthan = greaterthan)))
-    }
-  } else if (threshold == T) {
-    for (i in 1:length(ssv)) {
-      r <- append(r, ef.dr.identifier(list(..., X = as.data.frame(get(ssv[i], pos = .GlobalEnv)), threshold = as.double(dlg_input(message = paste("Enter custom threshold for dataset ", ssv[i],".", sep = ""))$res), greaterthan = greaterthan)))
-    }
-  } else if (length(threshold) == length(ssv)) {
-    for (i in 1:length(ssv)) {
-      r <- append(r, ef.dr.identifier(list(..., X = as.data.frame(get(ssv[i], pos = .GlobalEnv)), threshold = threshold[i], greaterthan = greaterthan)))
-    }
-  } else if (is.double(threshold)) {
-    for (i in 1:length(ssv)) {
-      r <- append(r, ef.dr.identifier(list(..., X = as.data.frame(get(ssv[i], pos = .GlobalEnv)), threshold = threshold, greaterthan = greaterthan)))
-    }
-  } else {
-    stop(paste("Argument 'threshold' has unexpected value at ", threshold, ". Please refer to the code.", sep = ""))
-  }
-  return(unlist(r))
-}) 
 
 message("Finished Executing 'Functions.R'.", domain = "r-pkg")
