@@ -31,7 +31,7 @@ pancan.doscor <- doscor(pancan.clean, doscor = "dfd", perdrug = F, PT = prism.tr
 message("   Executing dose correlation per drug for 'prism.clean'.")
 prism.perdrug <- doscor(prism.clean, doscor = "dfd", perdrug = T, PT = prism.treat)
 
-message("   Executing dose correlation per drug for 'pancna.clean'.")
+message("   Executing dose correlation per drug for 'pancan.clean'.")
 pancan.perdrug <- doscor(pancan.clean, doscor = "dfd", perdrug = T, PT = prism.treat)
 
 message("   Executing subtype splitting for 'pancan.clean'.")
