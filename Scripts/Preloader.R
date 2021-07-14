@@ -1,3 +1,5 @@
+message("Executing 'Preloader.R'. This will take a while.", domain = "r-pkg")
+
 message("Preloader.R >>")
 
 while (TRUE) {
@@ -42,3 +44,5 @@ message("   Exectuing subtype splitting for 'pancan.perdrug'.")
 st.splitter(pancan.perdrug, custom.sh = custom, doscor = 2)
 
 rm(custom)
+
+message("Finished Executing 'Preloader.R'.", domain = "r-pkg")

@@ -12,19 +12,13 @@ if (as.logical(toupper(dlg_input(message = "Re-initiate?")$res))) {
     pl <- as.logical(toupper(dlg_input(message = "Re-initiate Preloader.R?")$res))
   }
   if (ps) {
-    message("Executing 'Presets.R'.", domain = "r-pkg")
     source("Scripts/Presets.R")
-    message("Finished Executing 'Presets.R'.", domain = "r-pkg")
   }
   if (fn) {
-    message("Executing 'Functions.R'.", domain = "r-pkg")
     source("Scripts/Functions.R")
-    message("Finished Executing 'Functions.R'.", domain = "r-pkg")
   }
   if (pl) {
-    message("Executing 'Preloader.R'. This will take a while.", domain = "r-pkg")
-    source("Scripts/Preloader.R") 
-    message("Finished Executing 'Preloader.R'.", domain = "r-pkg")
+    source("Scripts/Preloader.R")
   }
   rm("ps","fn","pl", "cs", pos = .GlobalEnv)
 }

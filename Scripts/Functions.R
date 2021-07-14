@@ -1,3 +1,5 @@
+message("Executing 'Functions.R'.", domain = "r-pkg")
+
 message("Functions.R >>")
 
 message("   Loading in function 'ob.name.ex()'.")
@@ -59,6 +61,7 @@ l.prism.extractor <- cmpfun(function(X, disease="Pancreatic Cancer") {
 
 message("   Loading in function 'extraction.verifier()'.")
 ##  extraction veracity verification              NOT FUNCTIONAL!!!
+#   
 extraction.verifier <- cmpfun(function(X, disease="Pancreatic Cancer") {
   r <- c()
   for (i in 1:nrow(X)) {
@@ -74,11 +77,13 @@ extraction.verifier <- cmpfun(function(X, disease="Pancreatic Cancer") {
 
 
 ##  vector imputation             NOT FUNCTIONAL!!!
+#   
 lat.NA.to.val <- function(x, fun) {}
 
 
 message("   Loading in function 'df.NA.to.val()'.")
 ##  whole data frame imputation
+#   Imputates NAs with mean, median or norm values over a whole data frame, using column or row data.
 df.NA.to.val <- cmpfun(function(X, mar, fun) {
   if (!is.data.frame(X)) {
     stop("Please use data frame type for 'X'.", domain = "r-pkg")
@@ -113,6 +118,7 @@ df.NA.to.val <- cmpfun(function(X, mar, fun) {
 
 
 ##  whole data frame NA to values operation verifier
+#   Verifies the df.NA.to.val operation.
 df.NA.to.val.ver <- cmpfun(function(X, Y, mar, fun, tol=10^-10, m.tol=.1, sd.tol=.1) {
   r <- c()
   if (fun == "median" | fun == "Median") {
@@ -162,13 +168,15 @@ df.NA.to.val.ver <- cmpfun(function(X, Y, mar, fun, tol=10^-10, m.tol=.1, sd.tol
 
 message("   Loading in function 'st.ex()'.")
 ##  subtype extractor
+#   Returns a list of the subtypes of the wanted disease. The argument 'disease' needs to be formatted in congruence with the column 'disease' of 'prism.cl'.
 st.ex <- cmpfun(function(disease="Pancreatic Cancer") {
   return(levels(factor(prism.cl[which(prism.cl[, "disease"] == disease), "disease_subtype"])))
 })
 
 
 message("   Loading in function 'dmid.ex()'.")
-##  Dep Map ID extractor
+##  Dep Map ID extractor#
+#   Extracts the DepMap IDs of all cell lines of a disease subtype.
 dmid.ex <- cmpfun(function(target, targetcol = "disease_subtype") {
   return(prism.cl[which(prism.cl[, targetcol] == target), "DepMap_ID"])
 })
@@ -176,6 +184,7 @@ dmid.ex <- cmpfun(function(target, targetcol = "disease_subtype") {
 
 message("   Loading in function 'short.hander()'.")
 ##  short hander 
+#   Generates a short hand out of a character string. 
 short.hander <- cmpfun(function(s, mode="initials", n=1, p.ignore=T) {
   if (typeof(s) != "character") {
     stop("Typeof argument s not character.", domain = "r-pkg")
@@ -209,7 +218,7 @@ short.hander <- cmpfun(function(s, mode="initials", n=1, p.ignore=T) {
 
 message("   Loading in function 'st.splitter()'.")
 ##  subtype splitter   
-#
+#   Splits a data set in regard to the cell lines subtypes of the cell lines. 
 st.splitter <- cmpfun(function(X, disease="Pancreatic Cancer", custom.sh=F, sh.mode="initials", sh.n=3, sh.p.ignore=T, doscor = 0) {
   sts <- st.ex(disease)
   dmids <- lapply(sts, dmid.ex, targetcol = "disease_subtype")
@@ -230,8 +239,8 @@ st.splitter <- cmpfun(function(X, disease="Pancreatic Cancer", custom.sh=F, sh.m
 
 
 message("   Loading in function 'doscor()'.")
-##  dose correlator
-#
+##  dose correlator, takes a long time
+#   Has different operations>> With doscor = T and perdrug = T, it computes the mean efficacy per dosage for each drug. With doscor = T and perdrug = F it normalises each dose of each drug to the given dosage. With doscor = F it does nothing and will throw a warning, that no operation has been performed. 
 doscor <- cmpfun(function(X, doscor = T, perdrug = T, PT = prism.treat) {
   if (doscor == T) {
     l.drugs <- unique(PT[, "name"])
@@ -286,9 +295,8 @@ doscor <- cmpfun(function(X, doscor = T, perdrug = T, PT = prism.treat) {
 
 
 message("   Loading in function 'ef.dr.identifier()'.")
-##  efficacious drug identifier         doscor = 'dfd' takes a fuck-ton of time, unsure how to optimise
-#   doscor = 'dfd' needs to be made compatible to the rest, taking the mean of X initially???
-#   
+##  efficacious drug identifier
+#   Identifies the most effective drugs in a given population 'X'.
 ef.dr.identifier <- cmpfun(function(X, threshold = "q.001", greaterthan = F, impmeth="i", sinonco = F) {
   if (sinonco) {
     assign("prism.treat", get("prism.treat.sinonco", pos = .GlobalEnv), pos = -1)
@@ -302,15 +310,12 @@ ef.dr.identifier <- cmpfun(function(X, threshold = "q.001", greaterthan = F, imp
   if (grepl(".doscor", onex(X))) doscor <- 1 else if (grepl(".perdrug", onex(X))) doscor <- 2 else doscor <- 0
   
   #   which type of thresholding is to be used? static or quantile?
-  
   if (is.double(threshold)) {
     
     #   static thresholding
-    
     if (impmeth == "ignore" | impmeth == "i" | impmeth == "ign") {
       
       #   NAs are ignored 
-      
       if (greaterthan) {
         if (nrow(X) > 1) {
           x <- apply(X, 2, mean, na.rm = T)
@@ -337,7 +342,6 @@ ef.dr.identifier <- cmpfun(function(X, threshold = "q.001", greaterthan = F, imp
     }
     
     #   NAs are imputated 
-    
     warning("You are not ignoring NAs. This can impact the reliability of your results negatively. Please check if your method of imputation is robust in regards to your thresholding.", domain = "r-pkg")
     if (greaterthan) {
       w <- names(which(apply(df.NA.to.val(X, 2, impmeth), 2, mean) > threshold))
@@ -350,13 +354,11 @@ ef.dr.identifier <- cmpfun(function(X, threshold = "q.001", greaterthan = F, imp
   } else if (is.character(threshold)) {
     
     #   quantile thresholding
-    
     if (substr(threshold, 1, 1) == "q" | substr(threshold, 1, 1)== "Q") {
       threshold <- as.double(substr(threshold, 2, nchar(threshold)))
       if (is.double(threshold)) {
         
         #   NAs are ignored
-        
         if (impmeth == "ignore" | impmeth == "i" | impmeth == "ign") {
           if (greaterthan) {
             if (nrow(X) > 1) {
@@ -392,7 +394,6 @@ ef.dr.identifier <- cmpfun(function(X, threshold = "q.001", greaterthan = F, imp
         }
         
         #   NAs are imputated
-        
         warning("You are not ignoring NAs. This can impact the reliability of your results negatively. Please check if your method of imputation is robust in regards to your thresholding.", domain = "r-pkg")
         if (greaterthan) {
           if (nrow(X) > 1) {
@@ -457,3 +458,5 @@ ef.caller <- cmpfun(function(threshold, greaterthan, ..., addat=c()){
   }
   return(unlist(r))
 }) 
+
+message("Finished Executing 'Functions.R'.", domain = "r-pkg")

@@ -24,6 +24,7 @@ Which drugs have a negative impact on general cell growth?
 
 
 ```{r}
+th <- " "
 source("./Scripts/EfDrIdentifier.R")
 ```
 
