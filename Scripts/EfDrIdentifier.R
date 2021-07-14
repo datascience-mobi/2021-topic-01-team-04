@@ -1,9 +1,10 @@
 message("Executing 'EfDrIdentifier.R'.")
 
 while (TRUE) {
-  if (th == "standard" | th == " " | th == "st") {th <- "q.001,q.005"; break} 
-  else if (!exist("th")) th <- dlg_input(message = "Thresholding to be used for doscor and perdrug? Seperate them by comma.")$res 
-  else if (sum(grepl(th, ","))!=1) th <- dlg_input(message = "Format unusable. Seperate them by comma.")$res
+  if (grepl(",", th) == T) {break
+  } else if (th == "standard" | th == " " | th == "st") {th <- "q.001,q.005"; break
+  } else if (!exists("th")) {th <- dlg_input(message = "Thresholding to be used for doscor and perdrug? Seperate them by comma.")$res 
+  } else if (grepl(",", th) == F) {th <- dlg_input(message = "Format unusable. Seperate them by comma.")$res}
 }
 
 
