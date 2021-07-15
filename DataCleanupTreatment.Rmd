@@ -32,12 +32,3 @@ message("ef.pancan.perdrug")
 print(dr.to.effect(as.vector(ef.pancan.perdrug), doscor = 2))
 for (i in 1:4) {message(paste("ef.pancan.", i, ".perdrug", sep = ""));print(dr.to.effect(as.vector(get(paste("ef.pancan.", i, ".perdrug", sep = ""))), doscor = 2))}; rm(i)
 ```
-
-
-
-
-
-
-
-
-
