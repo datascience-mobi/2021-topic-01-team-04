@@ -32,3 +32,42 @@ message("ef.pancan.perdrug")
 print(dr.to.effect(as.vector(ef.pancan.perdrug), doscor = 2))
 for (i in 1:4) {message(paste("ef.pancan.", i, ".perdrug", sep = ""));print(dr.to.effect(as.vector(get(paste("ef.pancan.", i, ".perdrug", sep = ""))), doscor = 2))}; rm(i)
 ```
+
+
+```{r}
+## compute variance over all rows of the data.frame (hence genes)
+prism.cl.pancan <- prism.extractor(prism.cl)
+pancan.perdrug.na.imp <- df.NA.to.val(pancan.perdrug, 2, "median")
+
+topVar <- apply(pancan.perdrug.na.imp, 2, var) 
+summary(topVar)
+```
+```{r}
+## filtering to keep genes which have a variance greater than the 75% percentile
+pancan.perdrug.topVar <- pancan.perdrug.na.imp[ ,topVar > quantile(topVar, probs = 0.75, na.rm = T)] 
+dim(pancan.perdrug.topVar)
+```
+
+
+```{r}
+mydata <- pancan.perdrug.topVar
+# Determine number of clusters
+wss <- (nrow(mydata)-1)*sum(apply(mydata,2,var))
+for (i in 2:15) wss[i] <- sum(kmeans(mydata, 
+   centers=i)$withinss)
+plot(1:15, wss, type="b", xlab="Number of Clusters",
+  ylab="Within groups sum of squares")
+```
+```{r}
+km = kmeans(x=pancan.perdrug.topVar, 
+            centers = 3, 
+            nstart = 10)
+km$cluster[1:10]
+
+```
+
+
+```{r}
+summary(km)
+km$cluster[rownames(prism.cl)[which(prism.cl[, 20] == "Pancreatic Cancer")]]
+```
