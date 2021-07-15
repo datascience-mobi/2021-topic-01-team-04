@@ -44,7 +44,7 @@ summary(topVar)
 ```
 ```{r}
 ## filtering to keep genes which have a variance greater than the 75% percentile
-pancan.perdrug.topVar <- pancan.perdrug.na.imp[, topVar > quantile(topVar, probs = 0.75, na.rm = T)] 
+pancan.perdrug.topVar <- pancan.perdrug.na.imp[, topVar > quantile(topVar, probs = 0.8, na.rm = T)] 
 dim(pancan.perdrug.topVar)
 ```
 
@@ -73,12 +73,19 @@ km$cluster
 
 
 ```{r}
+avs <- c()
 for (i in 2:15) {
-  km = kmeans(x=pancan.perdrug.topVar, 
+  km <- kmeans(x = pancan.perdrug.topVar, 
             centers = i, 
-            nstart = 10000)
-  D = dist(pancan.perdrug.topVar)
-  s = silhouette(km$cluster,D)
-  plot(s)
+            nstart = 100000)
+  D <- dist(pancan.perdrug.topVar)
+  avs <- append(avs, summary(silhouette(km$cluster,D))$avg.width)
 }
+print(avs); print(avs[which(avs == max(avs))]); print(which(avs == max(avs)))
 ```
+
+
+```{r}
+pheatmap::pheatmap(pancan.perdrug.topVar)
+```
+
