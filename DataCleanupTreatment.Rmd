@@ -77,7 +77,7 @@ avs <- c()
 for (i in 2:15) {
   km <- kmeans(x = pancan.perdrug.topVar, 
             centers = i, 
-            nstart = 1000)
+            nstart = 10000)
   D <- dist(pancan.perdrug.topVar)
   avs <- append(avs, summary(silhouette(km$cluster,D))$avg.width)
 }
