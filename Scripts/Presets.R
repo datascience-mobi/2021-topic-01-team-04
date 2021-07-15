@@ -9,6 +9,7 @@ library(ggplot2)
 library(dplyr)
 library(compiler)
 library(svDialogs)
+library(cluster)
 
 message("   Loading in all relevant data sets.")
 load("Data/prism_datasets.rda", envir = .GlobalEnv)
