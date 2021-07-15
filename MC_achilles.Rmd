@@ -189,3 +189,43 @@ interesting.cor.cols <- (interesting.cor.values %% merlinsvariable)
 cor.mat.achilles[interesting.cor.rows,  interesting.cor.cols]
 ```
 
+
+k-means clustering
+
+Using the most variable, thus informative genes
+We first reduce our dataset to take the most variable gene, which are expected to carry most of the information about the samples:
+```{r}
+## compute variance over all rows of the data.frame (hence genes)
+topVar = apply(prism.achilles.numeric, 2, var) 
+summary(topVar)
+```
+```{r}
+## filtering to keep genes which have a variance greater than the 75% percentile
+prism.achilles.numeric.topVar = prism.achilles.numeric[,topVar > quantile(topVar, probs = 0.75)] 
+dim(prism.achilles.numeric.topVar)
+```
+
+
+Clustering
+```{r}
+mydata <- prism.achilles.numeric.topVar
+# Determine number of clusters
+wss <- (nrow(mydata)-1)*sum(apply(mydata,2,var))
+for (i in 2:15) wss[i] <- sum(kmeans(mydata, 
+   centers=i)$withinss)
+plot(1:15, wss, type="b", xlab="Number of Clusters",
+  ylab="Within groups sum of squares")
+```
+```{r}
+km = kmeans(x=prism.achilles.numeric.topVar, 
+            centers = 5, 
+            nstart = 10)
+km$cluster[1:10]
+
+```
+
+```{r}
+summary(km)
+km$cluster[prism.cl.pancan]
+```
+
