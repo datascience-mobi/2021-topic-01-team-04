@@ -246,8 +246,12 @@ mydata <- prism.achilles.numeric.topVar
 
 wss.genes <- (ncol(mydata)-1)*sum(apply(mydata,1,var))
 dim(mydata)
-for (i in 500:1000) wss.genes[i] <- sum(kmeans(t(mydata), centers=i)$withinss)
+for (i in seq(500,1000, by = 10)) wss.genes[i] <- sum(kmeans(t(mydata), centers=i, iter.max = 500)$withinss)
 ```
+```{r}
+for (i in 1:499) wss.genes[i] <- sum(kmeans(t(mydata), centers=i, iter.max = 500)$withinss)
+```
+
 ```{r}
 wss.genes
 dim(wss.genes)
