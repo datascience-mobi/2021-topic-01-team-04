@@ -216,6 +216,8 @@ for (i in 2:15) wss[i] <- sum(kmeans(mydata,
 plot(1:15, wss, type="b", xlab="Number of Clusters",
   ylab="Within groups sum of squares")
 ```
+
+
 ```{r}
 km = kmeans(x=prism.achilles.numeric.topVar, 
             centers = 5, 
@@ -223,6 +225,7 @@ km = kmeans(x=prism.achilles.numeric.topVar,
 km$cluster[1:10]
 
 ```
+
 
 ```{r}
 summary(km)
