@@ -295,7 +295,7 @@ wss = sapply(400:402,function(e) {
 ```
 
 
-Destinction between primary and metastasis celllines
+Distinction between primary and metastasis cell lines
 
 ```{r}
 
