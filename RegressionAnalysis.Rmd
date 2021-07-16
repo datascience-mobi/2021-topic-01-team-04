@@ -7,7 +7,24 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-source("./DataCleanupTreatment.Rmd", echo = F)
-source("./test_moritz.Rmd", echo = F)
+source("Scripts/Initiator.R")
+th <- "q.001, q.005"
+source("./Scripts/EfDrIdentifier.R")
+```
+
+
+```{r}
+pancan.achilles <- list()
+iter <- 1
+for (i in 1:nrow(pancan.perdrug)) {
+  w <- which(rownames(prism.achilles) == rownames(pancan.perdrug)[i])
+  if (length(w)!=0) {iter <- iter + 1; pancan.achilles[iter] <- c(prism.achilles[w, ])}
+}
+pancan.achilles <- t(as.data.frame(pancan.achilles))
+
+for (j in 1:nrow(pancan.perdrug))
+for (i in 1:length(ef.pancan.perdrug)) {
+  
+}
 ```
 
