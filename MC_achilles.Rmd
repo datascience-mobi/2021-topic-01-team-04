@@ -206,34 +206,69 @@ dim(prism.achilles.numeric.topVar)
 ```
 
 
-Clustering
+Clustering by depmap
 ```{r}
 mydata <- prism.achilles.numeric.topVar
 # Determine number of clusters
-wss <- (nrow(mydata)-1)*sum(apply(mydata,2,var))
-for (i in 2:100) wss[i] <- sum(kmeans(mydata, 
-   centers=i)$withinss)
+wss.depmap <- (nrow(mydata)-1)*sum(apply(mydata,2,var))
+wss.depmap
+for (i in 2:100) wss.depmap[i] <- sum(kmeans(mydata, centers=i)$withinss)
 ```
+
 ```{r}
-plot(1:100, wss, type="b", xlab="Number of Clusters",
+wss.depmap
+plot(1:100, wss.depmap, type="b", xlab="Number of Clusters",
   ylab="Within groups sum of squares")
-plot(1:20, wss[1:20], type="b", xlab="Number of Clusters",
+plot(1:20, wss.depmap[1:20], type="b", xlab="Number of Clusters",
   ylab="Within groups sum of squares")
 ```
 
 
 ```{r}
-km = kmeans(x=prism.achilles.numeric.topVar, 
+km.depmap = kmeans(x=prism.achilles.numeric.topVar, 
             centers = 2, 
             nstart = 10)
-km$cluster[1:10]
+km.depmap$cluster[1:10]
 
 ```
 
 
 ```{r}
-summary(km)
+summary(km.depmap)
 prism.cl.pancan
-km$cluster[prism.cl.pancan]
+km.depmap$cluster[prism.cl.pancan]
 ```
 
+Clustering by genes
+```{r}
+mydata <- prism.achilles.numeric.topVar
+# Determine number of clusters
+
+wss.genes <- (ncol(mydata)-1)*sum(apply(mydata,1,var))
+dim(mydata)
+for (i in 500:1000) wss.genes[i] <- sum(kmeans(t(mydata), centers=i)$withinss)
+```
+```{r}
+wss.genes
+dim(wss.genes)
+plot(wss.genes[100:1000], type="b", xlab="Number of Clusters",
+  ylab="Within groups sum of squares")
+plot(wss.genes[100:500], type="b", xlab="Number of Clusters",
+  ylab="Within groups sum of squares")
+```
+
+
+```{r}
+km.genes = kmeans(x=prism.achilles.numeric.topVar, 
+            centers = 2, 
+            nstart = 10)
+km.genes$cluster[1:10]
+
+```
+
+
+```{r}
+summary(km.genes)
+prism.cl.pancan
+km.genes$cluster[prism.cl.pancan]
+```
