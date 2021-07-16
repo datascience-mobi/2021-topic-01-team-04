@@ -12,14 +12,56 @@ th <- "q.001, q.005"
 source("./Scripts/EfDrIdentifier.R")
 ```
 
+Interesting drug>>
 
 ```{r}
 pancan.achilles <- row.col.cleaner(prism.extractor(prism.achilles))
 
 dr.ef.pancan.max <- dr.to.effect(ef.pancan.perdrug, doscor = 2)[1]
-dr.ef.pancan.max
+id.dr.ef.pancan.max <- as.character(unique(prism.treat[which(prism.treat[, "name"]==names(dr.ef.pancan.max)), "broad_id"]))
 
 
+ef.pancan.max.percl <- pancan.perdrug[, id.dr.ef.pancan.max]; names(ef.pancan.max.percl) <- rownames(pancan.perdrug); ef.pancan.max.percl <- ef.pancan.max.percl[!is.na(ef.pancan.max.percl)]
 
+del <- c()
+for (i in 1:length(ef.pancan.max.percl)) {
+  if (sum(grepl(names(ef.pancan.max.percl)[i], rownames(pancan.achilles)))==0) {del <- append(del, i)}
+}
+ef.pancan.max.percl <- ef.pancan.max.percl[if(length(del) > 0) -del]
+
+del <- c()
+for (i in 1:nrow(pancan.achilles)) {
+  if (sum(grepl(rownames(pancan.achilles)[i], names(ef.pancan.max.percl)))==0) {del <- append(del, i)}
+}
+pancan.achilles <- pancan.achilles[if(length(del) > 0) -del, ]
+
+length(ef.pancan.max.percl); nrow(pancan.achilles)
+```
+
+Interesting achilles genes>>
+
+```{r}
+pancan.achilles.na.imp <- df.NA.to.val(pancan.achilles, 2, "median")
+
+topVar <- apply(pancan.achilles.na.imp, 2, var) 
+summary(topVar)
+pancan.achilles.topVar <- pancan.achilles.na.imp[, topVar > quantile(topVar, probs = 0.95, na.rm = T)] 
+dim(pancan.achilles.topVar)
+```
+
+
+```{r}
+models <- list()
+for (i in 1:(ncol(pancan.achilles.topVar))) {
+  models[[i]]<-summary(lm(ef.pancan.max.percl ~ pancan.achilles.topVar[, i]))
+}
+length(models); unlist(models[sample(1:length(models), 1)])
+
+r2 <- 
+```
+
+
+```{r}
+summary(lm(ef.pancan.max.percl ~ pancan.achilles.topVar))
 ```
 
