@@ -15,5 +15,11 @@ source("./Scripts/EfDrIdentifier.R")
 
 ```{r}
 pancan.achilles <- row.col.cleaner(prism.extractor(prism.achilles))
+
+dr.ef.pancan.max <- dr.to.effect(ef.pancan.perdrug, doscor = 2)[1]
+dr.ef.pancan.max
+
+
+
 ```
 
