@@ -6,8 +6,8 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
-load("/Users/moritzcarlonaeumann/Documents/GitHub/2021-topic-01-team-04/Data/cellline_datasets.rda")
-load("/Users/moritzcarlonaeumann/Documents/GitHub/2021-topic-01-team-04/Data/prism_datasets.rda")
+load("./Data/cellline_datasets.rda")
+load("./Data/prism_datasets.rda")
 ```
 Junk
 ```{r}
