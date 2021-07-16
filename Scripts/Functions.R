@@ -396,4 +396,51 @@ dr.to.effect <- cmpfun(function(n, doscor, sort = 1, output = "mean") {
 })
 
 
+message("   Loading in function 'reg.an.prepper()'.")
+##  regression analysis prepper
+#   
+reg.an.prepper <- cmpfun(function(n, pos = .env.ra) {
+  if (!exists(as.character(substitute(pos)), where = .GlobalEnv)) {
+    assign(as.character(substitute(pos)), new.env(parent = .GlobalEnv), pos = .GlobalEnv)
+  } else rm(list = ls(pos = as.environment(pos)))
+  
+  pancan.achilles <- row.col.cleaner(prism.extractor(prism.achilles))
+  
+  
+  for (i in 1:5) { 
+    assign(
+      paste("dr.ef.pancan.max.", i, sep = ""), 
+      dr.to.effect(ef.pancan.perdrug, doscor = 2)[i],  
+      pos = .env.ra)
+    assign(
+      paste("id.dr.ef.pancan.max.", i, sep = ""), 
+      as.character(unique(prism.treat[which(prism.treat[, "name"]==names(get(paste("dr.ef.pancan.max.", i, sep = ""), pos = .env.ra))), "broad_id"])),  
+      pos = .env.ra)
+    assign(
+      paste("ef.pancan.max.percl.", i, sep = ""), 
+      pancan.perdrug[, get(paste("id.dr.ef.pancan.max.", i, sep = ""), pos = .env.ra)],  
+      pos = .env.ra)
+    names(.env.ra[[paste("ef.pancan.max.percl.", i, sep = "")]]) <- rownames(pancan.perdrug)
+    assign(
+      paste("ef.pancan.max.percl.", i, sep = ""), 
+      get(paste("ef.pancan.max.percl.", i, sep = ""), pos = .env.ra)[!is.na(get(paste("ef.pancan.max.percl.", i, sep = ""), pos = .env.ra))], 
+      pos = .env.ra)
+    del <- c(NULL)
+    for (j in 1:length(get(paste("ef.pancan.max.percl.", i, sep = ""), pos = .env.ra))) {
+      if (sum(grepl(names(get(paste("ef.pancan.max.percl.", i, sep = ""), pos = .env.ra))[j], rownames(pancan.achilles)))==0) {del <- append(del, j)}
+    }
+    if(!is.null(del)) {
+      .env.ra[[paste("ef.pancan.max.percl.", i, sep = "")]] <- .env.ra[[paste("ef.pancan.max.percl.", i, sep = "")]][-rev(del)]
+    }
+    del <- c(NULL)
+    for (j in 1:nrow(pancan.achilles)) {
+      if (!{rownames(pancan.achilles)[j] %in% names(get(paste("ef.pancan.max.percl.", i, sep = ""), pos = .env.ra))}) del <- append(del, j)
+    }
+    if(!is.null(del)) {
+      .env.ra[[paste("pancan.achilles.fitted.", i, sep = "")]] <- pancan.achilles[-rev(del), ]
+    } else .env.ra[[paste("pancan.achilles.fitted.", i, sep = "")]] <- pancan.achilles
+  }
+})
+
+
 message("Finished Executing 'Functions.R'.", domain = "r-pkg")

@@ -15,34 +15,53 @@ source("./Scripts/EfDrIdentifier.R")
 Interesting drug>>
 
 ```{r}
+.env.ra <- new.env(parent = .GlobalEnv)
+
 pancan.achilles <- row.col.cleaner(prism.extractor(prism.achilles))
+
+
 for (i in 1:5) { 
-  dr.ef.pancan.max <- dr.to.effect(ef.pancan.perdrug, doscor = 2)[1]
-  id.dr.ef.pancan.max <- as.character(unique(prism.treat[which(prism.treat[, "name"]==names(dr.ef.pancan.max)), "broad_id"]))
-
-
-  ef.pancan.max.percl <- pancan.perdrug[, id.dr.ef.pancan.max]; names(ef.pancan.max.percl) <- rownames(pancan.perdrug); ef.pancan.max.percl <- ef.pancan.max.percl[!is.na(ef.pancan.max.percl)]
-
-  del <- c()
-  for (i in 1:length(ef.pancan.max.percl)) {
-    if (sum(grepl(names(ef.pancan.max.percl)[i], rownames(pancan.achilles)))==0) {del <- append(del, i)}
+  assign(
+    paste("dr.ef.pancan.max.", i, sep = ""), 
+    dr.to.effect(ef.pancan.perdrug, doscor = 2)[i],  
+    pos = .env.ra)
+  assign(
+    paste("id.dr.ef.pancan.max.", i, sep = ""), 
+    as.character(unique(prism.treat[which(prism.treat[, "name"]==names(get(paste("dr.ef.pancan.max.", i, sep = ""), pos = .env.ra))), "broad_id"])),  
+    pos = .env.ra)
+  assign(
+    paste("ef.pancan.max.percl.", i, sep = ""), 
+    pancan.perdrug[, get(paste("id.dr.ef.pancan.max.", i, sep = ""), pos = .env.ra)],  
+    pos = .env.ra)
+  names(.env.ra[[paste("ef.pancan.max.percl.", i, sep = "")]]) <- rownames(pancan.perdrug)
+  assign(
+    paste("ef.pancan.max.percl.", i, sep = ""), 
+    get(paste("ef.pancan.max.percl.", i, sep = ""), pos = .env.ra)[!is.na(get(paste("ef.pancan.max.percl.", i, sep = ""), pos = .env.ra))], 
+    pos = .env.ra)
+  del <- c(NULL)
+  for (j in 1:length(get(paste("ef.pancan.max.percl.", i, sep = ""), pos = .env.ra))) {
+    if (sum(grepl(names(get(paste("ef.pancan.max.percl.", i, sep = ""), pos = .env.ra))[j], rownames(pancan.achilles)))==0) {del <- append(del, j)}
   }
-  ef.pancan.max.percl <- ef.pancan.max.percl[if(length(del) > 0) -del]
-
-  del <- c()
-  for (i in 1:nrow(pancan.achilles)) {
-    if (sum(grepl(rownames(pancan.achilles)[i], names(ef.pancan.max.percl)))==0) {del <- append(del, i)}
+  if(!is.null(del)) {
+    .env.ra[[paste("ef.pancan.max.percl.", i, sep = "")]] <- .env.ra[[paste("ef.pancan.max.percl.", i, sep = "")]][-rev(del)]
   }
-  pancan.achilles <- pancan.achilles[if(length(del) > 0) -del, ]
-
-  length(ef.pancan.max.percl); nrow(pancan.achilles)
+  del <- c(NULL)
+  for (j in 1:nrow(pancan.achilles)) {
+    if (!{rownames(pancan.achilles)[j] %in% names(get(paste("ef.pancan.max.percl.", i, sep = ""), pos = .env.ra))}) del <- append(del, j)
+  }
+  if(!is.null(del)) {
+    .env.ra[[paste("pancan.achilles.fitted.", i, sep = "")]] <- pancan.achilles[-rev(del), ]
+  } else .env.ra[[paste("pancan.achilles.fitted.", i, sep = "")]] <- pancan.achilles
 }
+
+env.ra.vars <- ls(pos = .env.ra); env.ra.vars
+env.ra.vars.grpd <- lapply(0:3, function(i) return(env.ra.vars[{1+(i*5)}:{5+(i*5)}])); env.ra.vars.grpd
 ```
 
 Interesting achilles genes>>
 
 ```{r}
-pancan.achilles.na.imp <- df.NA.to.val(pancan.achilles, 2, "median")
+pancan.achilles.na.imp <- df.NA.to.val(.env.ra$pancan.achilles.fitted.2, 2, "median")
 
 topVar <- apply(pancan.achilles.na.imp, 2, var) 
 summary(topVar)
@@ -54,7 +73,7 @@ dim(pancan.achilles.topVar)
 ```{r}
 models <- list()
 for (i in 1:(ncol(pancan.achilles.topVar))) {
-  models[[i]] <- summary(lm(ef.pancan.max.percl ~ pancan.achilles.topVar[, i]))
+  models[[i]] <- summary(lm(.env.ra$ef.pancan.max.percl.2 ~ pancan.achilles.topVar[, i]))
 }
 length(models)
 
@@ -71,6 +90,6 @@ names(r2[which(r2 == max(r2))])
 
 
 ```{r}
-summary(lm(ef.pancan.max.percl ~ pancan.achilles.topVar))
+
 ```
 
