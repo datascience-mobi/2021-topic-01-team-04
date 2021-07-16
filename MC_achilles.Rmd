@@ -211,16 +211,20 @@ Clustering
 mydata <- prism.achilles.numeric.topVar
 # Determine number of clusters
 wss <- (nrow(mydata)-1)*sum(apply(mydata,2,var))
-for (i in 2:15) wss[i] <- sum(kmeans(mydata, 
+for (i in 2:100) wss[i] <- sum(kmeans(mydata, 
    centers=i)$withinss)
-plot(1:15, wss, type="b", xlab="Number of Clusters",
+```
+```{r}
+plot(1:100, wss, type="b", xlab="Number of Clusters",
+  ylab="Within groups sum of squares")
+plot(1:20, wss[1:20], type="b", xlab="Number of Clusters",
   ylab="Within groups sum of squares")
 ```
 
 
 ```{r}
 km = kmeans(x=prism.achilles.numeric.topVar, 
-            centers = 5, 
+            centers = 2, 
             nstart = 10)
 km$cluster[1:10]
 
@@ -229,6 +233,7 @@ km$cluster[1:10]
 
 ```{r}
 summary(km)
+prism.cl.pancan
 km$cluster[prism.cl.pancan]
 ```
 
