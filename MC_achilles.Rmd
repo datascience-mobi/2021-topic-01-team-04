@@ -1,6 +1,8 @@
 ---
-title: "Bioinfo 4"
-output: html_document
+title: "MC_achilles"
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -15,6 +17,14 @@ which(prism.cl[,20] %in% rownames(prism.achilles))
 for(n in 1:481) {prism.cl[n,20] %in% rownames(prism.achilles)}
 keep.rows = apply(prism.cl,1,function(x){prism.cl[x,1] %in% rownames(prism.achilles) })
 ```
+
+
+
+
+
+
+
+
 
 Cleanup of prism.achilles 
 na removal
@@ -124,12 +134,6 @@ prism.achilles.numeric.pancan <- prism.achilles.numeric[prism.cl.pancan,]
 prism.achilles.numeric.pancan[1:10,1]
 ```
 
-## Including Plots for prism.achilles.pancan
-
-
-```{r}
-
-```
 
 ```{r}
 is.numeric(prism.achilles.numeric.pancan)

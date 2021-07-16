@@ -3,8 +3,8 @@ title: "DataCleanupExpression"
 author: "Spring"
 date: "06 6 2021"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 ---
 
 ```{r}
@@ -269,14 +269,71 @@ var.prism.exp.pan = apply(prism.exp.pan, 2, function(x){var(x)})
 topvar.prism.exp.pan = prism.exp.pan[ ,var.prism.exp.pan > quantile(var.prism.exp.pan, probs = 0.75)]
 
 #performing k means
+wss = sapply(1:15,function(e) { 
+  kmeans(x=(topvar.prism.exp.pan), centers =e)$tot.withinss
+})
+
+plot(1:15,wss,type='b',pch=19,xlab="Number of clusters K",
+     ylab="Total within-clusters sum of squares",main= "prism.exp gene clustering elbow method")
+
+
+
+```
+
+How does our clustering look like with two clusters?
+```{r}
+km = kmeans(x=(topvar.prism.exp.pan), 
+            centers = 2, 
+            nstart = 10)
+
+dim(topvar.prism.exp.pan)
+table(km$cluster)
+km$tot.withinss
+
+#to compute a Silhouette method we need to calculate the distances first. Data transponation is necessary for that.
+D = dist((topvar.prism.exp.pan))
+install.packages("cluster")
+library(cluster)
+km = kmeans(x=(topvar.prism.exp.pan), centers = 2, nstart = 10)
+s = silhouette(km$cluster,D)
+plot(s)
+```
+
+```{r}
+km = kmeans(x=(topvar.prism.exp.pan), 
+            centers = 3, 
+            nstart = 10)
+
+dim(topvar.prism.exp.pan)
+table(km$cluster)
+km$tot.withinss
+
+#to compute a Silhouette method we need to calculate the distances first. Data transponation is necessary for that.
+D = dist((topvar.prism.exp.pan))
+install.packages("cluster")
+library(cluster)
+km = kmeans(x=(topvar.prism.exp.pan), centers = 3, nstart = 10)
+s = silhouette(km$cluster,D)
+plot(s)
+```
+
+
+```{r}
+#selecting the most informative genes
+var.prism.exp.pan = apply(prism.exp.pan, 1, function(x){var(x)})
+topvar.prism.exp.pan = prism.exp.pan[ ,var.prism.exp.pan > quantile(var.prism.exp.pan, probs = 0.75)]
+
+#performing k means
 wss = sapply(1:7,function(e) { 
   kmeans(x=t(topvar.prism.exp.pan), centers =e)$tot.withinss
 })
 
 plot(1:7,wss,type='b',pch=19,xlab="Number of clusters K",
      ylab="Total within-clusters sum of squares",main= "prism.exp gene clustering elbow method")
-```
 
+
+
+```
 
 ```{r}
 #selecting the most informative genes
