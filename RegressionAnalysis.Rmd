@@ -7,7 +7,13 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-source("./DataCleanupTreatment.Rmd", echo = F)
-source("./test_moritz.Rmd", echo = F)
+source("Scripts/Initiator.R")
+th <- "q.001, q.005"
+source("./Scripts/EfDrIdentifier.R")
+```
+
+
+```{r}
+pancan.achilles <- row.col.cleaner(prism.extractor(prism.achilles))
 ```
 

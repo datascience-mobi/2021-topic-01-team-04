@@ -4,6 +4,7 @@ message("Presets.R >>")
 
 message("   Loading in all relevant libraries.")
 library(knitr)
+library(cluster)
 library(tibble)
 library(ggplot2)
 library(dplyr)

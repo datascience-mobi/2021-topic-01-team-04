@@ -12,7 +12,7 @@ source("Scripts/Initiator.R")
 
 
 ```{r}
-hist(apply(df.NA.to.val(prism.clean, 2, "norm"), 2, mean), breaks=20, main="Drug Efficacy across Pancreatic Cancer Cell Lines", xlab="Mean Logfold Drug Effect on Cell Growth", ylab="Number of Drugs")
+hist(apply(df.NA.to.val(prism.clean, 2, "median"), 2, mean), breaks=20, main="Drug Efficacy across Pancreatic Cancer Cell Lines", xlab="Mean Logfold Drug Effect on Cell Growth", ylab="Number of Drugs")
 ```
 
 
@@ -47,7 +47,7 @@ summary(topVar)
 
 ```{r}
 #   filtering to keep genes which have a variance greater than the 96% percentile
-pancan.perdrug.topVar <- pancan.perdrug.na.imp[, topVar > quantile(topVar, probs = 0.96, na.rm = T)] 
+pancan.perdrug.topVar <- pancan.perdrug.na.imp[, topVar >= sort(topVar, decreasing = T)[100]] 
 dim(pancan.perdrug.topVar)
 ```
 
@@ -55,7 +55,7 @@ dim(pancan.perdrug.topVar)
 ```{r}
 mydata <- pancan.perdrug.topVar
 #   Determine number of clusters
-wss <- (nrow(mydata)-1)*sum(apply(mydata,2,var))
+wss <- (nrow(mydata) - 1) * sum(apply(mydata, 2, var))
 for (i in 2:15) wss[i] <- sum(kmeans(mydata, 
    centers=i)$withinss)
 plot(1:15, wss, type="b", xlab="Number of Clusters",
@@ -66,7 +66,7 @@ plot(1:15, wss, type="b", xlab="Number of Clusters",
 ```{r}
 km = kmeans(x=pancan.perdrug.topVar, 
             centers = 2, 
-            nstart = 10000)
+            nstart = 100)
 
 ```
 
@@ -82,7 +82,7 @@ avs <- c()
 for (i in 2:15) {
   km <- kmeans(x = pancan.perdrug.topVar, 
             centers = i, 
-            nstart = 10000)
+            nstart = 100)
   D <- dist(pancan.perdrug.topVar)
   avs <- append(avs, summary(silhouette(km$cluster,D))$avg.width)
 }
@@ -97,14 +97,6 @@ pheatmap::pheatmap(pancan.perdrug.topVar)
 
 ```{r}
 
-for (i in 1:nrow(pancan.perdrug)) {
-  
-}
-
-for (j in 1:nrow(pancan.perdrug))
-for (i in 1:length(ef.pancan.perdrug)) {
-  
-}
 ```
 
 
