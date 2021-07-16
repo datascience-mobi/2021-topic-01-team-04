@@ -53,11 +53,19 @@ dim(pancan.achilles.topVar)
 ```{r}
 models <- list()
 for (i in 1:(ncol(pancan.achilles.topVar))) {
-  models[[i]]<-summary(lm(ef.pancan.max.percl ~ pancan.achilles.topVar[, i]))
+  models[[i]] <- summary(lm(ef.pancan.max.percl ~ pancan.achilles.topVar[, i]))
 }
-length(models); unlist(models[sample(1:length(models), 1)])
+length(models)
 
-r2 <- 
+r2 <- c()
+
+for (i in 1:length(models)) {
+  r2 <- append(r2, unlist(models[[i]]$r.squared))
+}
+names(r2) <- colnames(pancan.achilles.topVar)
+length(r2)
+max(r2)
+names(r2[which(r2 == max(r2))])
 ```
 
 
