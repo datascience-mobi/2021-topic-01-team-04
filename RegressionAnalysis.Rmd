@@ -61,6 +61,42 @@ env.ra.vars.grpd <- lapply(0:3, function(i) return(env.ra.vars[{1+(i*5)}:{5+(i*5
 Interesting achilles genes>>
 
 ```{r}
+pancan.achilles.na.imp <- df.NA.to.val(.env.ra$pancan.achilles.fitted.1, 2, "median")
+
+topVar <- apply(pancan.achilles.na.imp, 2, var) 
+summary(topVar)
+pancan.achilles.topVar <- pancan.achilles.na.imp[, topVar > quantile(topVar, probs = 0.95, na.rm = T)] 
+dim(pancan.achilles.topVar)
+```
+
+
+```{r}
+models <- list()
+for (i in 1:(ncol(pancan.achilles.topVar))) {
+  models[[i]] <- summary(lm(.env.ra$ef.pancan.max.percl.1 ~ pancan.achilles.topVar[, i]))
+}
+length(models)
+
+r2 <- c()
+
+for (i in 1:length(models)) {
+  r2 <- append(r2, unlist(models[[i]]$r.squared))
+}
+names(r2) <- colnames(pancan.achilles.topVar)
+length(r2)
+max(r2); min(r2)
+names(r2[which(r2 == max(r2))]); names(r2[which(r2 == min(r2))])
+unname(which(r2 == max(r2)))
+```
+
+
+```{r}
+plot(pancan.achilles.topVar[, 432], .env.ra$ef.pancan.max.percl.1, ylab = paste("Efficacy per dosage of", ef.pancan.perdrug[1]), xlab = paste("Achilles value of", names(r2[which(r2 == max(r2))])), main = paste("Correlation of", names(r2[which(r2 == max(r2))]), "with", ef.pancan.perdrug[1], "at r.squared =", round(max(r2), digits = 5)))
+abline(lm(.env.ra$ef.pancan.max.percl.1 ~ pancan.achilles.topVar[, 432]))
+```
+
+
+```{r}
 pancan.achilles.na.imp <- df.NA.to.val(.env.ra$pancan.achilles.fitted.2, 2, "median")
 
 topVar <- apply(pancan.achilles.na.imp, 2, var) 
@@ -84,12 +120,14 @@ for (i in 1:length(models)) {
 }
 names(r2) <- colnames(pancan.achilles.topVar)
 length(r2)
-max(r2)
-names(r2[which(r2 == max(r2))])
+max(r2); min(r2)
+names(r2[which(r2 == max(r2))]); names(r2[which(r2 == min(r2))])
+unname(which(r2 == max(r2)))
 ```
 
 
 ```{r}
-
+plot(pancan.achilles.topVar[, 259], .env.ra$ef.pancan.max.percl.2, ylab = paste("Efficacy per dosage of", ef.pancan.perdrug[2]), xlab = paste("Achilles value of", names(r2[which(r2 == max(r2))])), main = paste("Correlation of", names(r2[which(r2 == max(r2))]), "with", ef.pancan.perdrug[2], "at r.squared =", round(max(r2), digits = 5)))
+abline(lm(.env.ra$ef.pancan.max.percl.2 ~ pancan.achilles.topVar[, 259]))
 ```
 

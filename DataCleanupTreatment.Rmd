@@ -36,7 +36,7 @@ for (i in 1:4) {message(paste("ef.pancan.", i, ".perdrug", sep = ""));print(dr.t
 
 
 ```{r}
-#   compute variance over all rows of the data.frame (hence genes)
+#   compute variance over all rows of the data.frame (hence drugs)
 prism.cl.pancan <- prism.extractor(prism.cl)
 pancan.perdrug.na.imp <- df.NA.to.val(pancan.perdrug, 2, "median")
 
@@ -46,7 +46,7 @@ summary(topVar)
 
 
 ```{r}
-#   filtering to keep genes which have a variance greater than the 96% percentile
+#   filtering to keep the 100 best drugs in regards to variance 
 pancan.perdrug.topVar <- pancan.perdrug.na.imp[, topVar >= sort(topVar, decreasing = T)[100]] 
 dim(pancan.perdrug.topVar)
 ```
@@ -84,9 +84,10 @@ for (i in 2:15) {
             centers = i, 
             nstart = 100)
   D <- dist(pancan.perdrug.topVar)
-  avs <- append(avs, summary(silhouette(km$cluster,D))$avg.width)
+  avs <- append(avs, summary(silhouette(km$cluster, D))$avg.width)
 }
 print(avs); print(avs[which(avs == max(avs))]); print(which(avs == max(avs)) + 1)
+plot(silhouette(kmeans(x = pancan.perdrug.topVar, centers = 2, nstart = 100)$cluster, dist(pancan.perdrug.topVar)), main = "Silhouette Diagramme for Two Clusters")
 ```
 
 
