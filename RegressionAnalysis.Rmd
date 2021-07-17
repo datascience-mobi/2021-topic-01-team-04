@@ -19,7 +19,6 @@ Interesting drug>>
 
 pancan.achilles <- row.col.cleaner(prism.extractor(prism.achilles))
 
-
 for (i in 1:5) { 
   assign(
     paste("dr.ef.pancan.max.", i, sep = ""), 
