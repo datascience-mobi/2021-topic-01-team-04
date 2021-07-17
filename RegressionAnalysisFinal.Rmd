@@ -1,7 +1,7 @@
 ---
-title: "Regression Analysis"
+title: "RegressionAnalysisFinal"
 author: "Autumn"
-date: "14/07/2021"
+date: "17/07/2021"
 output: html_document
 ---
 
@@ -118,4 +118,3 @@ unname(which(r2 == max(r2)))
 plot(pancan.achilles.topVar[, 259], .env.ra$ef.pancan.max.percl.2, ylab = paste("Efficacy per dosage of", ef.pancan.perdrug[2]), xlab = paste("Achilles value of", names(r2[which(r2 == max(r2))])), main = paste("Correlation of", names(r2[which(r2 == max(r2))]), "with", ef.pancan.perdrug[2], "at r.squared =", round(max(r2), digits = 5)))
 abline(lm(.env.ra$ef.pancan.max.percl.2 ~ pancan.achilles.topVar[, 259]))
 ```
-
