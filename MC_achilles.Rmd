@@ -5,103 +5,104 @@ output:
   html_document: default
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
 
-load("./Data/cellline_datasets.rda")
-load("./Data/prism_datasets.rda")
-```
 Junk
 ```{r}
 which(prism.cl[,20] %in% rownames(prism.achilles))
 for(n in 1:481) {prism.cl[n,20] %in% rownames(prism.achilles)}
 keep.rows = apply(prism.cl,1,function(x){prism.cl[x,1] %in% rownames(prism.achilles) })
 ```
-
-
-
-
-
-
-
-
-
-Cleanup of prism.achilles 
-na removal
-```{r}
-which(is.na(prism.achilles[,14]))
-prism.achilles[275:280,14]
-prism.achilles[320:325,14]
-```
-
-
 ------- na test
 z <- c(1:350)
 for(n in 1:350) {z[n] <- sum(is.na(prism.achilles[n,]))}
 z
 ----------
 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+load("./Data/cellline_datasets.rda")
+load("./Data/prism_datasets.rda")
+```
+4 prism.achilles
+
+4.1 Cleanup of prism.achilles 
+
+4.1.1 na removal
+
 ```{r}
+# Where are our NAs?
+which(is.na(prism.achilles[,14]))
+prism.achilles[275:280,14]
+prism.achilles[320:325,14]
+```
+
+```{r}
+# vector with NA rows - na.achilles
 na.achilles <- c(277,309,323)
+# Depmap ids of NA containing cellines
 rownames(prism.achilles[na.achilles,])
+# how many total NAs?
 sum(is.na(prism.achilles[na.achilles,]))
+# removing NA containing rows from achilles
 prism.achilles <- prism.achilles[-na.achilles,]
+# checking if any NAs left
 sum(is.na(prism.achilles))
+# checking dim of prism.achilles - no genes removed - only NA cell lines removed
 dim(prism.achilles)
 ```
 
-Make Prism.achilles numeric
-```{r}
+4.1.2 Make Prism.achilles numeric
 
+```{r}
 prism.achilles.numeric <- apply(prism.achilles, 2, as.numeric)
 ```
 
+10.Intermission - Sort Prism.cl by depmap_id resulting in prism.cl.ordered
 
-
-
-Sort Prism.cl by depmap_id resulting in prism.cl.ordered
 ```{r}
+# show slice of prism.cl - rows are not yet ordered
 prism.cl[1:3,1:3]
-
-order(prism.cl$DepMap_ID)
+# order prism.cl by DepMap_ID resulting in prism.cl.ordered
 prism.cl.ordered <- prism.cl[order(prism.cl$DepMap_ID),]
+# dimmension check - hasn't changed
 dim(prism.cl.ordered)
-
-rownames(prism.cl.ordered) <- 1:481
+# rownames are scrambled now -> reset
+rownames(prism.cl.ordered) <- 1:nrow(prism.cl.ordered)
+# check rowname order
 rownames(prism.cl.ordered)[1:30]
+# check slice - everything worked
 prism.cl.ordered[1:30,1:3]
-
 ```
-
-
 
 ```{r}
-a <- c(1:481)
-
+# vector a with length of nrow prism.cl
+a <- c(1:nrow(prism.cl.ordered))
+# because prism cl is ordered we can easily remove the cellines, that have no achilles value, from prism.cl.ordered
+# This loop checks if a certain celline has an achilles value and correspondingly writes a 0 or 1 into vector a
 for(n in 1:481) {a[n] <- (prism.cl.ordered[n,1] %in% rownames(prism.achilles))}
-prism.cl.ordered[1:3,]
+# vector b contains the prism.cl rows / cellines that do not have an achilles value
 b <- which(a == 0)
+# remove prism.cl rows that don't have a corresponding achilles value
 prism.cl.ordered.achilles <- prism.cl.ordered[-b, ]
+# check dimensions of prism.cl.ordered.achilles
 dim(prism.cl.ordered.achilles)
-rownames(prism.cl.ordered.achilles) <- 1:347
-
-dim(prism.cl.ordered.achilles)
-prism.cl.ordered.achilles
-dim(prism.cl.ordered)
-prism.cl.ordered.achilles[1:10,1]
-rownames(prism.achilles.numeric)[1:10]
+# reset rownames of prism.cl.ordered.achilles
+rownames(prism.cl.ordered.achilles) <- 1:nrow(prism.cl.ordered.achilles)
+# compare rownames of achilles with cl - checking for same order and same elements - they are equal
+prism.cl.ordered.achilles[1:5,1]
+rownames(prism.achilles.numeric)[1:5]
 ```
-
 Find PanCan Cellines in prism.cl.achilles
 ```{r}
+# prism.cl.pancan.rownumbers is a vector with the row numbers that are pancreatic cancer cellines
 prism.cl.pancan.rownumbers <- c(which(prism.cl.ordered.achilles[,20] == 'Pancreatic Cancer'))
-prism.cl.pancan.rownumbers
+# pancan.cl.names contains the DepMap IDs of the pancan cellines
 pancan.cl.names <- prism.cl.ordered.achilles[prism.cl.pancan.rownumbers,1]
-pancan.cl.names
-
-which(prism.cl.achilles[,20] == 'Pancreatic Cancer')
-
+# checking if this was done correctly
 prism.cl.ordered.achilles[prism.cl.pancan.rownumbers,20]
+# this checks if all steps before were done correctly - row numbers of cl and achilles correspond to the same depmap ids
 rownames(prism.achilles.numeric)[prism.cl.pancan.rownumbers]
 ```
 ```{r}
