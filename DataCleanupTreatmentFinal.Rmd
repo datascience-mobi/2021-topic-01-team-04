@@ -5,81 +5,81 @@ date: "17/07/2021"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
+
+#   Setup and Initiation   
+
+First we remove all variables of the global environment and load in all functions, data, and packages to be used. 
+Furthermore, all data sets to be used have their information void columns and rows removed. Then all prism data is dose correlated, meaning that a drugs effect on cell growth is normalised to the applied dosage (doscor). Morevover, this doscor data is further processed, where the mean is taken of each drug's effect per dosage (perdrug). All three---prism, prism.doscor, and prism.perdrug---are then split each into a data set, containing only data for pancreatic cancer cell lines and further into data sets, each containing only cell lines of one of the four subtypes of pancreatic cancer as identified in prism.treat.
+
+
+```{r setup}
 knitr::opts_chunk$set(echo = TRUE)
-source("Scripts/Initiator.R")
+source("Scripts/InitiatorFinal.R")
 ```
 
 
-```{r}
-hist(apply(df.NA.to.val(prism.clean, 2, "median"), 2, mean), breaks=20, main="Drug Efficacy across Pancreatic Cancer Cell Lines", xlab="Mean Logfold Drug Effect on Cell Growth", ylab="Number of Drugs")
-```
+#   Identification of effective drugs
 
-
-Which drugs have the most negative impact on cell growth?
+Now we want to identify the most efficacious drugs in regards to their ability to inhabit cell growth per applied dosage. 
+we here extract the drugs above the 95th percentile for each of the six data sets: prism.perdrug, pancan.perdrug, and the four perdrug data frames for the four subtypes of pancreatic cancer. 
 
 
 ```{r}
 #   first is for doscor, second for perdrug
-th <- "q.001, q.005"
-source("./Scripts/EfDrIdentifier.R")
+th <- "q.005"
+source("./Scripts/EfDrIdentifierFinal.R")
 ```
 
 
+#   Having a look at the most effective drugs
+
+Here we take a look at most effective 5% of drugs, together with their mean effect per dosage. 
+
+
 ```{r}
-message("ef.prism.perdrug")
-print(dr.to.effect(as.vector(ef.prism.perdrug), doscor = 2))
 message("ef.pancan.perdrug")
 print(dr.to.effect(as.vector(ef.pancan.perdrug), doscor = 2))
-for (i in 1:4) {message(paste("ef.pancan.", i, ".perdrug", sep = ""));print(dr.to.effect(as.vector(get(paste("ef.pancan.", i, ".perdrug", sep = ""))), doscor = 2))}; rm(i)
 ```
+
+
+#   Preparing data for kmeans clustering
+
+To cluster our cell lines in respect to drug efficacies per dosage, we decided to only use the 100 drugs with the highest variance. 
+To check how many clusters are reasonable we used the elbow method. 
 
 
 ```{r}
-#   compute variance over all rows of the data.frame (hence drugs)
-prism.cl.pancan <- prism.extractor(prism.cl)
-pancan.perdrug.na.imp <- df.NA.to.val(pancan.perdrug, 2, "median")
+topVar <- apply(df.NA.to.val(pancan.perdrug, 2, "median"), 2, var) 
 
-topVar <- apply(pancan.perdrug.na.imp, 2, var) 
-summary(topVar)
+pancan.perdrug.topVar <- pancan.perdrug.na.imp[, topVar >= sort(topVar, decreasing = T)[100]]
+
+wss <- (nrow(pancan.perdrug.topVar) - 1) * sum(apply(pancan.perdrug.topVar, 2, var))
+for (i in 2:15) wss[i] <- sum(kmeans(pancan.perdrug.topVar, centers=i)$withinss)
+
+plot(1:15, wss, type="b", xlab="Number of Clusters", ylab="Within groups sum of squares", bty = "l")
 ```
 
 
-```{r}
-#   filtering to keep the 100 best drugs in regards to variance 
-pancan.perdrug.topVar <- pancan.perdrug.na.imp[, topVar >= sort(topVar, decreasing = T)[100]] 
-dim(pancan.perdrug.topVar)
-```
+#   K-means clustering
 
-
-```{r}
-mydata <- pancan.perdrug.topVar
-#   Determine number of clusters
-wss <- (nrow(mydata) - 1) * sum(apply(mydata, 2, var))
-for (i in 2:15) wss[i] <- sum(kmeans(mydata, 
-   centers=i)$withinss)
-plot(1:15, wss, type="b", xlab="Number of Clusters",
-  ylab="Within groups sum of squares")
-```
+Since the above graph exhibited a kink at i = 2 we chose to use two clusters.
 
 
 ```{r}
 km = kmeans(x=pancan.perdrug.topVar, 
             centers = 2, 
             nstart = 100)
-
-```
-
-
-```{r}
 summary(km)
-km$cluster
 ```
+
+
+To further verify, that our choice of two clusters is the best choice, we check which amount of clusters has the highest average silhouette width. 
+The result shows us that a clustering with two clusters is optimal.
 
 
 ```{r}
 avs <- c()
-for (i in 2:15) {
+for (i in 2:{nrow(pancan.perdrug.topVar)-1}) {
   km <- kmeans(x = pancan.perdrug.topVar, 
             centers = i, 
             nstart = 100)
@@ -87,6 +87,7 @@ for (i in 2:15) {
   avs <- append(avs, summary(silhouette(km$cluster, D))$avg.width)
 }
 print(avs); print(avs[which(avs == max(avs))]); print(which(avs == max(avs)) + 1)
+
 plot(silhouette(kmeans(x = pancan.perdrug.topVar, centers = 2, nstart = 100)$cluster, dist(pancan.perdrug.topVar)), main = "Silhouette Diagramme for Two Clusters")
 ```
 

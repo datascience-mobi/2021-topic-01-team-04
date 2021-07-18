@@ -1,8 +1,8 @@
 library(svDialogs)
-ri <- as.logical(toupper(dlg_input(message = "Re-initiate?")$res))
+if (!exists("ri")) ri <- as.logical(toupper(dlg_input(message = "Re-initiate?")$res))
 if(length(ri != 0)) {
   if (ri == T) {
-    cs <- as.logical(toupper(dlg_input(message = "Cleanslate?")$res))
+    if (!exists("cs")) cs <- as.logical(toupper(dlg_input(message = "Cleanslate?")$res))
     if (cs) {
       message("Executing Protocol 'Clean Slate'.", domain = "r-pkg")
       rm(list = ls(pos = ".GlobalEnv"), pos = ".GlobalEnv")
