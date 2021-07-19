@@ -1,6 +1,6 @@
 ---
 title: "Drug sensitivity in cancer cell lines"
-author: "D'Antoni, Marquard, Neumann, Zymela"
+author: "D'Antoni, Marquard, Näumann, Zymela"
 date: "19 7 2021"
 output: pdf_document
 ---
