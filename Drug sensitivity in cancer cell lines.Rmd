@@ -1,0 +1,592 @@
+---
+title: "Drug sensitivity in cancer cell lines"
+author: "D'Antoni, Marquard, Neumann, Zymela"
+date: "19 7 2021"
+output: pdf_document
+---
+
+
+```{r setup}
+knitr::opts_chunk$set(echo = F)
+source("Scripts/InitiatorFinal.R")
+th <- "q.005"
+source("./Scripts/EfDrIdentifierFinal.R")
+```
+
+
+# Introduction:
+
+Developing new drugs against certain diseases always is combined with high costs, hard work and complicated requirements before even reaching the market. Therefore an alternative approach of repurposing already approved drugs to new diseases displays an attractive method to save time and resources. On top of that by researching further with these already licensed drugs most safety concerns can be eliminated, since the medications have been thoroughly tested in previous investigations. All in all the potential that drug repurposing possesses helps researchers to create new therapy approaches without the excessive use of follow-up investigations (Pushpakom et al., 2019).
+
+In our research, we worked with multiple datasets that display among other things the growth-inhibitory activity of 4518 different drugs against 481 human cancer cell lines. Here we directed our attention towards pancreatic cancer cell lines, of which there were 33 found in the data provided (Corsello et al., 2020). 
+
+The most important datasets we focused on in our research were:  
+-	the prism Dataset -> containing the treatment effects of the different cell lines  
+-	the prism.exp Dataset -> containing the gene expression levels for every cell line gene  
+-	the prism.achilles -> containing the gene knockdown score for all cell line genes  
+
+The following questions we tried to answer over the course of our research:  
+-	can we identify certain genes that are related to pancreatic cell lines  
+-	can we determine treatments against these pancreatic cell line genes  
+
+
+# Data Clean-up:
+
+The first step in our research was to clean up the Datasets. This meant to get rid of all N/A values that would interfere with our findings. The prism.exp dataset did not contain any of these missing values, hence no further clean up steps were necessary. The prism and the prism.achilles dataset on the other hand did possess some N/A values. Here we [..........]
+
+
+# Descriptive Statistics:
+
+Afterwards we tried to visualize the given datasets to obtain a greater knowledge about their distribution using different dicriptive statistical methods. 
+
+## prism dataset
+
+Here we tried to display the data containing the different treatment effects for each cell lines via a heatmap. 
+
+
+## prism.exp dataset cell lines 
+
+For this dataset we checked the distribution of the mean gene values of all 481 human cancer cell lines to observe some initial characteristics. This was done using a simple histogram.
+
+```{r echo=FALSE}
+# mean value for every column of prism.exp.pancreatic
+meanval.prism.exp.pan = apply(prism.exp.pan, 2, function(x){mean(x)})
+#welche gene am haeufigsten
+sorted.meanval.exp.pan = sort(meanval.prism.exp.pan, decreasing = TRUE, na.last = TRUE)
+hist(meanval.prism.exp.pan,
+     freq = TRUE,
+     main = "Summary mean expression values",
+     xlab = "Mean expression Values",
+     ylab = "Counts of Mean expression Values",
+     plot = TRUE,
+     breaks = "fd")
+```
+
+
+
+
+# Using a statistical test to greatly reduce the number of genes of interest
+
+After basic data cleanup and evaluation of the data set prism.exp, which contained expression data of the cell lines on genes, we were looking for meaningful criteria with which to reduce the data set. It was clear that our group should initially focus on the pancreatic cancer cell lines. A reduction by pancreatic cell lines diminished the expression data set from 477 to 33 rows. To achieve this, we first used the metadata set prism.cl to get Depmap IDs, which are assigned to pancreatic cancer. Since the row names of the prism.exp data set received the Depmap ID's, we could cut the data set down.
+
+In contrast, identifying interesting genes that are relevant to us turned out to be more difficult. First, it had to be clear what exactly was being searched for. Above all, the aim was to find genes that had distinctive expressions. Such genes whose expression differed significantly from other cancer cell lines. For such a task there are competent methods in statistics, which were also discussed in our bioinformatics lecture. With the help of statistical tests, it is possible to test hypotheses between values of two cohorts and to calculate a p-value, which represents a probability with which a hypothesis can be rejected. For this reason, a corresponding H0 hypothesis was set up for the expression data, paying particular attention to the mean values.  
+
+H0: “The mean expression of gene X between pancreatic cancer cell lines and non-pancreatic cancer cell lines is equal”  
+H1: “The mean expression of gene X between pancreatic cancer cell lines and non-pancreatic cancer cell lines is different”  
+
+One gene from the cohort of 33 pancreatic cancer cell lines and a cohort of 33 randomly selected other cancer cell lines were examined for significant deviations from the mean. Since we were using non-normalized values, we had to use a non-parametric test. Furthermore, we are going to use two-samples, which are unpaired. For that reason, we were using the Wilcoxon Rank Sum Test. In this process, the values of the two groups are combined and given a rank, whereby the information on group membership is not lost. A test statistic is calculated from this, which takes the sum of the ranks in a group into account. The result of the test statistic is compared with critical values, the smaller the result, the more significant the H0 hypothesis can be rejected.  
+
+First, in addition to the data frame, which contained cell lines and genes, a data frame with the same number of genes in the same order but with 33 other randomly selected cancer cell lines had to be made. A prism.exp data frame was created for this, which did not contain any pancreatic cancer cell lines. 33 cell lines were randomly selected from this new data frame using the sample function. So, we got two cohorts.
+
+33 values of a gene in one group were compared with 33 values of the same gene in the other pancreatic cancer-free group using the Wilcoxon rank sum test. That alone was not enough to find interesting genes. We had to do the same with all 19177 genes in the data frame. So, a multiple hypothesis test. For this reason, a for loop was used, which took over the procedure column by column. For each gene, the calculated p-value was put into a variable, so that in the end a variable with 19177 values was obtained. Now we can convert the p-values into Boolean values, according to whether these values reach a given significance level alpha or not. It must be noted that the significance level must be adjusted in the case of multiple hypothesis tests, as otherwise the results will be greatly changed by false positive values at high implementation rates. We simply used the Bonferroni correction, whereby the significance value alpha is divided by the number of times, in this case 19177. Any NA values have been replaced by FALSE. This made it possible to produce a vector that contained the names that were significant. The colnames vector of one of the cohorts that had the same sequence of gene names was used for that.
+
+
+```{r include=FALSE}
+cl.metadata.exp = subset(prism.cl, Type_for_Manuscript == "Pancreatic" )
+pan.cl.Vector = cl.metadata.exp[,1]
+prism.exp.pan = prism.exp[pan.cl.Vector,]
+prism.exp.nopan = prism.exp[!row.names(prism.exp)%in%pan.cl.Vector,]
+
+interesting.genes = vector()
+q = 1
+alpha = 0.025/ncol(prism.exp)
+beta = 1 - 0.025/ncol(prism.exp)
+for(g in 1:q)
+  {
+    p.vector = vector()
+    random.prism.exp = prism.exp.nopan[(sample(nrow(prism.exp.nopan), 33)),]
+
+
+    for(i in 1:ncol(prism.exp))
+      {
+  
+        wil = c(wilcox.test(prism.exp.pan[,i], random.prism.exp[,i], exact = FALSE)$p.value)
+        p.vector = append(p.vector, wil)
+  
+    }
+    
+    boolean.p.vector = p.vector <= alpha | p.vector >= beta
+    boolean.p.vector[is.na(boolean.p.vector)] = FALSE
+  
+    interesting.genes = append(interesting.genes, colnames(prism.exp.pan[,boolean.p.vector]))
+  }
+```
+```{r include=FALSE}
+table.interesting.genes = table(interesting.genes)
+df.interesting.genes = as.data.frame(table.interesting.genes)
+```
+```{r echo = FALSE}
+hist(log(table.interesting.genes),
+     freq = TRUE,
+     main = "Frequency of genes with significant difference",
+     xlab = "Amount of genes",
+     ylab = "Frequency",
+     plot = TRUE,
+     breaks = 10)
+```
+We can see in this distribution that there is a small group of genes that regularly differs in the wilcoxon test. Therefore we can reject our previously established H0 hypothesis.
+```{r echo = FALSE}
+a1 = order(df.interesting.genes[,2], decreasing = TRUE, na.last = TRUE)
+sorted.df.interesting.genes = df.interesting.genes[a1,]
+```
+```{r echo = FALSE}
+head(sorted.df.interesting.genes)
+```
+The names of the top interesting genes can be viewed in this data frame. Here for each gene is the number of times the H0 hypothesis was discarded for this gene after carrying out onehundred.
+
+
+
+
+# Treatment dataset
+
+##   Setup and Initiation   
+
+First we removed all variables of the global environment and loaded in all functions, data, and packages to be used. 
+Furthermore, all data sets to be used had their information void columns and rows removed. Then all prism data were dose correlated, meaning that a drugs effect on cell growth is normalised to the applied dosage (doscor). Morevover, this doscor data is further processed, where the mean was taken of each drug's effect per dosage (perdrug). All three---prism, prism.doscor, and prism.perdrug---are then split each into a data set, containing only data for pancreatic cancer cell lines and further into data sets, each containing only cell lines of one of the four subtypes of pancreatic cancer as identified in prism.treat. 
+Then we identified the most efficacious drugs in regards to their ability to inhabit cell growth per applied dosage. 
+To this end we extracted the drugs above the 95th percentile for each of the six data sets: prism.perdrug, pancan.perdrug, and the four perdrug data frames for the four subtypes of pancreatic cancer. 
+
+
+#   Having a look at the most effective drugs
+
+Here we take a look at most effective 5% of drugs, together with their mean effect per dosage. 
+
+
+```{r}
+message("ef.pancan.perdrug")
+print(dr.to.effect(as.vector(ef.pancan.perdrug), doscor = 2))
+```
+
+
+#   Preparing data for kmeans clustering
+
+To cluster our cell lines in respect to drug efficacies per dosage, we decided to only use the 100 drugs with the highest variance. 
+To check how many clusters are reasonable we used the elbow method. 
+
+
+```{r}
+topVar <- apply(df.NA.to.val(pancan.perdrug, 2, "median"), 2, var) 
+
+pancan.perdrug.topVar <- df.NA.to.val(pancan.perdrug, 2, "median")[, topVar >= sort(topVar, decreasing = T)[100]]
+
+wss <- (nrow(pancan.perdrug.topVar) - 1) * sum(apply(pancan.perdrug.topVar, 2, var))
+for (i in 2:15) wss[i] <- sum(kmeans(pancan.perdrug.topVar, centers=i)$withinss)
+
+plot(1:15, wss, type="b", xlab="Number of Clusters", ylab="Within groups sum of squares", bty = "l")
+```
+
+
+#   K-means clustering
+
+Since the above graph exhibited a kink at i = 2 we chose to use two clusters.
+
+
+```{r}
+km = kmeans(x=pancan.perdrug.topVar, 
+            centers = 2, 
+            nstart = 100)
+summary(km)
+```
+
+
+To further verify, that our choice of two clusters is the best choice, we check which amount of clusters has the highest average silhouette width. 
+The result shows us that a clustering with two clusters is optimal.
+
+
+```{r}
+avs <- c()
+for (i in 2:{nrow(pancan.perdrug.topVar)-1}) {
+  km <- kmeans(x = pancan.perdrug.topVar, 
+            centers = i, 
+            nstart = 100)
+  D <- dist(pancan.perdrug.topVar)
+  avs <- append(avs, summary(silhouette(km$cluster, D))$avg.width)
+}
+print(avs); print(avs[which(avs == max(avs))]); print(which(avs == max(avs)) + 1)
+
+plot(silhouette(kmeans(x = pancan.perdrug.topVar, centers = 2, nstart = 100)$cluster, dist(pancan.perdrug.topVar)), main = "Silhouette Diagramme for Two Clusters")
+```
+
+
+```{r}
+pheatmap::pheatmap(pancan.perdrug.topVar)
+```
+
+
+
+
+
+# Regression Analysis
+
+##   Preparation for Regression Analysis
+
+We extract all data regarding pancreatic cancer cell lines from the prism.achilles data set. Then we extract information about the top 2 drugs in regard to their ability to inhibit cell growth. We then define a fitted pancan.achilles data frame for each of the five drugs, that contains only the cell lines where we have drug efficacy data and visa versa.
+
+
+```{r}
+.env.ra <- new.env(parent = .GlobalEnv)
+
+.env.ra$pancan.achilles <- row.col.cleaner(prism.extractor(prism.achilles))
+
+for (i in 1:5) { 
+  .env.ra[[paste("dr.ef.pancan.max.", i, sep = "")]] <- dr.to.effect(ef.pancan.perdrug, doscor = 2)[i]
+  .env.ra[[paste("id.dr.ef.pancan.max.", i, sep = "")]] <- as.character(unique(prism.treat[which(prism.treat[, "name"]==names(.env.ra[[paste("dr.ef.pancan.max.", i, sep = "")]])), "broad_id"]))
+  .env.ra[[paste("ef.pancan.max.percl.", i, sep = "")]] <- pancan.perdrug[, .env.ra[[paste("id.dr.ef.pancan.max.", i, sep = "")]]]
+  names(.env.ra[[paste("ef.pancan.max.percl.", i, sep = "")]]) <- rownames(pancan.perdrug)
+  .env.ra[[paste("ef.pancan.max.percl.", i, sep = "")]] <- get(paste("ef.pancan.max.percl.", i, sep = ""), pos = .env.ra)[!is.na(get(paste("ef.pancan.max.percl.", i, sep = ""), pos = .env.ra))]
+  
+  del <- c(NULL)
+  for (j in 1:length(.env.ra[[paste("ef.pancan.max.percl.", i, sep = "")]])) {
+    if (sum(grepl(names(.env.ra[[paste("ef.pancan.max.percl.", i, sep = "")]])[j], rownames(.env.ra$pancan.achilles)))==0) {del <- append(del, j)}
+  }
+  if(!is.null(del)) {
+    .env.ra[[paste("ef.pancan.max.percl.", i, sep = "")]] <- .env.ra[[paste("ef.pancan.max.percl.", i, sep = "")]][-rev(del)]
+  }
+  del <- c(NULL)
+  for (j in 1:nrow(.env.ra$pancan.achilles)) {
+    if (!{rownames(.env.ra$pancan.achilles)[j] %in% names(.env.ra[[paste("ef.pancan.max.percl.", i, sep = "")]])}) del <- append(del, j)
+  }
+  if(!is.null(del)) {
+    .env.ra[[paste("pancan.achilles.fitted.", i, sep = "")]] <- .env.ra$pancan.achilles[-rev(del), ]
+  } else .env.ra[[paste("pancan.achilles.fitted.", i, sep = "")]] <- .env.ra$pancan.achilles
+}
+
+env.ra.vars <- ls(pos = .env.ra); env.ra.vars
+```
+
+
+We now set up our data upon which our linear regression will be based. We here only use the 5th percentile of the achilles gene data of the highest variance. 
+
+
+```{r}
+for (j in 1:2) {
+  .env.ra[[paste("pancan.achilles.na.imp.", j, sep = "")]] <- df.NA.to.val(.env.ra[[paste("pancan.achilles.fitted.", j, sep = "")]], 2, "median")
+
+  .env.ra[[paste("topVar.", j, sep = "")]] <- apply(.env.ra[[paste("pancan.achilles.na.imp.", j, sep = "")]], 2, var) 
+  
+  .env.ra[[paste("pancan.achilles.topVar.", j, sep = "")]] <- .env.ra[[paste("pancan.achilles.na.imp.", j, sep = "")]][, .env.ra[[paste("topVar.", j, sep = "")]] > quantile(.env.ra[[paste("topVar.", j, sep = "")]], probs = 0.95, na.rm = T)]
+}
+```
+
+
+##   Regression analysis
+
+Now we perform the regression analysis for the two best drugs in regard to their ability to inhabit cell growth in pancreatic cancer cell lines. 
+
+
+```{r}
+for (j in 1:2) {
+  .env.ra[[paste("models.", j, sep = "")]] <- list()
+  for (i in 1:(ncol(.env.ra[[paste("pancan.achilles.topVar.", j, sep = "")]]))) {
+    .env.ra[[paste("models.", j, sep = "")]][[i]] <- summary(lm(.env.ra[[paste("ef.pancan.max.percl.", j, sep = "")]] ~ .env.ra[[paste("pancan.achilles.topVar.", j, sep = "")]][, i]))
+  }
+  
+  .env.ra[[paste("r2.", j, sep = "")]] <- c()
+  for (i in 1:length(.env.ra[[paste("models.", j, sep = "")]])) {
+    .env.ra[[paste("r2.", j, sep = "")]] <- append(.env.ra[[paste("r2.", j, sep = "")]], unlist(.env.ra[[paste("models.", j, sep = "")]][[i]]$r.squared))
+  }
+  names(.env.ra[[paste("r2.", j, sep = "")]]) <- colnames(.env.ra[[paste("pancan.achilles.topVar.", j, sep = "")]])
+  print(max(.env.ra[[paste("r2.", j, sep = "")]]))
+  print(names(.env.ra[[paste("r2.", j, sep = "")]][which(.env.ra[[paste("r2.", j, sep = "")]] == max(.env.ra[[paste("r2.", j, sep = "")]]))]))
+  print(unname(which(.env.ra[[paste("r2.", j, sep = "")]] == max(.env.ra[[paste("r2.", j, sep = "")]]))))
+}
+```
+
+
+```{r}
+plot(
+  .env.ra$pancan.achilles.topVar.1[, 432], 
+  .env.ra$ef.pancan.max.percl.1, 
+  ylab = paste("Efficacy per dosage of", names(.env.ra$dr.ef.pancan.max.1)), 
+  xlab = paste("Achilles value of", names(.env.ra$r2.1[which(.env.ra$r2.1 == max(.env.ra$r2.1))])), 
+  main = paste("Correlation of", names(.env.ra$r2.1[which(.env.ra$r2.1 == max(.env.ra$r2.1))]), "with", names(.env.ra$dr.ef.pancan.max.1), "at r.squared =", round(max(.env.ra$r2.1), digits = 5))
+)
+abline(lm(.env.ra$ef.pancan.max.percl.1 ~ .env.ra$pancan.achilles.topVar.1[, 432]), col = "red")
+```
+
+
+```{r}
+plot(
+  .env.ra$pancan.achilles.topVar.2[, 259], 
+  .env.ra$ef.pancan.max.percl.2, 
+  ylab = paste("Efficacy per dosage of", names(.env.ra$dr.ef.pancan.max.2)), 
+  xlab = paste("Achilles value of", names(.env.ra$r2.2[which(.env.ra$r2.2 == max(.env.ra$r2.2))])), 
+  main = paste("Correlation of", names(.env.ra$r2.2[which(.env.ra$r2.2 == max(.env.ra$r2.2))]), "with", names(.env.ra$dr.ef.pancan.max.2), "at r.squared =", round(max(.env.ra$r2.2), digits = 5))
+)
+abline(lm(.env.ra$ef.pancan.max.percl.2 ~ .env.ra$pancan.achilles.topVar.2[, 259]), col = "red")
+```
+
+
+```{r}
+plot(
+  lm(.env.ra$ef.pancan.max.percl.1 ~ .env.ra$pancan.achilles.topVar.1[, 432])$residuals, 
+  ylab = "Residuals"
+)
+abline(h = 0, col = "red")
+```
+
+
+```{r}
+plot(
+  lm(.env.ra$ef.pancan.max.percl.2 ~ .env.ra$pancan.achilles.topVar.2[, 259])$residuals, 
+  ylab = "Residuals"
+)
+abline(h = 0, col = "red")
+```
+
+
+
+
+
+
+
+#4 prism.achilles
+
+##4.1 Cleanup of prism.achilles 
+
+##4.1.1 na removal
+
+```{r}
+# Where are our NAs?
+which(is.na(prism.achilles[,14]))
+prism.achilles[275:280,14]
+prism.achilles[320:325,14]
+```
+
+```{r}
+# vector with NA rows - na.achilles
+na.achilles <- c(277,309,323)
+# Depmap ids of NA containing cellines
+rownames(prism.achilles[na.achilles,])
+# how many total NAs?
+sum(is.na(prism.achilles[na.achilles,]))
+# removing NA containing rows from achilles
+prism.achilles <- prism.achilles[-na.achilles,]
+# checking if any NAs left
+sum(is.na(prism.achilles))
+# checking dim of prism.achilles - no genes removed - only NA cell lines removed
+dim(prism.achilles)
+```
+
+4.1.2 Make Prism.achilles numeric
+
+```{r}
+prism.achilles.numeric <- apply(prism.achilles, 2, as.numeric)
+# step below conserves rownames 
+rownames(prism.achilles.numeric) <- rownames(prism.achilles)
+```
+
+10.Intermission - Sort Prism.cl by depmap_id resulting in prism.cl.ordered
+
+```{r}
+# show slice of prism.cl - rows are not yet ordered
+prism.cl[1:3,1:3]
+# order prism.cl by DepMap_ID resulting in prism.cl.ordered
+prism.cl.ordered <- prism.cl[order(prism.cl$DepMap_ID),]
+# dimmension check - hasn't changed
+dim(prism.cl.ordered)
+# rownames are scrambled now -> reset
+rownames(prism.cl.ordered) <- 1:nrow(prism.cl.ordered)
+# check rowname order
+rownames(prism.cl.ordered)[1:30]
+# check slice - everything worked
+prism.cl.ordered[1:30,1:3]
+```
+
+```{r}
+# vector a with length of nrow prism.cl
+a <- c(1:nrow(prism.cl.ordered))
+# because prism cl is ordered we can easily remove the cellines, that have no achilles value, from prism.cl.ordered
+# This loop checks if a certain celline has an achilles value and correspondingly writes a 0 or 1 into vector a
+for(n in 1:481) {a[n] <- (prism.cl.ordered[n,1] %in% rownames(prism.achilles))}
+# vector b contains the prism.cl rows / cellines that do not have an achilles value
+b <- which(a == 0)
+# remove prism.cl rows that don't have a corresponding achilles value
+prism.cl.ordered.achilles <- prism.cl.ordered[-b, ]
+# check dimensions of prism.cl.ordered.achilles
+dim(prism.cl.ordered.achilles)
+# reset rownames of prism.cl.ordered.achilles
+rownames(prism.cl.ordered.achilles) <- 1:nrow(prism.cl.ordered.achilles)
+# compare rownames of achilles with cl - checking for same order and same elements - they are equal
+prism.cl.ordered.achilles[1:5,1]
+rownames(prism.achilles.numeric)[1:5]
+```
+Find PanCan Cellines in prism.cl.achilles
+```{r}
+# pancan.rownumbers is a vector with the row numbers that are pancreatic cancer cellines
+pancan.rownumbers <- c(which(prism.cl.ordered.achilles[,20] == 'Pancreatic Cancer'))
+# pancan.cl.names contains the DepMap IDs of the pancan cellines
+pancan.cl.names <- prism.cl.ordered.achilles[pancan.rownumbers,1]
+# checking if this was done correctly
+prism.cl.ordered.achilles[pancan.rownumbers,20]
+# this checks if all steps before were done correctly - row numbers of cl and achilles correspond to the same depmap ids
+rownames(prism.achilles.numeric)[pancan.rownumbers]
+pancan.cl.names
+```
+
+```{r}
+# More tests if everything is ordered correctly
+rownames(prism.cl.ordered.achilles)[1:10]
+prism.cl.ordered.achilles[1:10,1]
+rownames(prism.achilles.numeric)[1:10]
+```
+
+
+The data frame prism.achilles consists of gene knockdown scores. The score is a measure of how essential/important is a particular gene for the cell survival. This score reflects whether upon knocking down that genes does the cell reduce its proliferation or increases it or has no change. Smaller values refers to higher essentiality. The rows of this matrix are the gene names and the columns are the cancer cell line identifiers.
+
+Exploration of prism.achilles.numeric
+```{r}
+dim(prism.achilles.numeric)
+prism.achilles.numeric[1:10,1:2]
+```
+
+
+```{r}
+pancan.rownumbers
+prism.achilles.numeric.pancan <- prism.achilles.numeric[pancan.rownumbers,]
+
+prism.achilles.numeric.pancan[1:10,1]
+```
+
+
+```{r}
+is.numeric(prism.achilles.numeric.pancan)
+hist(prism.achilles.numeric.pancan[1,])
+hist(prism.achilles.numeric[1,])
+quantile(prism.achilles.numeric.pancan,probs=seq(0,1,.1))
+```
+```{r}
+quantile(prism.achilles.numeric,probs=seq(0,1,.1))
+quantile(prism.achilles.numeric,prob=0.1)
+```
+```{r}
+
+dim(prism.achilles.numeric)
+prism.achilles.numeric[345:347,1:5]
+dim(prism.achilles.numeric)
+dim(prism.achilles)
+rownames(prism.achilles.numeric) <- rownames(prism.achilles)
+```
+
+Neuen Dataframe für Untersuchungen an prism.achilles.numeric
+```{r}
+achilles.research.dataframe <- prism.achilles[1:10,]
+achilles.research.dataframe[1:10,1:18119] <- 0
+rownames(achilles.research.dataframe) <- c('max','mean','min','10%quantile','Pancanmean','is(r5<r4)','stdev','empty8','empty9','empty10')
+
+achilles.research.dataframe[1,] <- apply(prism.achilles.numeric, 2, max)
+achilles.research.dataframe[2,] <- apply(prism.achilles.numeric, 2, mean)
+achilles.research.dataframe[3,] <- apply(prism.achilles.numeric, 2, min)
+achilles.research.dataframe[4,] <- apply(prism.achilles.numeric, 2, function(x){quantile(x,prob=0.1)})
+achilles.research.dataframe[5,] <- apply(prism.achilles.numeric.pancan, 2, mean)
+achilles.research.dataframe[6,] <- apply(achilles.research.dataframe, 2, function(x) {return(x[4] > x[5])})
+achilles.research.dataframe[7,] <- apply(prism.achilles.numeric, 2, var)
+
+```
+
+
+```{r}
+achilles.research.dataframe[1:6,1:100]
+which(achilles.research.dataframe[6,] == 1)
+achilles.research.dataframe[1:7,which(achilles.research.dataframe[6,] == 1)]
+```
+
+
+```{r}
+merlinsvariable <- 10000
+cor.mat.achilles <- cor(prism.achilles.numeric.pancan[,1:merlinsvariable])
+cor.mat.achilles[779,782]
+interesting.cor.values <- which(cor.mat.achilles > 0.90 & cor.mat.achilles < 1 ) 
+interesting.cor.rows <- (((interesting.cor.values - (interesting.cor.values %% merlinsvariable)) /merlinsvariable) +1)
+interesting.cor.cols <- (interesting.cor.values %% merlinsvariable)
+cor.mat.achilles[interesting.cor.rows,  interesting.cor.cols]
+```
+
+
+k-means clustering
+
+Using the most variable, thus informative genes
+We first reduce our dataset to take the most variable gene, which are expected to carry most of the information about the samples:
+```{r}
+## compute variance over all rows of the data.frame (hence genes)
+topVar = apply(prism.achilles.numeric, 2, var) 
+summary(topVar)
+```
+```{r}
+## filtering to keep genes which have a variance greater than the 75% percentile
+prism.achilles.numeric.topVar = prism.achilles.numeric[,topVar > quantile(topVar, probs = 0.75)] 
+dim(prism.achilles.numeric.topVar)
+```
+
+
+Clustering by depmap
+```{r}
+mydata <- prism.achilles.numeric.topVar
+# Determine number of clusters
+wss.depmap <- (nrow(mydata)-1)*sum(apply(mydata,2,var))
+wss.depmap
+for (i in 2:100) wss.depmap[i] <- sum(kmeans(mydata, centers=i)$withinss)
+```
+
+```{r}
+wss.depmap
+plot(1:100, wss.depmap, type="b", xlab="Number of Clusters",
+  ylab="Within groups sum of squares")
+plot(1:20, wss.depmap[1:20], type="b", xlab="Number of Clusters",
+  ylab="Within groups sum of squares")
+```
+
+
+```{r}
+km.depmap = kmeans(x=prism.achilles.numeric.topVar, 
+            centers = 2, 
+            nstart = 10)
+km.depmap$cluster[1:10]
+
+```
+
+
+```{r}
+prism.cl.pancan <- rownames(prism.extractor(prism.cl))
+summary(km.depmap)
+prism.cl.pancan
+km.depmap$cluster[prism.cl.pancan]
+```
+
+Clustering by genes
+```{r}
+mydata <- prism.achilles.numeric.topVar
+# Determine number of clusters
+
+wss.genes <- (ncol(mydata)-1)*sum(apply(mydata,1,var))
+dim(mydata)
+for (i in seq(500,1000, by = 10)) wss.genes[i] <- sum(kmeans(t(mydata), centers=i, iter.max = 500)$withinss)
+```
+```{r}
+for (i in 1:499) wss.genes[i] <- sum(kmeans(t(mydata), centers=i, iter.max = 500)$withinss)
+```
+
+```{r}
+wss.genes
+dim(wss.genes)
+plot(wss.genes[100:1000], type="b", xlab="Number of Clusters",
+  ylab="Within groups sum of squares")
+plot(wss.genes[100:500], type="b", xlab="Number of Clusters",
+  ylab="Within groups sum of squares")
+```
+
+
+```{r}
+km.genes = kmeans(x=prism.achilles.numeric.topVar, 
+            centers = 2, 
+            nstart = 10)
+km.genes$cluster[1:10]
+
+```
+
+
+```{r}
+summary(km.genes)
+prism.cl.pancan
+km.genes$cluster[prism.cl.pancan]
+```
