@@ -6,18 +6,6 @@ output:
 ---
 
 
-Junk
-```{r}
-which(prism.cl[,20] %in% rownames(prism.achilles))
-for(n in 1:481) {prism.cl[n,20] %in% rownames(prism.achilles)}
-keep.rows = apply(prism.cl,1,function(x){prism.cl[x,1] %in% rownames(prism.achilles) })
-```
-------- na test
-z <- c(1:350)
-for(n in 1:350) {z[n] <- sum(is.na(prism.achilles[n,]))}
-z
-----------
-
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -57,6 +45,8 @@ dim(prism.achilles)
 
 ```{r}
 prism.achilles.numeric <- apply(prism.achilles, 2, as.numeric)
+# step below conserves rownames 
+rownames(prism.achilles.numeric) <- rownames(prism.achilles)
 ```
 
 10.Intermission - Sort Prism.cl by depmap_id resulting in prism.cl.ordered
@@ -96,23 +86,19 @@ rownames(prism.achilles.numeric)[1:5]
 ```
 Find PanCan Cellines in prism.cl.achilles
 ```{r}
-# prism.cl.pancan.rownumbers is a vector with the row numbers that are pancreatic cancer cellines
-prism.cl.pancan.rownumbers <- c(which(prism.cl.ordered.achilles[,20] == 'Pancreatic Cancer'))
+# pancan.rownumbers is a vector with the row numbers that are pancreatic cancer cellines
+pancan.rownumbers <- c(which(prism.cl.ordered.achilles[,20] == 'Pancreatic Cancer'))
 # pancan.cl.names contains the DepMap IDs of the pancan cellines
-pancan.cl.names <- prism.cl.ordered.achilles[prism.cl.pancan.rownumbers,1]
+pancan.cl.names <- prism.cl.ordered.achilles[pancan.rownumbers,1]
 # checking if this was done correctly
-prism.cl.ordered.achilles[prism.cl.pancan.rownumbers,20]
+prism.cl.ordered.achilles[pancan.rownumbers,20]
 # this checks if all steps before were done correctly - row numbers of cl and achilles correspond to the same depmap ids
-rownames(prism.achilles.numeric)[prism.cl.pancan.rownumbers]
-```
-```{r}
-prism.cl.ordered.achilles[1:50,20]
-prism.cl.ordered.achilles[1:50,1]
+rownames(prism.achilles.numeric)[pancan.rownumbers]
+pancan.cl.names
 ```
 
-
-
 ```{r}
+# More tests if everything is ordered correctly
 rownames(prism.cl.ordered.achilles)[1:10]
 prism.cl.ordered.achilles[1:10,1]
 rownames(prism.achilles.numeric)[1:10]
@@ -121,16 +107,16 @@ rownames(prism.achilles.numeric)[1:10]
 
 The data frame prism.achilles consists of gene knockdown scores. The score is a measure of how essential/important is a particular gene for the cell survival. This score reflects whether upon knocking down that genes does the cell reduce its proliferation or increases it or has no change. Smaller values refers to higher essentiality. The rows of this matrix are the gene names and the columns are the cancer cell line identifiers.
 
-Exploration
+Exploration of prism.achilles.numeric
 ```{r}
 dim(prism.achilles.numeric)
-prism.achilles.numeric[1:10,1]
+prism.achilles.numeric[1:10,1:2]
 ```
 
 
 ```{r}
-prism.cl.pancan
-prism.achilles.numeric.pancan <- prism.achilles.numeric[prism.cl.pancan,]
+pancan.rownumbers
+prism.achilles.numeric.pancan <- prism.achilles.numeric[pancan.rownumbers,]
 
 prism.achilles.numeric.pancan[1:10,1]
 ```
@@ -180,14 +166,9 @@ achilles.research.dataframe[1:7,which(achilles.research.dataframe[6,] == 1)]
 
 
 ```{r}
-
-```
-```{r}
-cor.mat.achilles[779,782]
-```
-```{r}
 merlinsvariable <- 10000
 cor.mat.achilles <- cor(prism.achilles.numeric.pancan[,1:merlinsvariable])
+cor.mat.achilles[779,782]
 interesting.cor.values <- which(cor.mat.achilles > 0.90 & cor.mat.achilles < 1 ) 
 interesting.cor.rows <- (((interesting.cor.values - (interesting.cor.values %% merlinsvariable)) /merlinsvariable) +1)
 interesting.cor.cols <- (interesting.cor.values %% merlinsvariable)
