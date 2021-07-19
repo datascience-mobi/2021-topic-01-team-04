@@ -185,7 +185,7 @@ plot(silhouette(kmeans(x = pancan.perdrug.topVar, centers = 2, nstart = 100)$clu
 
 These three Rows had to be removed because 
 Three rows of our prism.achilles dataframe contain NAs. These are the corresponding DepMap IDs
-```{r}
+```{r, echo=FALSE}
 # vector with NA rows - na.achilles
 na.achilles <- c(277,309,323)
 # Depmap ids of NA containing cellines
@@ -194,13 +194,13 @@ rownames(prism.achilles[na.achilles,])
 prism.achilles <- prism.achilles[-na.achilles,]
 ```
 We make prism.achilles numeric
-```{r}
+```{r, echo=FALSE}
 prism.achilles.numeric <- apply(prism.achilles, 2, as.numeric)
 # step below conserves rownames 
 rownames(prism.achilles.numeric) <- rownames(prism.achilles)
 ```
 ### Sort Prism.cl by depmap_id resulting in prism.cl.ordered
-```{r}
+```{r, echo=FALSE}
 
 # order prism.cl by DepMap_ID resulting in prism.cl.ordered
 prism.cl.ordered <- prism.cl[order(prism.cl$DepMap_ID),]
@@ -210,7 +210,7 @@ dim(prism.cl.ordered)
 rownames(prism.cl.ordered) <- 1:nrow(prism.cl.ordered)
 ```
 
-```{r}
+```{r, echo=FALSE}
 # vector a with length of nrow prism.cl
 a <- c(1:nrow(prism.cl.ordered))
 # because prism cl is ordered we can easily remove the cellines, that have no achilles value, from prism.cl.ordered
@@ -229,7 +229,7 @@ prism.cl.ordered.achilles[1:5,1]
 rownames(prism.achilles.numeric)[1:5]
 ```
 ### Find PanCan Cellines in prism.cl.achilles
-```{r}
+```{r, echo=FALSE}
 # pancan.rownumbers is a vector with the row numbers that are pancreatic cancer cellines
 pancan.rownumbers <- c(which(prism.cl.ordered.achilles[,20] == 'Pancreatic Cancer'))
 # pancan.cl.names contains the DepMap IDs of the pancan cellines
@@ -238,32 +238,32 @@ pancan.cl.names <- prism.cl.ordered.achilles[pancan.rownumbers,1]
 The data frame prism.achilles consists of gene knockdown scores. The score is a measure of how essential/important is a particular gene for the cell survival. This score reflects whether upon knocking down that genes does the cell reduce its proliferation or increases it or has no change. Smaller values refers to higher essentiality. The rows of this matrix are the gene names and the columns are the cancer cell line identifiers.
 
 ### Exploration of prism.achilles.numeric
-```{r}
+```{r, echo=FALSE}
 dim(prism.achilles.numeric)
 prism.achilles.numeric[1:10,1:2]
 ```
-```{r}
+```{r, echo=FALSE}
 # More exploration
 
 prism.achilles.numeric.pancan <- prism.achilles.numeric[pancan.rownumbers,]
 prism.achilles.numeric.pancan[1:10,1]
 ```
 We confirm that Our prism.achilles.numeric and prism.achilles.numeric.pancan dataframes are numeric and can be used for plotting histograms or calculating quantiles.
-```{r}
+```{r, echo=FALSE}
 # just confirming it is still numeric
 is.numeric(prism.achilles.numeric.pancan)
 hist(prism.achilles.numeric.pancan[10,])
 quantile(prism.achilles.numeric.pancan,probs=seq(0,1,.1))
 ```
 
-```{r}
+```{r, echo=FALSE}
 prism.achilles.numeric[345:347,1:5]
 dim(prism.achilles.numeric)
 dim(prism.achilles)
 rownames(prism.achilles.numeric) <- rownames(prism.achilles)
 ```
 New Dataframe for Analysis of prism.achilles.numeric
-```{r}
+```{r, echo=FALSE}
 # creates Dataframe with 10 rows and the same column count and names as prism.achilles
 achilles.research.dataframe <- prism.achilles[1:10,]
 # this sets all values of the research.dataframe to 0
@@ -289,40 +289,38 @@ achilles.research.dataframe[7,] <- apply(prism.achilles.numeric, 2, var)
 ```
 
 
-```{r}
+```{r, echo=FALSE}
 achilles.research.dataframe[1:7,1]
 which(achilles.research.dataframe[6,] == 1)
 achilles.research.dataframe[1:7,which(achilles.research.dataframe[6,] == 1)]
 ```
 Shapiro tests of the four interesting prism.achilles columns shows that their values are not normally distributed. Thus the comparison of the prism.achilles.numeric.pancan mean and prism.achilles.numeric 10% quantile are of no importance until further examination. Shown is the result of a Shapiro-Wilk normality test on column 4283 of our prism.achilles.numeric dataset.
-```{r}
+```{r, echo=FALSE}
 # these values show that the interesting columns are not completely normally distributed
 shapiro.test(prism.achilles.numeric[,4283])
 ```
 A qqplot between prism.achilles.numeric[,4283] and an according normal distribution results in the following graph. This shows that the values do not correspond to one single normal distribution.
-```{r}
+```{r, echo=FALSE}
 ggqqplot(prism.achilles.numeric[,4283])
 ```
-
-
 
 
 ## K-Means Clustering
 
 Using the most variable, thus informative genes
 We first reduce our dataset to take the most variable gene, which are expected to carry most of the information about the samples:
-```{r}
+```{r, echo=FALSE}
 ## compute variance over all rows of the data.frame (hence genes)
 topVar = apply(prism.achilles.numeric, 2, var) 
 ```
-```{r variance filtering for clustering}
+```{r variance filtering for clustering, echo=FALSE}
 ## filtering to keep genes which have a variance greater than the 75% percentile
 prism.achilles.numeric.topVar = prism.achilles.numeric[,topVar > quantile(topVar, probs = 0.75)] 
 ```
 
 
 ### Clustering by depmap
-```{r}
+```{r, echo=FALSE}
 mydata <- prism.achilles.numeric.topVar
 # Determine number of clusters
 wss.depmap <- (nrow(mydata)-1)*sum(apply(mydata,2,var))
@@ -330,17 +328,17 @@ wss.depmap
 for (i in 2:10) wss.depmap[i] <- sum(kmeans(mydata, centers=i)$withinss)
 ```
 The following plot shows that there is no amount of clusters that is by far the best for clustering prism.achilles by cell lines but that two Clusters is probably our best option according to a slight kink at two clusters.
-```{r}
+```{r, echo=FALSE}
 plot(1:10, wss.depmap[1:10], type="b", xlab="Number of Clusters",
   ylab="Within groups sum of squares")
 ```
-```{r}
+```{r, echo=FALSE}
 km.depmap = kmeans(x=prism.achilles.numeric.topVar, 
             centers = 2, 
             nstart = 10)
 km.depmap$cluster[1:10]
 ```
-```{r}
+```{r, echo=FALSE}
 summary(km.depmap)
 km.depmap$cluster[pancan.cl.names]
 ```
