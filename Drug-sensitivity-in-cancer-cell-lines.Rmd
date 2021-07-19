@@ -6,7 +6,7 @@ output: pdf_document
 ---
 
 
-```{r setup, echo=FALSE, warning=FALSE}
+```{r setup, echo=FALSE, warning=FALSE, include=FALSE}
 knitr::opts_chunk$set(echo = F, warning = F)
 source("Scripts/InitiatorFinal.R")
 th <- "q.005"
@@ -181,8 +181,6 @@ plot(silhouette(kmeans(x = pancan.perdrug.topVar, centers = 2, nstart = 100)$clu
 
 ## Cleanup of prism.achilles 
 
-### NA Removal
-
 The cleanup of prism.achilles consisted of the following steps.
 Three Rows had to be removed because they contained NAs. These are the corresponding DepMap IDs.
 ```{r, echo=FALSE}
@@ -226,7 +224,6 @@ pancan.rownumbers <- c(which(prism.cl.ordered.achilles[,20] == 'Pancreatic Cance
 # pancan.cl.names contains the DepMap IDs of the pancan cellines
 pancan.cl.names <- prism.cl.ordered.achilles[pancan.rownumbers,1]
 ```
-The data frame prism.achilles consists of gene knockdown scores. The score is a measure of how essential/important is a particular gene for the cell survival. This score reflects whether upon knocking down that genes does the cell reduce its proliferation or increases it or has no change. Smaller values refers to higher essentiality. The rows of this matrix are the gene names and the columns are the cancer cell line identifiers.
 
 ## Exploration of prism.achilles.numeric
 ```{r, echo=FALSE}
@@ -235,7 +232,8 @@ The data frame prism.achilles consists of gene knockdown scores. The score is a 
 prism.achilles.numeric.pancan <- prism.achilles.numeric[pancan.rownumbers,]
 rownames(prism.achilles.numeric) <- rownames(prism.achilles)
 ```
-New Dataframe for Analysis of prism.achilles.numeric
+We compared the mean of each prism.achilles.numeric.pancan column with the according 10% quantiles across the prism.achilles.numeric colums.
+Because smaller achilles values refer to higher essentiality we noted the Genes for which the pancan mean was below the 10% quantile across all cellines. We found four interesting genes.
 ```{r, echo=FALSE}
 # creates Dataframe with 10 rows and the same column count and names as prism.achilles
 achilles.research.dataframe <- prism.achilles[1:10,]
@@ -266,12 +264,12 @@ achilles.research.dataframe[7,] <- apply(prism.achilles.numeric, 2, var)
 
 achilles.research.dataframe[1:7,which(achilles.research.dataframe[6,] == 1)]
 ```
-Shapiro tests of the four interesting prism.achilles columns shows that their values are not normally distributed. Thus the comparison of the prism.achilles.numeric.pancan mean and prism.achilles.numeric 10% quantile are of no importance until further examination. Shown is the result of a Shapiro-Wilk normality test on column 4283 of our prism.achilles.numeric dataset.
+Shapiro tests of the four interesting prism.achilles columns shows that their values are not normally distributed. Thus the comparison of the prism.achilles.numeric.pancan mean and prism.achilles.numeric 10% quantile are of no importance until further examination. Shown is the result of a Shapiro-Wilk normality test on column DOCK5 of our prism.achilles.numeric dataset.
 ```{r, echo=FALSE}
 # these values show that the interesting columns are not completely normally distributed
 shapiro.test(prism.achilles.numeric[,4283])
 ```
-A qqplot between prism.achilles.numeric[,4283] and an according normal distribution results in the following graph. This shows that the values do not correspond to one single normal distribution.
+A qqplot between prism.achilles.numeric[,DOCK5] and an according normal distribution results in the following graph. This shows that the values do not correspond to one single normal distribution.
 ```{r, echo=FALSE}
 ggqqplot(prism.achilles.numeric[,4283])
 ```
