@@ -77,10 +77,9 @@ prism.cl.ordered <- prism.cl[order(prism.cl$DepMap_ID),]
 dim(prism.cl.ordered)
 # rownames are scrambled now -> reset
 rownames(prism.cl.ordered) <- 1:nrow(prism.cl.ordered)
-# check rowname order
-rownames(prism.cl.ordered)[1:30]
+
 # check slice - everything worked
-prism.cl.ordered[1:30,1:3]
+prism.cl.ordered[1:5,1:3]
 ```
 
 ```{r}
@@ -212,13 +211,11 @@ mydata <- prism.achilles.numeric.topVar
 # Determine number of clusters
 wss.depmap <- (nrow(mydata)-1)*sum(apply(mydata,2,var))
 wss.depmap
-for (i in 2:100) wss.depmap[i] <- sum(kmeans(mydata, centers=i)$withinss)
+for (i in 2:10) wss.depmap[i] <- sum(kmeans(mydata, centers=i)$withinss)
 ```
 
 ```{r}
-plot(1:100, wss.depmap, type="b", xlab="Number of Clusters",
-  ylab="Within groups sum of squares")
-plot(1:20, wss.depmap[1:20], type="b", xlab="Number of Clusters",
+plot(1:10, wss.depmap[1:10], type="b", xlab="Number of Clusters",
   ylab="Within groups sum of squares")
 ```
 
@@ -268,7 +265,5 @@ km.genes$cluster[1:10]
 
 
 ```{r}
-summary(km.genes)
-pancan.cl.names
 km.genes$cluster[pancan.cl.names]
 ```
