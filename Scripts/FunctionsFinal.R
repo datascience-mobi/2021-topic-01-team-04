@@ -1,15 +1,8 @@
-message("Executing 'Functions.R'.", domain = "r-pkg")
-
-message("Functions.R >>")
-
-
-message("   Loading in function 'ob.name.ex()'.")
 ##  object name extractor
 #   SImple function that returns the name of the single argument 'ob' as a character sting.
 onex <- cmpfun(function(ob) return(deparse(substitute(ob))))
 
 
-message("   Loading in function 'frame.is.na()'.")
 ##  frame is.na
 #   Returns a data frame of the same dimensions and orientations as the input data frame with TRUE (invert=F) or FALSE (invert=T) for each NA in the input data frame.
 frame.is.na <- cmpfun(function(X, invert=F) {
@@ -24,7 +17,6 @@ frame.is.na <- cmpfun(function(X, invert=F) {
 })  
 
 
-message("   Loading in function 'row.col.cleaner()'.")
 ##  cleaner
 #   Removes all columns and rows of a data frame that ONLY (ex=T) or AT ALL (ex=F) contain NA.
 row.col.cleaner <- cmpfun(function(X, ex=T) {
@@ -43,7 +35,6 @@ row.col.cleaner <- cmpfun(function(X, ex=T) {
 })
 
 
-message("   Loading in function 'prism.extractor()'.")
 ##  extractor
 #   Returns a data frame with the subset of the input data frame which matches the disease type specified with the argument 'disease'.
 prism.extractor <- cmpfun(function(X, disease="Pancreatic Cancer") {
@@ -52,7 +43,6 @@ prism.extractor <- cmpfun(function(X, disease="Pancreatic Cancer") {
 })
 
 
-message("   Loading in function 'df.NA.to.val()'.")
 ##  whole data frame imputation
 #   Imputates NAs with mean, median or norm values over a whole data frame, using column or row data.
 df.NA.to.val <- cmpfun(function(X, mar, fun) {
@@ -87,7 +77,6 @@ df.NA.to.val <- cmpfun(function(X, mar, fun) {
 })
 
 
-message("   Loading in function 'st.ex()'.")
 ##  subtype extractor
 #   Returns a list of the subtypes of the wanted disease. The argument 'disease' needs to be formatted in congruence with the column 'disease' of 'prism.cl'.
 st.ex <- cmpfun(function(disease="Pancreatic Cancer") {
@@ -95,7 +84,6 @@ st.ex <- cmpfun(function(disease="Pancreatic Cancer") {
 })
 
 
-message("   Loading in function 'dmid.ex()'.")
 ##  Dep Map ID extractor#
 #   Extracts the DepMap IDs of all cell lines of a disease subtype.
 dmid.ex <- cmpfun(function(target, targetcol = "disease_subtype") {
@@ -103,7 +91,6 @@ dmid.ex <- cmpfun(function(target, targetcol = "disease_subtype") {
 })
 
 
-message("   Loading in function 'short.hander()'.")
 ##  short hander 
 #   Generates a short hand out of a character string. 
 short.hander <- cmpfun(function(s, mode="initials", n=1, p.ignore=T) {
@@ -137,7 +124,6 @@ short.hander <- cmpfun(function(s, mode="initials", n=1, p.ignore=T) {
 })
 
 
-message("   Loading in function 'st.splitter()'.")
 ##  subtype splitter   
 #   Splits a data set in regard to the cell lines subtypes of the cell lines. 
 st.splitter <- cmpfun(function(X, disease="Pancreatic Cancer", custom.sh=F, sh.mode="initials", sh.n=3, sh.p.ignore=T, doscor = 0) {
@@ -159,7 +145,6 @@ st.splitter <- cmpfun(function(X, disease="Pancreatic Cancer", custom.sh=F, sh.m
 })
 
 
-message("   Loading in function 'doscor()'.")
 ##  dose correlator, takes a long time
 #   Has different operations>> With doscor = T and perdrug = T, it computes the mean efficacy per dosage for each drug. With doscor = T and perdrug = F it normalises each dose of each drug to the given dosage. With doscor = F it does nothing and will throw a warning, that no operation has been performed. 
 doscor <- cmpfun(function(X, doscor = T, perdrug = T, PT = prism.treat) {
@@ -215,7 +200,6 @@ doscor <- cmpfun(function(X, doscor = T, perdrug = T, PT = prism.treat) {
 })
 
 
-message("   Loading in function 'ef.dr.identifier()'.")
 ##  efficacious drug identifier
 #   Identifies the most effective drugs in a given population 'X'.
 ef.dr.identifier <- cmpfun(function(X, threshold = "q.001", greaterthan = F, impmeth="i", sinonco = F) {
@@ -350,7 +334,6 @@ ef.dr.identifier <- cmpfun(function(X, threshold = "q.001", greaterthan = F, imp
 })
 
 
-message("   Loading in function 'dr.to.effect()'.")
 ##  drugs to effect 
 #   Returns the drug effect
 dr.to.effect <- cmpfun(function(n, doscor, sort = 1, output = "mean") {
@@ -396,7 +379,6 @@ dr.to.effect <- cmpfun(function(n, doscor, sort = 1, output = "mean") {
 })
 
 
-message("   Loading in function 'reg.an.prepper()'.")
 ##  regression analysis prepper
 #   
 reg.an.prepper <- cmpfun(function(n, pos = .env.ra) {
@@ -441,6 +423,3 @@ reg.an.prepper <- cmpfun(function(n, pos = .env.ra) {
     } else .env.ra[[paste("pancan.achilles.fitted.", i, sep = "")]] <- pancan.achilles
   }
 })
-
-
-message("Finished Executing 'Functions.R'.", domain = "r-pkg")

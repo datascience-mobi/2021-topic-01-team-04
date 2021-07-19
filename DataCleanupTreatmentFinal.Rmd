@@ -51,7 +51,7 @@ To check how many clusters are reasonable we used the elbow method.
 ```{r}
 topVar <- apply(df.NA.to.val(pancan.perdrug, 2, "median"), 2, var) 
 
-pancan.perdrug.topVar <- pancan.perdrug.na.imp[, topVar >= sort(topVar, decreasing = T)[100]]
+pancan.perdrug.topVar <- df.NA.to.val(pancan.perdrug, 2, "median")[, topVar >= sort(topVar, decreasing = T)[100]]
 
 wss <- (nrow(pancan.perdrug.topVar) - 1) * sum(apply(pancan.perdrug.topVar, 2, var))
 for (i in 2:15) wss[i] <- sum(kmeans(pancan.perdrug.topVar, centers=i)$withinss)
