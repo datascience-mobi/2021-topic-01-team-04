@@ -47,6 +47,7 @@ Here we tried to display the data containing the different treatment effects for
 ## prism.exp dataset cell lines 
 
 For this dataset we checked the distribution of the mean gene values of all 481 human cancer cell lines to observe some initial characteristics. This was done using a simple histogram.
+
 ```{r echo=FALSE}
 # mean value for every column of prism.exp.pancreatic
 meanval.prism.exp.pan = apply(prism.exp.pan, 2, function(x){mean(x)})
