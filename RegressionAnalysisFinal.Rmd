@@ -5,6 +5,9 @@ date: "17/07/2021"
 output: html_document
 ---
 
+
+#   Setup and Initiation
+
 First we remove all variables of the global environment and load in all functions, data, and packages to be used. 
 Furthermore, all data sets to be used have their information void columns and rows removed. Then all prism data is dose correlated, meaning that a drugs effect on cell growth is normalised to the applied dosage (doscor). Morevover, this doscor data is further processed, where the mean is taken of each drug's effect per dosage (perdrug). All three---prism, prism.doscor, and prism.perdrug---are then split each into a data set, containing only data for pancreatic cancer cell lines and further into data sets, each containing only cell lines of one of the four subtypes of pancreatic cancer as identified in prism.treat.
 
@@ -13,7 +16,7 @@ Furthermore, all data sets to be used have their information void columns and ro
 knitr::opts_chunk$set(echo = TRUE)
 
 source("./Scripts/InitiatorFinal.R")
-th <- "q.001"
+th <- "q.005"
 source("./Scripts/EfDrIdentifierFinal.R")
 ```
 
