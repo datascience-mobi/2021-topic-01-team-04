@@ -256,7 +256,6 @@ achilles.research.dataframe[7,] <- apply(prism.achilles.numeric, 2, var)
 
 ## The Four Interesting Genes
 ```{r, echo=FALSE}
-
 achilles.research.dataframe[1:7,which(achilles.research.dataframe[6,] == 1)]
 ```
 Shapiro tests of the four interesting prism.achilles columns shows that their values are not normally distributed. Thus the comparison of the prism.achilles.numeric.pancan mean and prism.achilles.numeric 10% quantile are of no importance until further examination. Shown is the result of a Shapiro-Wilk normality test on column DOCK5 of our prism.achilles.numeric dataset.
