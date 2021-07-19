@@ -14,7 +14,7 @@ Furthermore, all data sets to be used have their information void columns and ro
 
 ```{r setup}
 knitr::opts_chunk$set(echo = TRUE)
-source("./Scripts/InitiatorFinal.R")
+source("Scripts/InitiatorFinal.R")
 ```
 
 

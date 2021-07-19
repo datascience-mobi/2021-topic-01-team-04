@@ -104,17 +104,35 @@ plot(
   xlab = paste("Achilles value of", names(.env.ra$r2.1[which(.env.ra$r2.1 == max(.env.ra$r2.1))])), 
   main = paste("Correlation of", names(.env.ra$r2.1[which(.env.ra$r2.1 == max(.env.ra$r2.1))]), "with", names(.env.ra$dr.ef.pancan.max.1), "at r.squared =", round(max(.env.ra$r2.1), digits = 5))
 )
-abline(lm(.env.ra$ef.pancan.max.percl.1 ~ .env.ra$pancan.achilles.topVar.1[, 432]))
+abline(lm(.env.ra$ef.pancan.max.percl.1 ~ .env.ra$pancan.achilles.topVar.1[, 432]), col = "red")
 ```
 
 
 ```{r}
 plot(
-  .env.ra$pancan.achilles.topVar.2[, 475], 
+  .env.ra$pancan.achilles.topVar.2[, 259], 
   .env.ra$ef.pancan.max.percl.2, 
   ylab = paste("Efficacy per dosage of", names(.env.ra$dr.ef.pancan.max.2)), 
   xlab = paste("Achilles value of", names(.env.ra$r2.2[which(.env.ra$r2.2 == max(.env.ra$r2.2))])), 
   main = paste("Correlation of", names(.env.ra$r2.2[which(.env.ra$r2.2 == max(.env.ra$r2.2))]), "with", names(.env.ra$dr.ef.pancan.max.2), "at r.squared =", round(max(.env.ra$r2.2), digits = 5))
 )
-abline(lm(.env.ra$ef.pancan.max.percl.2 ~ .env.ra$pancan.achilles.topVar.2[, 475]))
+abline(lm(.env.ra$ef.pancan.max.percl.2 ~ .env.ra$pancan.achilles.topVar.2[, 259]), col = "red")
+```
+
+
+```{r}
+plot(
+  lm(.env.ra$ef.pancan.max.percl.1 ~ .env.ra$pancan.achilles.topVar.1[, 432])$residuals, 
+  ylab = "Residuals"
+)
+abline(h = 0, col = "red")
+```
+
+
+```{r}
+plot(
+  lm(.env.ra$ef.pancan.max.percl.2 ~ .env.ra$pancan.achilles.topVar.2[, 259])$residuals, 
+  ylab = "Residuals"
+)
+abline(h = 0, col = "red")
 ```
