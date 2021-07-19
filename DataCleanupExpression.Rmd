@@ -269,11 +269,11 @@ var.prism.exp.pan = apply(prism.exp.pan, 2, function(x){var(x)})
 topvar.prism.exp.pan = prism.exp.pan[ ,var.prism.exp.pan > quantile(var.prism.exp.pan, probs = 0.75)]
 
 #performing k means
-wss = sapply(1:15,function(e) { 
-  kmeans(x=(topvar.prism.exp.pan), centers =e)$tot.withinss
+wss = sapply(1:7,function(e) { 
+  kmeans(x=t(topvar.prism.exp.pan), centers =e)$tot.withinss
 })
 
-plot(1:15,wss,type='b',pch=19,xlab="Number of clusters K",
+plot(1:7,wss,type='b',pch=19,xlab="Number of clusters K",
      ylab="Total within-clusters sum of squares",main= "prism.exp gene clustering elbow method")
 
 
@@ -282,7 +282,7 @@ plot(1:15,wss,type='b',pch=19,xlab="Number of clusters K",
 
 How does our clustering look like with two clusters?
 ```{r}
-km = kmeans(x=(topvar.prism.exp.pan), 
+km = kmeans(x=t(topvar.prism.exp.pan), 
             centers = 2, 
             nstart = 10)
 
@@ -325,7 +325,7 @@ topvar.prism.exp.pan = prism.exp.pan[ ,var.prism.exp.pan > quantile(var.prism.ex
 
 #performing k means
 wss = sapply(1:7,function(e) { 
-  kmeans(x=t(topvar.prism.exp.pan), centers =e)$tot.withinss
+  kmeans(x=(topvar.prism.exp.pan), centers =e)$tot.withinss
 })
 
 plot(1:7,wss,type='b',pch=19,xlab="Number of clusters K",
