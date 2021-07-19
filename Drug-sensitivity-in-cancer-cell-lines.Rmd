@@ -185,7 +185,7 @@ plot(silhouette(kmeans(x = pancan.perdrug.topVar, centers = 2, nstart = 100)$clu
 
 These three Rows had to be removed because 
 Three rows of our prism.achilles dataframe contain NAs. These are the corresponding DepMap IDs
-```{r}
+```{r, echo=FALSE}
 # vector with NA rows - na.achilles
 na.achilles <- c(277,309,323)
 # Depmap ids of NA containing cellines
@@ -195,13 +195,13 @@ prism.achilles <- prism.achilles[-na.achilles,]
 
 ```
 We make Prism.achilles numeric
-```{r}
+```{r, echo=FALSE}
 prism.achilles.numeric <- apply(prism.achilles, 2, as.numeric)
 # step below conserves rownames 
 rownames(prism.achilles.numeric) <- rownames(prism.achilles)
 ```
 Sort Prism.cl by depmap_id resulting in prism.cl.ordered
-```{r}
+```{r, echo=FALSE}
 # order prism.cl by DepMap_ID resulting in prism.cl.ordered
 prism.cl.ordered <- prism.cl[order(prism.cl$DepMap_ID),]
 # rownames are scrambled now -> reset
@@ -220,7 +220,7 @@ prism.cl.ordered.achilles <- prism.cl.ordered[-b, ]
 rownames(prism.cl.ordered.achilles) <- 1:nrow(prism.cl.ordered.achilles)
 ```
 Find PanCan Cellines in prism.cl.achilles
-```{r}
+```{r, echo=FALSE}
 # pancan.rownumbers is a vector with the row numbers that are pancreatic cancer cellines
 pancan.rownumbers <- c(which(prism.cl.ordered.achilles[,20] == 'Pancreatic Cancer'))
 # pancan.cl.names contains the DepMap IDs of the pancan cellines
@@ -229,14 +229,14 @@ pancan.cl.names <- prism.cl.ordered.achilles[pancan.rownumbers,1]
 The data frame prism.achilles consists of gene knockdown scores. The score is a measure of how essential/important is a particular gene for the cell survival. This score reflects whether upon knocking down that genes does the cell reduce its proliferation or increases it or has no change. Smaller values refers to higher essentiality. The rows of this matrix are the gene names and the columns are the cancer cell line identifiers.
 
 ## Exploration of prism.achilles.numeric
-```{r}
+```{r, echo=FALSE}
 # More exploration
 
 prism.achilles.numeric.pancan <- prism.achilles.numeric[pancan.rownumbers,]
 rownames(prism.achilles.numeric) <- rownames(prism.achilles)
 ```
 New Dataframe for Analysis of prism.achilles.numeric
-```{r}
+```{r, echo=FALSE}
 # creates Dataframe with 10 rows and the same column count and names as prism.achilles
 achilles.research.dataframe <- prism.achilles[1:10,]
 # this sets all values of the research.dataframe to 0
@@ -262,17 +262,17 @@ achilles.research.dataframe[7,] <- apply(prism.achilles.numeric, 2, var)
 ```
 
 ## The four interesting genes
-```{r}
+```{r, echo=FALSE}
 
 achilles.research.dataframe[1:7,which(achilles.research.dataframe[6,] == 1)]
 ```
 Shapiro tests of the four interesting prism.achilles columns shows that their values are not normally distributed. Thus the comparison of the prism.achilles.numeric.pancan mean and prism.achilles.numeric 10% quantile are of no importance until further examination. Shown is the result of a Shapiro-Wilk normality test on column 4283 of our prism.achilles.numeric dataset.
-```{r}
+```{r, echo=FALSE}
 # these values show that the interesting columns are not completely normally distributed
 shapiro.test(prism.achilles.numeric[,4283])
 ```
 A qqplot between prism.achilles.numeric[,4283] and an according normal distribution results in the following graph. This shows that the values do not correspond to one single normal distribution.
-```{r}
+```{r, echo=FALSE}
 ggqqplot(prism.achilles.numeric[,4283])
 ```
 
@@ -382,3 +382,12 @@ abline(h = 0, col = "red")
 # Discussion
 
 Following up on our two questions mentioned in the beginning, we now identified several different interesting genes that seem to be coupled to pancreatic cell lines. For example we determined the HOXD8 gene, the CLEC11A gene and ID3 gene. All of these genes were shown to possess significantly different mean values when compared to other cancer cell lines. A deeper analysis of the HOXD8 gene showed that this gene seemed to exert a tumor suppressing activity (Mansour & Senga, 2017). Additionally we found four other genes, namely DOCK5, KCNK13, KRAS and WLS. These genes were shown to possess a knockdown score below the 10% quantile of the knockdown score for all other genes. On top of that we also found that exatecan-mesylate had the highest mean efficacy per dosage in inhibiting cell growth of pancreatic cancer cell lines. This is affirmed by research into the antitumor and antimetastatic potential of exatecan-mesylate towards pancreatic cancer cells (Sun et al., 2003). Close contenders were SB-743921 and triptolide.
+
+
+# Bibliography
+
+Corsello, S.M., Nagari, R.T., Spangler, R.D., Rossen, J., Kocak, M., Bryan, J.G., Humeidi, R., Peck, D., Wu, X., Tang, A.A., et al. (2020). Discovering the anticancer potential of non-oncology drugs by systematic viability profiling. Nature Cancer 1, 235-248.
+Mansour, M.A., and Senga, T. (2017). HOXD8 exerts a tumor-suppressing role in colorectal cancer as an apoptotic inducer. The International Journal of Biochemistry & Cell Biology 88, 1-13.
+Pushpakom, S., Iorio, F., Eyers, P.A., Escott, K.J., Hopper, S., Wells, A., Doig, A., Guilliams, T., Latimer, J., McNamee, C., et al. (2019). Drug repurposing: progress, challenges and recommendations.
+Nature Reviews Drug Discovery 18, 41-58.
+Sun, F.-X., Tohgo, A., Bouvet, M., Yagi, S., Nassirpour, R., Moossa, A.R., and Hoffman, R.M. (2003). Efficacy of Camptothecin Analog DX-8951f (Exatecan Mesylate) on Human Pancreatic Cancer in an Orthotopic Metastatic Model. Cancer Research 63, 80-85.
