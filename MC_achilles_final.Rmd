@@ -68,7 +68,6 @@ prism.cl.ordered.achilles <- prism.cl.ordered[-b, ]
 # check dimensions of prism.cl.ordered.achilles
 # reset rownames of prism.cl.ordered.achilles
 rownames(prism.cl.ordered.achilles) <- 1:nrow(prism.cl.ordered.achilles)
-
 ```
 Find PanCan Cellines in prism.cl.achilles
 ```{r}
@@ -87,12 +86,11 @@ we Exploration of prism.achilles.numeric
 # More exploration
 
 prism.achilles.numeric.pancan <- prism.achilles.numeric[pancan.rownumbers,]
-prism.achilles.numeric.pancan[1:10,1]
 ```
 We confirm that Our prism.achilles.numeric and prism.achilles.numeric.pancan dataframes are numeric and can be used for plotting histograms or calculating quantiles.
 ```{r}
 # just confirming it is still numeric
-is.numeric(prism.achilles.numeric.pancan)
+
 hist(prism.achilles.numeric.pancan[10,])
 quantile(prism.achilles.numeric.pancan,probs=seq(0,1,.1))
 ```
@@ -178,12 +176,11 @@ plot(1:10, wss.depmap[1:10], type="b", xlab="Number of Clusters",
 km.depmap = kmeans(x=prism.achilles.numeric.topVar, 
             centers = 2, 
             nstart = 10)
-km.depmap$cluster[1:10]
 ```
-
+Clustering By Cellines
 
 ```{r}
-summary(km.depmap)
-km.depmap$cluster[pancan.cl.names]
+
+
 ```
 
