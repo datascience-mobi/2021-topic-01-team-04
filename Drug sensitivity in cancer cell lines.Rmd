@@ -107,7 +107,7 @@ We can see in this distribution that there is a small group of genes that regula
 a1 = order(df.interesting.genes[,2], decreasing = TRUE, na.last = TRUE)
 sorted.df.interesting.genes = df.interesting.genes[a1,]
 ```
-```{r echo=FALSE}
+```{r echo = FALSE}
 head(sorted.df.interesting.genes)
 ```
 The names of the top interesting genes can be viewed in this data frame. Here for each gene is the number of times the H0 hypothesis was discarded for this gene after carrying out onehundred.
