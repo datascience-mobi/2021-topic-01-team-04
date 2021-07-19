@@ -154,7 +154,7 @@ Here we take a look at most effective 5% of drugs, together with their mean effe
 message("ef.pancan.perdrug")
 print(dr.to.effect(as.vector(ef.pancan.perdrug), doscor = 2)[1:3])
 ```
-Here we can see that exatecan-mesylate is the most effective drugs across all dosages.
+Here we can see that exatecan-mesylate is the drug that has the highest effect per dosage across all dosages. 
 
 
 #   Preparing data for kmeans clustering
