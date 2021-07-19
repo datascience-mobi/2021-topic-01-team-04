@@ -5,11 +5,14 @@ date: "19 7 2021"
 output: pdf_document
 ---
 
-```{r include=FALSE}
-load("Data/prism_datasets.rda")
-load("Data/cellline_datasets.rda")
 
+```{r setup}
+knitr::opts_chunk$set(echo = F)
+source("Scripts/InitiatorFinal.R")
+th <- "q.005"
+source("./Scripts/EfDrIdentifierFinal.R")
 ```
+
 
 # Introduction:
 
@@ -102,7 +105,9 @@ hist(log(table.interesting.genes),
      plot = TRUE,
      breaks = 10)
 ```
+
 We can see in this distribution that there is a small group of genes that regularly differs in the wilcoxon test. Therefore we can reject our previously established H0 hypothesis.
+
 ```{r echo = FALSE}
 a1 = order(df.interesting.genes[,2], decreasing = TRUE, na.last = TRUE)
 sorted.df.interesting.genes = df.interesting.genes[a1,]
@@ -110,8 +115,8 @@ sorted.df.interesting.genes = df.interesting.genes[a1,]
 ```{r echo = FALSE}
 head(sorted.df.interesting.genes)
 ```
-The names of the top interesting genes can be viewed in this data frame. Here for each gene is the number of times the H0 hypothesis was discarded for this gene after carrying out onehundred.
 
+The names of the top interesting genes can be viewed in this data frame. Here for each gene is the number of times the H0 hypothesis was discarded for this gene after carrying out onehundred.
 
 
 
@@ -124,13 +129,6 @@ Furthermore, all data sets to be used have their information void columns and ro
 Now we want to identify the most efficacious drugs in regards to their ability to inhabit cell growth per applied dosage. 
 we here extract the drugs above the 95th percentile for each of the six data sets: prism.perdrug, pancan.perdrug, and the four perdrug data frames for the four subtypes of pancreatic cancer. 
 
-
-```{r setup}
-knitr::opts_chunk$set(echo = F)
-source("Scripts/InitiatorFinal.R")
-th <- "q.005"
-source("./Scripts/EfDrIdentifierFinal.R")
-```
 
 
 #   Having a look at the most effective drugs
