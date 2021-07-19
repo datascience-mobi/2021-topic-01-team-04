@@ -5,11 +5,14 @@ date: "19 7 2021"
 output: pdf_document
 ---
 
-```{r include=FALSE}
-load("Data/prism_datasets.rda")
-load("Data/cellline_datasets.rda")
 
+```{r setup}
+knitr::opts_chunk$set(echo = F)
+source("Scripts/InitiatorFinal.R")
+th <- "q.005"
+source("./Scripts/EfDrIdentifierFinal.R")
 ```
+
 
 # Introduction:
 
@@ -119,18 +122,10 @@ The names of the top interesting genes can be viewed in this data frame. Here fo
 
 ##   Setup and Initiation   
 
-First we remove all variables of the global environment and load in all functions, data, and packages to be used. 
-Furthermore, all data sets to be used have their information void columns and rows removed. Then all prism data is dose correlated, meaning that a drugs effect on cell growth is normalised to the applied dosage (doscor). Morevover, this doscor data is further processed, where the mean is taken of each drug's effect per dosage (perdrug). All three---prism, prism.doscor, and prism.perdrug---are then split each into a data set, containing only data for pancreatic cancer cell lines and further into data sets, each containing only cell lines of one of the four subtypes of pancreatic cancer as identified in prism.treat. 
+First we removed all variables of the global environment and loaded in all functions, data, and packages to be used. 
+Furthermore, all data sets to be used had their information void columns and rows removed. Then all prism data were dose correlated, meaning that a drugs effect on cell growth is normalised to the applied dosage (doscor). Morevover, this doscor data is further processed, where the mean is taken of each drug's effect per dosage (perdrug). All three---prism, prism.doscor, and prism.perdrug---are then split each into a data set, containing only data for pancreatic cancer cell lines and further into data sets, each containing only cell lines of one of the four subtypes of pancreatic cancer as identified in prism.treat. 
 Now we want to identify the most efficacious drugs in regards to their ability to inhabit cell growth per applied dosage. 
 we here extract the drugs above the 95th percentile for each of the six data sets: prism.perdrug, pancan.perdrug, and the four perdrug data frames for the four subtypes of pancreatic cancer. 
-
-
-```{r setup}
-knitr::opts_chunk$set(echo = F)
-source("Scripts/InitiatorFinal.R")
-th <- "q.005"
-source("./Scripts/EfDrIdentifierFinal.R")
-```
 
 
 #   Having a look at the most effective drugs
