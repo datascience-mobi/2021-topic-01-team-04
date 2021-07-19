@@ -48,7 +48,7 @@ Afterwards we tried to visualize the given datasets to obtain a greater knowledg
 Here we tried to display the data containing the different treatment effects for each cell lines via a heatmap. 
 
 
-## prism.exp dataset cell lines 
+## prism.exp dataset 
 
 For this dataset we checked the distribution of the mean gene values of all 481 human cancer cell lines to observe some initial characteristics. This was done using a simple histogram.
 ```{r echo=FALSE}
@@ -189,7 +189,6 @@ summary(km)
 
 
 To further verify, that our choice of two clusters is the best choice, we check which amount of clusters has the highest average silhouette width. 
-The result shows us that a clustering with two clusters is optimal.
 
 
 ```{r echo=FALSE}
@@ -205,6 +204,9 @@ print(avs); print(avs[which(avs == max(avs))]); print(which(avs == max(avs)) + 1
 
 plot(silhouette(kmeans(x = pancan.perdrug.topVar, centers = 2, nstart = 100)$cluster, dist(pancan.perdrug.topVar)), main = "Silhouette Diagramme for Two Clusters")
 ```
+
+
+From this we can see that a clustering with two clusters is optimal.
 
 
 ```{r echo=FALSE}
