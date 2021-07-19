@@ -176,7 +176,7 @@ which(achilles.research.dataframe[6,] == 1)
 achilles.research.dataframe[1:7,which(achilles.research.dataframe[6,] == 1)]
 ```
 ```{r}
-# these values 
+# these values show that the interesting columns are not completely normally distributed
 shapiro.test(prism.achilles.numeric[,4283])
 shapiro.test(prism.achilles.numeric[,7638])
 shapiro.test(prism.achilles.numeric[,7955])
