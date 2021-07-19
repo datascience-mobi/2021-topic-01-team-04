@@ -88,12 +88,7 @@ we Exploration of prism.achilles.numeric
 prism.achilles.numeric.pancan <- prism.achilles.numeric[pancan.rownumbers,]
 ```
 We confirm that Our prism.achilles.numeric and prism.achilles.numeric.pancan dataframes are numeric and can be used for plotting histograms or calculating quantiles.
-```{r}
-# just confirming it is still numeric
 
-hist(prism.achilles.numeric.pancan[10,])
-quantile(prism.achilles.numeric.pancan,probs=seq(0,1,.1))
-```
 
 ```{r}
 
