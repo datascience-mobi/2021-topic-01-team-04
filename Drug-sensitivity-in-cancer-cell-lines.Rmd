@@ -53,7 +53,7 @@ pancan.perdrug.topVar <- df.NA.to.val(pancan.perdrug, 2, "median")[, topVar >= s
 pheatmap::pheatmap(pancan.perdrug.topVar)
 ```
 
-## prism.exp dataset 
+## prism.exp Dataset 
 
 For this dataset we checked the distribution of the mean gene values of all 481 human cancer cell lines to observe some initial characteristics. This was done using a simple histogram.
 ```{r, echo=FALSE}
@@ -71,7 +71,7 @@ hist(meanval.prism.exp.pan,
 ```
 
 
-# Using a statistical test to greatly reduce the number of genes of interest
+# Using a Statistical Test to Greatly Reduce the Number of Genes of Interest
 
 After basic data cleanup and evaluation of the data set prism.exp, which contained expression data of the cell lines on genes, we were looking for meaningful criteria with which to reduce the data set. It was clear that our group should initially focus on the pancreatic cancer cell lines. A reduction by pancreatic cell lines diminished the expression data set from 477 to 33 rows. To achieve this, we first used the metadata set prism.cl to get Depmap IDs, which are assigned to pancreatic cancer. Since the row names of the prism.exp data set received the Depmap ID's, we could cut the data set down.
 
@@ -132,7 +132,7 @@ head(sorted.df.interesting.genes)
 The names of the top interesting genes can be viewed in this data frame. Here for each gene is the number of times the H0 hypothesis was discarded for this gene after carrying out onehundred.
 
 
-# Treatment dataset
+# Treatment Dataset
 
 ## Setup and Initiation   
 
@@ -254,7 +254,7 @@ achilles.research.dataframe[7,] <- apply(prism.achilles.numeric, 2, var)
 
 ```
 
-## The four interesting genes
+## The Four Interesting Genes
 ```{r, echo=FALSE}
 
 achilles.research.dataframe[1:7,which(achilles.research.dataframe[6,] == 1)]
