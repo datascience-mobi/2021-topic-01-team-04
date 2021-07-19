@@ -13,6 +13,13 @@ knitr::opts_chunk$set(echo = TRUE)
 load("./Data/cellline_datasets.rda")
 load("./Data/prism_datasets.rda")
 ```
+```{r}
+install.packages("dplyr")
+```
+```{r}
+install.packages("ggpubr")
+```
+
 4 prism.achilles
 
 4.1 Cleanup of prism.achilles 
@@ -112,47 +119,52 @@ Exploration of prism.achilles.numeric
 dim(prism.achilles.numeric)
 prism.achilles.numeric[1:10,1:2]
 ```
-
-
 ```{r}
+# More exploration
 pancan.rownumbers
 prism.achilles.numeric.pancan <- prism.achilles.numeric[pancan.rownumbers,]
-
 prism.achilles.numeric.pancan[1:10,1]
 ```
-
-
 ```{r}
+# just confirming it is still numeric
 is.numeric(prism.achilles.numeric.pancan)
-hist(prism.achilles.numeric.pancan[1,])
+hist(prism.achilles.numeric.pancan[10,])
 hist(prism.achilles.numeric[1,])
 quantile(prism.achilles.numeric.pancan,probs=seq(0,1,.1))
 ```
 ```{r}
+# checking that i can apply the quantile function...
 quantile(prism.achilles.numeric,probs=seq(0,1,.1))
 quantile(prism.achilles.numeric,prob=0.1)
 ```
 ```{r}
-
-dim(prism.achilles.numeric)
 prism.achilles.numeric[345:347,1:5]
 dim(prism.achilles.numeric)
 dim(prism.achilles)
 rownames(prism.achilles.numeric) <- rownames(prism.achilles)
 ```
-
-Neuen Dataframe für Untersuchungen an prism.achilles.numeric
+New Dataframe for Analysis of prism.achilles.numeric
 ```{r}
+# creates Dataframe with 10 rows and the same column count and names as prism.achilles
 achilles.research.dataframe <- prism.achilles[1:10,]
+# this sets all values of the research.dataframe to 0
 achilles.research.dataframe[1:10,1:18119] <- 0
+# this sets all rownames according to their future contents
 rownames(achilles.research.dataframe) <- c('max','mean','min','10%quantile','Pancanmean','is(r5<r4)','stdev','empty8','empty9','empty10')
 
+# fills first row of research.dataframe with the maximum value of the according prism.achilles.numeric column
 achilles.research.dataframe[1,] <- apply(prism.achilles.numeric, 2, max)
+# means of prism.achilles.numeric
 achilles.research.dataframe[2,] <- apply(prism.achilles.numeric, 2, mean)
+# min of prism.achilles.numeric
 achilles.research.dataframe[3,] <- apply(prism.achilles.numeric, 2, min)
+# 10% quantile of prism.achilles.numeric
 achilles.research.dataframe[4,] <- apply(prism.achilles.numeric, 2, function(x){quantile(x,prob=0.1)})
+# mean of prism.achilles.numeric.pancan
 achilles.research.dataframe[5,] <- apply(prism.achilles.numeric.pancan, 2, mean)
+# is 1 if mean of prism.achilles.numeric.pancan is smaller that 10% quantile of prism.achilles.numeric
 achilles.research.dataframe[6,] <- apply(achilles.research.dataframe, 2, function(x) {return(x[4] > x[5])})
+# var of prism.achilles.numeric
 achilles.research.dataframe[7,] <- apply(prism.achilles.numeric, 2, var)
 
 ```
@@ -162,6 +174,20 @@ achilles.research.dataframe[7,] <- apply(prism.achilles.numeric, 2, var)
 achilles.research.dataframe[1:6,1:100]
 which(achilles.research.dataframe[6,] == 1)
 achilles.research.dataframe[1:7,which(achilles.research.dataframe[6,] == 1)]
+```
+```{r}
+# these values 
+shapiro.test(prism.achilles.numeric[,4283])
+shapiro.test(prism.achilles.numeric[,7638])
+shapiro.test(prism.achilles.numeric[,7955])
+shapiro.test(prism.achilles.numeric[,17229])
+```
+```{r}
+library("ggpubr")
+ggqqplot(prism.achilles.numeric[,4283])
+ggqqplot(prism.achilles.numeric[,7638])
+ggqqplot(prism.achilles.numeric[,7955])
+ggqqplot(prism.achilles.numeric[,17229])
 ```
 
 
@@ -221,8 +247,8 @@ km.depmap$cluster[1:10]
 
 ```{r}
 summary(km.depmap)
-prism.cl.pancan
-km.depmap$cluster[prism.cl.pancan]
+pancan.cl.names
+km.depmap$cluster[pancan.cl.names]
 ```
 
 Clustering by genes
@@ -259,6 +285,6 @@ km.genes$cluster[1:10]
 
 ```{r}
 summary(km.genes)
-prism.cl.pancan
-km.genes$cluster[prism.cl.pancan]
+pancan.cl.names
+km.genes$cluster[pancan.cl.names]
 ```
