@@ -7,7 +7,7 @@ output: pdf_document
 
 
 ```{r setup, echo=FALSE}
-knitr::opts_chunk$set(echo = F)
+knitr::opts_chunk$set(echo = F, warning = F)
 source("Scripts/InitiatorFinal.R")
 th <- "q.005"
 source("./Scripts/EfDrIdentifierFinal.R")
