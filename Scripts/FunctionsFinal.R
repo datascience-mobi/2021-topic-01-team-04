@@ -348,7 +348,7 @@ dr.to.effect <- cmpfun(function(n, doscor, sort = 1, output = "mean") {
       } else if (output == "full") {out <- as.vector(prism.perdrug[, broadID]); names(out) <- rownames(prism.perdrug)
       } else stop("Argument 'output' is of wrong fromat. It needs to be a character string of values {'mean', 'median', 'full'}!")
     } else if (doscor == 1) {
-      ID <- pt.rn[grep(broadID), pt.rn]
+      ID <- pt.rn[grep(broadID, pt.rn)]
       if (output != "mean") warning("With doscor ∈ {0, 1} only a 'mean' output will be made.")
       out <- apply(prism.doscor[, ID], 2, mean, na.rm = T)
       names(out) <- ID

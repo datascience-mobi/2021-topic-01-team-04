@@ -152,8 +152,9 @@ Here we take a look at most effective 5% of drugs, together with their mean effe
 
 ```{r}
 message("ef.pancan.perdrug")
-print(dr.to.effect(as.vector(ef.pancan.perdrug), doscor = 2))
+print(dr.to.effect(as.vector(ef.pancan.perdrug), doscor = 2)[1:3])
 ```
+Here we can see that exatecan-mesylate is the most effective drugs across all dosages.
 
 
 #   Preparing data for kmeans clustering
@@ -497,7 +498,7 @@ cor.mat.achilles[779,782]
 interesting.cor.values <- which(cor.mat.achilles > 0.90 & cor.mat.achilles < 1 ) 
 interesting.cor.rows <- (((interesting.cor.values - (interesting.cor.values %% merlinsvariable)) /merlinsvariable) +1)
 interesting.cor.cols <- (interesting.cor.values %% merlinsvariable)
-cor.mat.achilles[interesting.cor.rows,  interesting.cor.cols]
+# cor.mat.achilles[interesting.cor.rows,  interesting.cor.cols]
 ```
 
 
