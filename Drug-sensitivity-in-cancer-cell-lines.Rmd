@@ -430,7 +430,8 @@ plot(
 abline(h = 0, col = "red")
 ```
 Since the residuals are large and the r²-value is relatively low we can conclude that the achilles value of one gene of a cell is insufficient to explain the efficacy of a drug against said cell.
-```{r, echo=FALSE}
+```{r, figures-side, fig.show="hold", out.width="50%", echo=FALSE}
+par(mar = c(5, 4, 4, 2))
 plot(
   .env.ra$pancan.achilles.topVar.2[, 259], 
   .env.ra$ef.pancan.max.percl.2, 
