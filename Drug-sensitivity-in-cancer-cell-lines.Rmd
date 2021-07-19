@@ -6,8 +6,8 @@ output: pdf_document
 ---
 
 
-```{r setup, echo=FALSE}
-knitr::opts_chunk$set(echo = F)
+```{r setup, echo=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = F, warning = F)
 source("Scripts/InitiatorFinal.R")
 th <- "q.005"
 source("./Scripts/EfDrIdentifierFinal.R")
@@ -27,7 +27,7 @@ In our research, we worked with multiple datasets that display among other thing
 The most important datasets we focused on in our research were:  
 -	the prism Dataset -> containing the treatment effects of the different cell lines  
 -	the prism.exp Dataset -> containing the gene expression levels for every cell line gene  
--	the prism.achilles -> containing the gene knockdown score for all cell line genes  
+-	the prism.achilles Dataset -> containing the gene knockdown score for all cell line genes  
 
 The following questions we tried to answer over the course of our research:  
 -	can we identify certain genes that are related to pancreatic cell lines  
@@ -134,14 +134,14 @@ The names of the top interesting genes can be viewed in this data frame. Here fo
 
 # Treatment dataset
 
-##   Setup and Initiation   
+## Setup and Initiation   
 
 All prism data were dose correlated, meaning that a drugs effect on cell growth is normalised to the applied dosage (doscor). Morevover, this doscor data is further processed, where the mean was taken of each drug's effect per dosage (perdrug). All three---prism, prism.doscor, and prism.perdrug---are then split each into a data set, containing only data for pancreatic cancer cell lines and further into data sets, each containing only cell lines of one of the four subtypes of pancreatic cancer as identified in prism.treat. 
 Then we identified the most efficacious drugs in regards to their ability to inhabit cell growth per applied dosage. 
 To this end we extracted the drugs above the 95th percentile for each of the six data sets: prism.perdrug, pancan.perdrug, and the four perdrug data frames for the four subtypes of pancreatic cancer. 
 
 
-#   Preparing Data for Kmeans Clustering
+# Preparing Data for Kmeans Clustering
 
 To cluster our cell lines in respect to drug efficacies per dosage, we decided to only use the 100 drugs with the highest variance. 
 To check how many clusters are reasonable we used the elbow method. 
@@ -153,7 +153,7 @@ plot(1:15, wss, type="b", xlab="Number of Clusters", ylab="Within groups sum of 
 ```
 
 
-#   K-means Clustering
+# K-means Clustering
 
 Since the above graph exhibited a kink at i = 2 we chose to use two clusters.
 ```{r, echo=FALSE}
@@ -177,9 +177,178 @@ plot(silhouette(kmeans(x = pancan.perdrug.topVar, centers = 2, nstart = 100)$clu
 ```
 
 
+# prism.achilles
+
+## Cleanup of prism.achilles 
+
+### NA Removal
+
+These three Rows had to be removed because 
+Three rows of our prism.achilles dataframe contain NAs. These are the corresponding DepMap IDs
+```{r}
+# vector with NA rows - na.achilles
+na.achilles <- c(277,309,323)
+# Depmap ids of NA containing cellines
+rownames(prism.achilles[na.achilles,])
+# removing NA containing rows from achilles
+prism.achilles <- prism.achilles[-na.achilles,]
+```
+We make prism.achilles numeric
+```{r}
+prism.achilles.numeric <- apply(prism.achilles, 2, as.numeric)
+# step below conserves rownames 
+rownames(prism.achilles.numeric) <- rownames(prism.achilles)
+```
+### Sort Prism.cl by depmap_id resulting in prism.cl.ordered
+```{r}
+
+# order prism.cl by DepMap_ID resulting in prism.cl.ordered
+prism.cl.ordered <- prism.cl[order(prism.cl$DepMap_ID),]
+# dimmension check - hasn't changed
+dim(prism.cl.ordered)
+# rownames are scrambled now -> reset
+rownames(prism.cl.ordered) <- 1:nrow(prism.cl.ordered)
+```
+
+```{r}
+# vector a with length of nrow prism.cl
+a <- c(1:nrow(prism.cl.ordered))
+# because prism cl is ordered we can easily remove the cellines, that have no achilles value, from prism.cl.ordered
+# This loop checks if a certain celline has an achilles value and correspondingly writes a 0 or 1 into vector a
+for(n in 1:481) {a[n] <- (prism.cl.ordered[n,1] %in% rownames(prism.achilles))}
+# vector b contains the prism.cl rows / cellines that do not have an achilles value
+b <- which(a == 0)
+# remove prism.cl rows that don't have a corresponding achilles value
+prism.cl.ordered.achilles <- prism.cl.ordered[-b, ]
+# check dimensions of prism.cl.ordered.achilles
+dim(prism.cl.ordered.achilles)
+# reset rownames of prism.cl.ordered.achilles
+rownames(prism.cl.ordered.achilles) <- 1:nrow(prism.cl.ordered.achilles)
+# compare rownames of achilles with cl - checking for same order and same elements - they are equal
+prism.cl.ordered.achilles[1:5,1]
+rownames(prism.achilles.numeric)[1:5]
+```
+### Find PanCan Cellines in prism.cl.achilles
+```{r}
+# pancan.rownumbers is a vector with the row numbers that are pancreatic cancer cellines
+pancan.rownumbers <- c(which(prism.cl.ordered.achilles[,20] == 'Pancreatic Cancer'))
+# pancan.cl.names contains the DepMap IDs of the pancan cellines
+pancan.cl.names <- prism.cl.ordered.achilles[pancan.rownumbers,1]
+```
+The data frame prism.achilles consists of gene knockdown scores. The score is a measure of how essential/important is a particular gene for the cell survival. This score reflects whether upon knocking down that genes does the cell reduce its proliferation or increases it or has no change. Smaller values refers to higher essentiality. The rows of this matrix are the gene names and the columns are the cancer cell line identifiers.
+
+### Exploration of prism.achilles.numeric
+```{r}
+dim(prism.achilles.numeric)
+prism.achilles.numeric[1:10,1:2]
+```
+```{r}
+# More exploration
+
+prism.achilles.numeric.pancan <- prism.achilles.numeric[pancan.rownumbers,]
+prism.achilles.numeric.pancan[1:10,1]
+```
+We confirm that Our prism.achilles.numeric and prism.achilles.numeric.pancan dataframes are numeric and can be used for plotting histograms or calculating quantiles.
+```{r}
+# just confirming it is still numeric
+is.numeric(prism.achilles.numeric.pancan)
+hist(prism.achilles.numeric.pancan[10,])
+quantile(prism.achilles.numeric.pancan,probs=seq(0,1,.1))
+```
+
+```{r}
+prism.achilles.numeric[345:347,1:5]
+dim(prism.achilles.numeric)
+dim(prism.achilles)
+rownames(prism.achilles.numeric) <- rownames(prism.achilles)
+```
+New Dataframe for Analysis of prism.achilles.numeric
+```{r}
+# creates Dataframe with 10 rows and the same column count and names as prism.achilles
+achilles.research.dataframe <- prism.achilles[1:10,]
+# this sets all values of the research.dataframe to 0
+achilles.research.dataframe[1:10,1:18119] <- 0
+# this sets all rownames according to their future contents
+rownames(achilles.research.dataframe) <- c('max','mean','min','10%quantile','Pancanmean','is(r5<r4)','stdev','empty8','empty9','empty10')
+
+# fills first row of research.dataframe with the maximum value of the according prism.achilles.numeric column
+achilles.research.dataframe[1,] <- apply(prism.achilles.numeric, 2, max)
+# means of prism.achilles.numeric
+achilles.research.dataframe[2,] <- apply(prism.achilles.numeric, 2, mean)
+# min of prism.achilles.numeric
+achilles.research.dataframe[3,] <- apply(prism.achilles.numeric, 2, min)
+# 10% quantile of prism.achilles.numeric
+achilles.research.dataframe[4,] <- apply(prism.achilles.numeric, 2, function(x){quantile(x,prob=0.1)})
+# mean of prism.achilles.numeric.pancan
+achilles.research.dataframe[5,] <- apply(prism.achilles.numeric.pancan, 2, mean)
+# is 1 if mean of prism.achilles.numeric.pancan is smaller that 10% quantile of prism.achilles.numeric
+achilles.research.dataframe[6,] <- apply(achilles.research.dataframe, 2, function(x) {return(x[4] > x[5])})
+# var of prism.achilles.numeric
+achilles.research.dataframe[7,] <- apply(prism.achilles.numeric, 2, var)
+
+```
+
+
+```{r}
+achilles.research.dataframe[1:7,1]
+which(achilles.research.dataframe[6,] == 1)
+achilles.research.dataframe[1:7,which(achilles.research.dataframe[6,] == 1)]
+```
+Shapiro tests of the four interesting prism.achilles columns shows that their values are not normally distributed. Thus the comparison of the prism.achilles.numeric.pancan mean and prism.achilles.numeric 10% quantile are of no importance until further examination. Shown is the result of a Shapiro-Wilk normality test on column 4283 of our prism.achilles.numeric dataset.
+```{r}
+# these values show that the interesting columns are not completely normally distributed
+shapiro.test(prism.achilles.numeric[,4283])
+```
+A qqplot between prism.achilles.numeric[,4283] and an according normal distribution results in the following graph. This shows that the values do not correspond to one single normal distribution.
+```{r}
+ggqqplot(prism.achilles.numeric[,4283])
+```
+
+
+
+
+## K-Means Clustering
+
+Using the most variable, thus informative genes
+We first reduce our dataset to take the most variable gene, which are expected to carry most of the information about the samples:
+```{r}
+## compute variance over all rows of the data.frame (hence genes)
+topVar = apply(prism.achilles.numeric, 2, var) 
+```
+```{r variance filtering for clustering}
+## filtering to keep genes which have a variance greater than the 75% percentile
+prism.achilles.numeric.topVar = prism.achilles.numeric[,topVar > quantile(topVar, probs = 0.75)] 
+```
+
+
+### Clustering by depmap
+```{r}
+mydata <- prism.achilles.numeric.topVar
+# Determine number of clusters
+wss.depmap <- (nrow(mydata)-1)*sum(apply(mydata,2,var))
+wss.depmap
+for (i in 2:10) wss.depmap[i] <- sum(kmeans(mydata, centers=i)$withinss)
+```
+The following plot shows that there is no amount of clusters that is by far the best for clustering prism.achilles by cell lines but that two Clusters is probably our best option according to a slight kink at two clusters.
+```{r}
+plot(1:10, wss.depmap[1:10], type="b", xlab="Number of Clusters",
+  ylab="Within groups sum of squares")
+```
+```{r}
+km.depmap = kmeans(x=prism.achilles.numeric.topVar, 
+            centers = 2, 
+            nstart = 10)
+km.depmap$cluster[1:10]
+```
+```{r}
+summary(km.depmap)
+km.depmap$cluster[pancan.cl.names]
+```
+
+
 # Regression Analysis
 
-##   Preparation for Regression Analysis
+## Preparation for Regression Analysis
 
 We extract all data regarding pancreatic cancer cell lines from the prism.achilles data set. Then we extract information about the top 2 drugs in regard to their ability to inhibit cell growth. We then define a fitted pancan.achilles data frame for each of the five drugs, that contains only the cell lines where we have drug efficacy data and visa versa.
 ```{r, echo=FALSE}
@@ -224,7 +393,7 @@ for (j in 1:2) {
 ```
 
 
-##   Execution of Regression Analysis
+## Execution of Regression Analysis
 
 Now we perform the regression analysis for the two best drugs in regard to their ability to inhabit cell growth in pancreatic cancer cell lines. 
 ```{r, echo=FALSE}
@@ -244,8 +413,8 @@ for (j in 1:2) {
   print(unname(which(.env.ra[[paste("r2.", j, sep = "")]] == max(.env.ra[[paste("r2.", j, sep = "")]]))))
 }
 ```
-```{r, figures-side, fig.show="hold", out.width="50%", echo=FALSE}
-par(mar = c(3, 1, 2, 1))
+```{r, fig.show="hold", out.width="50%", echo=FALSE}
+par(mar = c(5, 4, 4, 2))
 plot(
   .env.ra$pancan.achilles.topVar.1[, 432], 
   .env.ra$ef.pancan.max.percl.1, 
@@ -261,7 +430,8 @@ plot(
 abline(h = 0, col = "red")
 ```
 Since the residuals are large and the r²-value is relatively low we can conclude that the achilles value of one gene of a cell is insufficient to explain the efficacy of a drug against said cell.
-```{r, echo=FALSE}
+```{r, fig.show="hold", out.width="50%", echo=FALSE}
+par(mar = c(5, 4, 4, 2))
 plot(
   .env.ra$pancan.achilles.topVar.2[, 259], 
   .env.ra$ef.pancan.max.percl.2, 
