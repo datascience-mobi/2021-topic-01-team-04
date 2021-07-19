@@ -245,7 +245,7 @@ for (j in 1:2) {
 }
 ```
 ```{r, figures-side, fig.show="hold", out.width="50%", echo=FALSE}
-par(mar = c(4, 4, .1, .1))
+par(mar = c(3, 1, 2, 1))
 plot(
   .env.ra$pancan.achilles.topVar.1[, 432], 
   .env.ra$ef.pancan.max.percl.1, 
