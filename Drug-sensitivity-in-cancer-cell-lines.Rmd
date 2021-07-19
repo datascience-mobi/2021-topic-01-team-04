@@ -339,20 +339,25 @@ abline(h = 0, col = "red")
 
 
 
-#4 prism.achilles
+```{r}
+library("ggpubr")
+```
 
-##4.1 Cleanup of prism.achilles 
 
-##4.1.1 na removal
+4 prism.achilles
 
-```{r echo=FALSE}
+4.1 Cleanup of prism.achilles 
+
+4.1.1 na removal
+
+```{r find NA}
 # Where are our NAs?
 which(is.na(prism.achilles[,14]))
 prism.achilles[275:280,14]
 prism.achilles[320:325,14]
 ```
 
-```{r echo=FALSE}
+```{r}
 # vector with NA rows - na.achilles
 na.achilles <- c(277,309,323)
 # Depmap ids of NA containing cellines
@@ -369,7 +374,7 @@ dim(prism.achilles)
 
 4.1.2 Make Prism.achilles numeric
 
-```{r echo=FALSE}
+```{r}
 prism.achilles.numeric <- apply(prism.achilles, 2, as.numeric)
 # step below conserves rownames 
 rownames(prism.achilles.numeric) <- rownames(prism.achilles)
@@ -377,7 +382,7 @@ rownames(prism.achilles.numeric) <- rownames(prism.achilles)
 
 10.Intermission - Sort Prism.cl by depmap_id resulting in prism.cl.ordered
 
-```{r echo=FALSE}
+```{r}
 # show slice of prism.cl - rows are not yet ordered
 prism.cl[1:3,1:3]
 # order prism.cl by DepMap_ID resulting in prism.cl.ordered
@@ -392,7 +397,7 @@ rownames(prism.cl.ordered)[1:30]
 prism.cl.ordered[1:30,1:3]
 ```
 
-```{r echo=FALSE}
+```{r}
 # vector a with length of nrow prism.cl
 a <- c(1:nrow(prism.cl.ordered))
 # because prism cl is ordered we can easily remove the cellines, that have no achilles value, from prism.cl.ordered
@@ -411,7 +416,7 @@ prism.cl.ordered.achilles[1:5,1]
 rownames(prism.achilles.numeric)[1:5]
 ```
 Find PanCan Cellines in prism.cl.achilles
-```{r echo=FALSE}
+```{r}
 # pancan.rownumbers is a vector with the row numbers that are pancreatic cancer cellines
 pancan.rownumbers <- c(which(prism.cl.ordered.achilles[,20] == 'Pancreatic Cancer'))
 # pancan.cl.names contains the DepMap IDs of the pancan cellines
@@ -423,7 +428,7 @@ rownames(prism.achilles.numeric)[pancan.rownumbers]
 pancan.cl.names
 ```
 
-```{r echo=FALSE}
+```{r}
 # More tests if everything is ordered correctly
 rownames(prism.cl.ordered.achilles)[1:10]
 prism.cl.ordered.achilles[1:10,1]
@@ -434,84 +439,102 @@ rownames(prism.achilles.numeric)[1:10]
 The data frame prism.achilles consists of gene knockdown scores. The score is a measure of how essential/important is a particular gene for the cell survival. This score reflects whether upon knocking down that genes does the cell reduce its proliferation or increases it or has no change. Smaller values refers to higher essentiality. The rows of this matrix are the gene names and the columns are the cancer cell line identifiers.
 
 Exploration of prism.achilles.numeric
-```{r echo=FALSE}
+```{r}
 dim(prism.achilles.numeric)
 prism.achilles.numeric[1:10,1:2]
 ```
-
-
-```{r echo=FALSE}
+```{r}
+# More exploration
 pancan.rownumbers
 prism.achilles.numeric.pancan <- prism.achilles.numeric[pancan.rownumbers,]
-
 prism.achilles.numeric.pancan[1:10,1]
 ```
-
-
-```{r echo=FALSE}
+```{r}
+# just confirming it is still numeric
 is.numeric(prism.achilles.numeric.pancan)
-hist(prism.achilles.numeric.pancan[1,])
+hist(prism.achilles.numeric.pancan[10,])
 hist(prism.achilles.numeric[1,])
 quantile(prism.achilles.numeric.pancan,probs=seq(0,1,.1))
 ```
-```{r echo=FALSE}
+```{r}
+# checking that i can apply the quantile function...
 quantile(prism.achilles.numeric,probs=seq(0,1,.1))
 quantile(prism.achilles.numeric,prob=0.1)
 ```
-```{r echo=FALSE}
-
-dim(prism.achilles.numeric)
+```{r}
 prism.achilles.numeric[345:347,1:5]
 dim(prism.achilles.numeric)
 dim(prism.achilles)
 rownames(prism.achilles.numeric) <- rownames(prism.achilles)
 ```
-
-Neuen Dataframe für Untersuchungen an prism.achilles.numeric
-```{r echo=FALSE}
+New Dataframe for Analysis of prism.achilles.numeric
+```{r}
+# creates Dataframe with 10 rows and the same column count and names as prism.achilles
 achilles.research.dataframe <- prism.achilles[1:10,]
+# this sets all values of the research.dataframe to 0
 achilles.research.dataframe[1:10,1:18119] <- 0
+# this sets all rownames according to their future contents
 rownames(achilles.research.dataframe) <- c('max','mean','min','10%quantile','Pancanmean','is(r5<r4)','stdev','empty8','empty9','empty10')
 
+# fills first row of research.dataframe with the maximum value of the according prism.achilles.numeric column
 achilles.research.dataframe[1,] <- apply(prism.achilles.numeric, 2, max)
+# means of prism.achilles.numeric
 achilles.research.dataframe[2,] <- apply(prism.achilles.numeric, 2, mean)
+# min of prism.achilles.numeric
 achilles.research.dataframe[3,] <- apply(prism.achilles.numeric, 2, min)
+# 10% quantile of prism.achilles.numeric
 achilles.research.dataframe[4,] <- apply(prism.achilles.numeric, 2, function(x){quantile(x,prob=0.1)})
+# mean of prism.achilles.numeric.pancan
 achilles.research.dataframe[5,] <- apply(prism.achilles.numeric.pancan, 2, mean)
+# is 1 if mean of prism.achilles.numeric.pancan is smaller that 10% quantile of prism.achilles.numeric
 achilles.research.dataframe[6,] <- apply(achilles.research.dataframe, 2, function(x) {return(x[4] > x[5])})
+# var of prism.achilles.numeric
 achilles.research.dataframe[7,] <- apply(prism.achilles.numeric, 2, var)
 
 ```
 
 
-```{r echo=FALSE}
-achilles.research.dataframe[1:6,1:100]
+```{r}
+achilles.research.dataframe[1:7,1]
 which(achilles.research.dataframe[6,] == 1)
 achilles.research.dataframe[1:7,which(achilles.research.dataframe[6,] == 1)]
 ```
+```{r}
+# these values show that the interesting columns are not completely normally distributed
+shapiro.test(prism.achilles.numeric[,4283])
+shapiro.test(prism.achilles.numeric[,7638])
+shapiro.test(prism.achilles.numeric[,7955])
+shapiro.test(prism.achilles.numeric[,17229])
+```
+
+ggqqplot(prism.achilles.numeric[,4283])
+ggqqplot(prism.achilles.numeric[,7638])
+ggqqplot(prism.achilles.numeric[,7955])
+ggqqplot(prism.achilles.numeric[,17229])
 
 
-```{r echo=FALSE}
+
+
 merlinsvariable <- 10000
 cor.mat.achilles <- cor(prism.achilles.numeric.pancan[,1:merlinsvariable])
 cor.mat.achilles[779,782]
 interesting.cor.values <- which(cor.mat.achilles > 0.90 & cor.mat.achilles < 1 ) 
 interesting.cor.rows <- (((interesting.cor.values - (interesting.cor.values %% merlinsvariable)) /merlinsvariable) +1)
 interesting.cor.cols <- (interesting.cor.values %% merlinsvariable)
-# cor.mat.achilles[interesting.cor.rows,  interesting.cor.cols]
-```
+cor.mat.achilles[interesting.cor.rows,  interesting.cor.cols]
+
 
 
 k-means clustering
 
 Using the most variable, thus informative genes
 We first reduce our dataset to take the most variable gene, which are expected to carry most of the information about the samples:
-```{r echo=FALSE}
+```{r}
 ## compute variance over all rows of the data.frame (hence genes)
 topVar = apply(prism.achilles.numeric, 2, var) 
 summary(topVar)
 ```
-```{r echo=FALSE}
+```{r variance filtering for clustering}
 ## filtering to keep genes which have a variance greater than the 75% percentile
 prism.achilles.numeric.topVar = prism.achilles.numeric[,topVar > quantile(topVar, probs = 0.75)] 
 dim(prism.achilles.numeric.topVar)
@@ -519,7 +542,7 @@ dim(prism.achilles.numeric.topVar)
 
 
 Clustering by depmap
-```{r echo=FALSE}
+```{r}
 mydata <- prism.achilles.numeric.topVar
 # Determine number of clusters
 wss.depmap <- (nrow(mydata)-1)*sum(apply(mydata,2,var))
@@ -527,7 +550,7 @@ wss.depmap
 for (i in 2:100) wss.depmap[i] <- sum(kmeans(mydata, centers=i)$withinss)
 ```
 
-```{r echo=FALSE}
+```{r}
 wss.depmap
 plot(1:100, wss.depmap, type="b", xlab="Number of Clusters",
   ylab="Within groups sum of squares")
@@ -536,7 +559,7 @@ plot(1:20, wss.depmap[1:20], type="b", xlab="Number of Clusters",
 ```
 
 
-```{r echo=FALSE}
+```{r}
 km.depmap = kmeans(x=prism.achilles.numeric.topVar, 
             centers = 2, 
             nstart = 10)
@@ -545,37 +568,34 @@ km.depmap$cluster[1:10]
 ```
 
 
-```{r echo=FALSE}
-prism.cl.pancan <- rownames(prism.extractor(prism.cl))
+```{r}
 summary(km.depmap)
-prism.cl.pancan
-km.depmap$cluster[prism.cl.pancan]
+pancan.cl.names
+km.depmap$cluster[pancan.cl.names]
 ```
 
 Clustering by genes
-```{r echo=FALSE}
+```{r}
 mydata <- prism.achilles.numeric.topVar
 # Determine number of clusters
 
 wss.genes <- (ncol(mydata)-1)*sum(apply(mydata,1,var))
 dim(mydata)
-for (i in seq(500,1000, by = 10)) wss.genes[i] <- sum(kmeans(t(mydata), centers=i, iter.max = 500)$withinss)
-```
-```{r echo=FALSE}
-for (i in 1:499) wss.genes[i] <- sum(kmeans(t(mydata), centers=i, iter.max = 500)$withinss)
+for (i in 500:501) wss.genes[i] <- sum(kmeans(t(mydata), centers=i, iter.max = 500)$withinss)
 ```
 
-```{r echo=FALSE}
+
+
 wss.genes
 dim(wss.genes)
 plot(wss.genes[100:1000], type="b", xlab="Number of Clusters",
   ylab="Within groups sum of squares")
 plot(wss.genes[100:500], type="b", xlab="Number of Clusters",
   ylab="Within groups sum of squares")
-```
 
 
-```{r echo=FALSE}
+
+```{r}
 km.genes = kmeans(x=prism.achilles.numeric.topVar, 
             centers = 2, 
             nstart = 10)
@@ -584,8 +604,8 @@ km.genes$cluster[1:10]
 ```
 
 
-```{r echo=FALSE}
+```{r}
 summary(km.genes)
-prism.cl.pancan
-km.genes$cluster[prism.cl.pancan]
+pancan.cl.names
+km.genes$cluster[pancan.cl.names]
 ```
