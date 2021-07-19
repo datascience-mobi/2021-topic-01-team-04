@@ -11,6 +11,10 @@ knitr::opts_chunk$set(echo = F)
 source("Scripts/InitiatorFinal.R")
 th <- "q.005"
 source("./Scripts/EfDrIdentifierFinal.R")
+cl.metadata.exp = subset(prism.cl, Type_for_Manuscript == "Pancreatic" )
+pan.cl.Vector = cl.metadata.exp[,1]
+prism.exp.pan = prism.exp[pan.cl.Vector,]
+prism.exp.nopan = prism.exp[!row.names(prism.exp)%in%pan.cl.Vector,]
 ```
 
 
@@ -81,11 +85,6 @@ First, in addition to the data frame, which contained cell lines and genes, a da
 
 
 ```{r include=FALSE}
-cl.metadata.exp = subset(prism.cl, Type_for_Manuscript == "Pancreatic" )
-pan.cl.Vector = cl.metadata.exp[,1]
-prism.exp.pan = prism.exp[pan.cl.Vector,]
-prism.exp.nopan = prism.exp[!row.names(prism.exp)%in%pan.cl.Vector,]
-
 interesting.genes = vector()
 q = 1
 alpha = 0.025/ncol(prism.exp)
