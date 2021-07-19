@@ -119,6 +119,8 @@ hist(var.prism.exp.pan,
 
 
 
+# Gene number reduction
+
 
 Which genes are especially interesting for us?
 
@@ -233,6 +235,20 @@ dim(hundred.df.interesting.genes)
 ```
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+# Z-transformation
+
 Performing a Z-Transformation
 ```{r}
 prism.exp.pan.Z = scale(prism.exp.pan)
@@ -261,6 +277,13 @@ hist(sd.prism.exp.pan.Z,
      plot = TRUE,
      breaks = "FD")
 ```
+
+
+
+
+
+# Clustering
+
 
 Let's see if we can find something interesting via k-means clustering. First we use the elbow method
 ```{r}
