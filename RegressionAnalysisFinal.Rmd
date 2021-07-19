@@ -31,7 +31,7 @@ We extract all data regarding pancreatic cancer cell lines from the prism.achill
 
 .env.ra$pancan.achilles <- row.col.cleaner(prism.extractor(prism.achilles))
 
-for (i in 1:2) { 
+for (i in 1:5) { 
   .env.ra[[paste("dr.ef.pancan.max.", i, sep = "")]] <- dr.to.effect(ef.pancan.perdrug, doscor = 2)[i]
   .env.ra[[paste("id.dr.ef.pancan.max.", i, sep = "")]] <- as.character(unique(prism.treat[which(prism.treat[, "name"]==names(.env.ra[[paste("dr.ef.pancan.max.", i, sep = "")]])), "broad_id"]))
   .env.ra[[paste("ef.pancan.max.percl.", i, sep = "")]] <- pancan.perdrug[, .env.ra[[paste("id.dr.ef.pancan.max.", i, sep = "")]]]
