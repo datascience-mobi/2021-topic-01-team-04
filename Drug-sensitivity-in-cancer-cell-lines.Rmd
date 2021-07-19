@@ -183,8 +183,8 @@ plot(silhouette(kmeans(x = pancan.perdrug.topVar, centers = 2, nstart = 100)$clu
 
 ### NA Removal
 
-These three Rows had to be removed because 
-Three rows of our prism.achilles dataframe contain NAs. These are the corresponding DepMap IDs
+The cleanup of prism.achilles consisted of the following steps.
+Three Rows had to be removed because they contained NAs. These are the corresponding DepMap IDs.
 ```{r, echo=FALSE}
 # vector with NA rows - na.achilles
 na.achilles <- c(277,309,323)
@@ -194,13 +194,13 @@ rownames(prism.achilles[na.achilles,])
 prism.achilles <- prism.achilles[-na.achilles,]
 
 ```
-We make Prism.achilles numeric
+We made Prism.achilles numeric.
 ```{r, echo=FALSE}
 prism.achilles.numeric <- apply(prism.achilles, 2, as.numeric)
 # step below conserves rownames 
 rownames(prism.achilles.numeric) <- rownames(prism.achilles)
 ```
-Sort Prism.cl by depmap_id resulting in prism.cl.ordered
+For further cleanup we sorted Prism.cl by depmap_id resulting in prism.cl.ordered.
 ```{r, echo=FALSE}
 # order prism.cl by DepMap_ID resulting in prism.cl.ordered
 prism.cl.ordered <- prism.cl[order(prism.cl$DepMap_ID),]
@@ -219,7 +219,7 @@ prism.cl.ordered.achilles <- prism.cl.ordered[-b, ]
 # reset rownames of prism.cl.ordered.achilles
 rownames(prism.cl.ordered.achilles) <- 1:nrow(prism.cl.ordered.achilles)
 ```
-Find PanCan Cellines in prism.cl.achilles
+
 ```{r, echo=FALSE}
 # pancan.rownumbers is a vector with the row numbers that are pancreatic cancer cellines
 pancan.rownumbers <- c(which(prism.cl.ordered.achilles[,20] == 'Pancreatic Cancer'))
