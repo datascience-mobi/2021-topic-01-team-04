@@ -2,7 +2,9 @@
 title: "Drug sensitivity in cancer cell lines"
 author: "DAntoni, Marquard, Neumann, Zymela"
 date: "19 7 2021"
-output: pdf_document
+output:
+  html_document:
+    df_print: paged
 ---
 
 
@@ -338,7 +340,6 @@ abline(h = 0, col = "red")
 
 
 
-
 ```{r}
 library("ggpubr")
 ```
@@ -356,21 +357,31 @@ which(is.na(prism.achilles[,14]))
 prism.achilles[275:280,14]
 prism.achilles[320:325,14]
 ```
-
+Three rows of our prism.achilles dataframe contain NAs. These are the corresponding DepMap IDs
 ```{r}
 # vector with NA rows - na.achilles
 na.achilles <- c(277,309,323)
 # Depmap ids of NA containing cellines
 rownames(prism.achilles[na.achilles,])
 # how many total NAs?
+```
+There are 3302 NAs in total
+```{r}
 sum(is.na(prism.achilles[na.achilles,]))
+```
+After removing the rows with NAs a test shows that there are 0 NAs left in prism.achilles
+```{r}
 # removing NA containing rows from achilles
 prism.achilles <- prism.achilles[-na.achilles,]
 # checking if any NAs left
 sum(is.na(prism.achilles))
+```
+A dimension check shows that three rows have been removed
+```{r}
 # checking dim of prism.achilles - no genes removed - only NA cell lines removed
 dim(prism.achilles)
 ```
+
 
 4.1.2 Make Prism.achilles numeric
 
@@ -428,13 +439,6 @@ rownames(prism.achilles.numeric)[pancan.rownumbers]
 pancan.cl.names
 ```
 
-```{r}
-# More tests if everything is ordered correctly
-rownames(prism.cl.ordered.achilles)[1:10]
-prism.cl.ordered.achilles[1:10,1]
-rownames(prism.achilles.numeric)[1:10]
-```
-
 
 The data frame prism.achilles consists of gene knockdown scores. The score is a measure of how essential/important is a particular gene for the cell survival. This score reflects whether upon knocking down that genes does the cell reduce its proliferation or increases it or has no change. Smaller values refers to higher essentiality. The rows of this matrix are the gene names and the columns are the cancer cell line identifiers.
 
@@ -449,18 +453,14 @@ pancan.rownumbers
 prism.achilles.numeric.pancan <- prism.achilles.numeric[pancan.rownumbers,]
 prism.achilles.numeric.pancan[1:10,1]
 ```
+We confirm that Our prism.achilles.numeric and prism.achilles.numeric.pancan dataframes are numeric and can be used for plotting histograms or calculating quantiles.
 ```{r}
 # just confirming it is still numeric
 is.numeric(prism.achilles.numeric.pancan)
 hist(prism.achilles.numeric.pancan[10,])
-hist(prism.achilles.numeric[1,])
 quantile(prism.achilles.numeric.pancan,probs=seq(0,1,.1))
 ```
-```{r}
-# checking that i can apply the quantile function...
-quantile(prism.achilles.numeric,probs=seq(0,1,.1))
-quantile(prism.achilles.numeric,prob=0.1)
-```
+
 ```{r}
 prism.achilles.numeric[345:347,1:5]
 dim(prism.achilles.numeric)
@@ -499,6 +499,7 @@ achilles.research.dataframe[1:7,1]
 which(achilles.research.dataframe[6,] == 1)
 achilles.research.dataframe[1:7,which(achilles.research.dataframe[6,] == 1)]
 ```
+Shapiro tests of the four interesting prism.achilles columns shows that their values are not normally distributed. Thus the comparison of the prism.achilles.numeric.pancan mean and prism.achilles.numeric 10% quantile are of no importance until further examination.
 ```{r}
 # these values show that the interesting columns are not completely normally distributed
 shapiro.test(prism.achilles.numeric[,4283])
@@ -506,22 +507,11 @@ shapiro.test(prism.achilles.numeric[,7638])
 shapiro.test(prism.achilles.numeric[,7955])
 shapiro.test(prism.achilles.numeric[,17229])
 ```
-
+A qqplot between prism.achilles.numeric[,4283] and an according normal distribution results in the following graph. This shows that the values do not correspond to one single normal distribution.
+```{r}
 ggqqplot(prism.achilles.numeric[,4283])
-ggqqplot(prism.achilles.numeric[,7638])
-ggqqplot(prism.achilles.numeric[,7955])
-ggqqplot(prism.achilles.numeric[,17229])
+```
 
-
-
-
-merlinsvariable <- 10000
-cor.mat.achilles <- cor(prism.achilles.numeric.pancan[,1:merlinsvariable])
-cor.mat.achilles[779,782]
-interesting.cor.values <- which(cor.mat.achilles > 0.90 & cor.mat.achilles < 1 ) 
-interesting.cor.rows <- (((interesting.cor.values - (interesting.cor.values %% merlinsvariable)) /merlinsvariable) +1)
-interesting.cor.cols <- (interesting.cor.values %% merlinsvariable)
-cor.mat.achilles[interesting.cor.rows,  interesting.cor.cols]
 
 
 
@@ -551,7 +541,6 @@ for (i in 2:100) wss.depmap[i] <- sum(kmeans(mydata, centers=i)$withinss)
 ```
 
 ```{r}
-wss.depmap
 plot(1:100, wss.depmap, type="b", xlab="Number of Clusters",
   ylab="Within groups sum of squares")
 plot(1:20, wss.depmap[1:20], type="b", xlab="Number of Clusters",
@@ -564,7 +553,6 @@ km.depmap = kmeans(x=prism.achilles.numeric.topVar,
             centers = 2, 
             nstart = 10)
 km.depmap$cluster[1:10]
-
 ```
 
 
