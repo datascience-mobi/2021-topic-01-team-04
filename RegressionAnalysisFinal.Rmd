@@ -5,116 +5,116 @@ date: "17/07/2021"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
+
+#   Setup and Initiation
+
+First we remove all variables of the global environment and load in all functions, data, and packages to be used. 
+Furthermore, all data sets to be used have their information void columns and rows removed. Then all prism data is dose correlated, meaning that a drugs effect on cell growth is normalised to the applied dosage (doscor). Morevover, this doscor data is further processed, where the mean is taken of each drug's effect per dosage (perdrug). All three---prism, prism.doscor, and prism.perdrug---are then split each into a data set, containing only data for pancreatic cancer cell lines and further into data sets, each containing only cell lines of one of the four subtypes of pancreatic cancer as identified in prism.treat.
+
+
+```{r setup}
 knitr::opts_chunk$set(echo = TRUE)
-source("Scripts/Initiator.R")
-th <- "q.001, q.005"
-source("./Scripts/EfDrIdentifier.R")
+
+source("./Scripts/InitiatorFinal.R")
+th <- "q.005"
+source("./Scripts/EfDrIdentifierFinal.R")
 ```
 
-Interesting drug>>
+
+#   Preparation for Regression Analysis
+
+We extract all data regarding pancreatic cancer cell lines from the prism.achilles data set. Then we extract information about the top 2 drugs in regard to their ability to inhibit cell growth. We then define a fitted pancan.achilles data frame for each of the five drugs, that contains only the cell lines where we have drug efficacy data and visa versa.
+
 
 ```{r}
 .env.ra <- new.env(parent = .GlobalEnv)
 
-pancan.achilles <- row.col.cleaner(prism.extractor(prism.achilles))
+.env.ra$pancan.achilles <- row.col.cleaner(prism.extractor(prism.achilles))
 
-for (i in 1:5) { 
+for (i in 1:2) { 
   .env.ra[[paste("dr.ef.pancan.max.", i, sep = "")]] <- dr.to.effect(ef.pancan.perdrug, doscor = 2)[i]
-  .env.ra[[paste("id.dr.ef.pancan.max.", i, sep = "")]] <- as.character(unique(prism.treat[which(prism.treat[, "name"]==names(get(paste("dr.ef.pancan.max.", i, sep = ""), pos = .env.ra))), "broad_id"]))
-  .env.ra[[paste("ef.pancan.max.percl.", i, sep = "")]] <- pancan.perdrug[, get(paste("id.dr.ef.pancan.max.", i, sep = ""), pos = .env.ra)]
+  .env.ra[[paste("id.dr.ef.pancan.max.", i, sep = "")]] <- as.character(unique(prism.treat[which(prism.treat[, "name"]==names(.env.ra[[paste("dr.ef.pancan.max.", i, sep = "")]])), "broad_id"]))
+  .env.ra[[paste("ef.pancan.max.percl.", i, sep = "")]] <- pancan.perdrug[, .env.ra[[paste("id.dr.ef.pancan.max.", i, sep = "")]]]
   names(.env.ra[[paste("ef.pancan.max.percl.", i, sep = "")]]) <- rownames(pancan.perdrug)
   .env.ra[[paste("ef.pancan.max.percl.", i, sep = "")]] <- get(paste("ef.pancan.max.percl.", i, sep = ""), pos = .env.ra)[!is.na(get(paste("ef.pancan.max.percl.", i, sep = ""), pos = .env.ra))]
   
   del <- c(NULL)
   for (j in 1:length(.env.ra[[paste("ef.pancan.max.percl.", i, sep = "")]])) {
-    if (sum(grepl(names(.env.ra[[paste("ef.pancan.max.percl.", i, sep = "")]])[j], rownames(pancan.achilles)))==0) {del <- append(del, j)}
+    if (sum(grepl(names(.env.ra[[paste("ef.pancan.max.percl.", i, sep = "")]])[j], rownames(.env.ra$pancan.achilles)))==0) {del <- append(del, j)}
   }
   if(!is.null(del)) {
     .env.ra[[paste("ef.pancan.max.percl.", i, sep = "")]] <- .env.ra[[paste("ef.pancan.max.percl.", i, sep = "")]][-rev(del)]
   }
   del <- c(NULL)
-  for (j in 1:nrow(pancan.achilles)) {
-    if (!{rownames(pancan.achilles)[j] %in% names(.env.ra[[paste("ef.pancan.max.percl.", i, sep = "")]])}) del <- append(del, j)
+  for (j in 1:nrow(.env.ra$pancan.achilles)) {
+    if (!{rownames(.env.ra$pancan.achilles)[j] %in% names(.env.ra[[paste("ef.pancan.max.percl.", i, sep = "")]])}) del <- append(del, j)
   }
   if(!is.null(del)) {
-    .env.ra[[paste("pancan.achilles.fitted.", i, sep = "")]] <- pancan.achilles[-rev(del), ]
-  } else .env.ra[[paste("pancan.achilles.fitted.", i, sep = "")]] <- pancan.achilles
+    .env.ra[[paste("pancan.achilles.fitted.", i, sep = "")]] <- .env.ra$pancan.achilles[-rev(del), ]
+  } else .env.ra[[paste("pancan.achilles.fitted.", i, sep = "")]] <- .env.ra$pancan.achilles
 }
 
 env.ra.vars <- ls(pos = .env.ra); env.ra.vars
-env.ra.vars.grpd <- lapply(0:3, function(i) return(env.ra.vars[{1+(i*5)}:{5+(i*5)}])); env.ra.vars.grpd
-```
-
-Interesting achilles genes>>
-
-```{r}
-pancan.achilles.na.imp <- df.NA.to.val(.env.ra$pancan.achilles.fitted.1, 2, "median")
-
-topVar <- apply(pancan.achilles.na.imp, 2, var) 
-summary(topVar)
-pancan.achilles.topVar <- pancan.achilles.na.imp[, topVar > quantile(topVar, probs = 0.95, na.rm = T)] 
-dim(pancan.achilles.topVar)
 ```
 
 
+We now set up our data upon which our linear regression will be based. We here only use the 5th percentile of the achilles gene data of the highest variance. 
+
+
 ```{r}
-models <- list()
-for (i in 1:(ncol(pancan.achilles.topVar))) {
-  models[[i]] <- summary(lm(.env.ra$ef.pancan.max.percl.1 ~ pancan.achilles.topVar[, i]))
+for (j in 1:2) {
+  .env.ra[[paste("pancan.achilles.na.imp.", j, sep = "")]] <- df.NA.to.val(.env.ra[[paste("pancan.achilles.fitted.", j, sep = "")]], 2, "median")
+
+  .env.ra[[paste("topVar.", j, sep = "")]] <- apply(.env.ra[[paste("pancan.achilles.na.imp.", j, sep = "")]], 2, var) 
+  
+  .env.ra[[paste("pancan.achilles.topVar.", j, sep = "")]] <- .env.ra[[paste("pancan.achilles.na.imp.", j, sep = "")]][, .env.ra[[paste("topVar.", j, sep = "")]] > quantile(.env.ra[[paste("topVar.", j, sep = "")]], probs = 0.95, na.rm = T)]
 }
-length(models)
+```
 
-r2 <- c()
 
-for (i in 1:length(models)) {
-  r2 <- append(r2, unlist(models[[i]]$r.squared))
+#   Regression analysis
+
+Now we perform the regression analysis for the two best drugs in regard to their ability to inhabit cell growth in pancreatic cancer cell lines. 
+
+
+```{r}
+for (j in 1:2) {
+  .env.ra[[paste("models.", j, sep = "")]] <- list()
+  for (i in 1:(ncol(.env.ra[[paste("pancan.achilles.topVar.", j, sep = "")]]))) {
+    .env.ra[[paste("models.", j, sep = "")]][[i]] <- summary(lm(.env.ra[[paste("ef.pancan.max.percl.", j, sep = "")]] ~ .env.ra[[paste("pancan.achilles.topVar.", j, sep = "")]][, i]))
+  }
+  
+  .env.ra[[paste("r2.", j, sep = "")]] <- c()
+  for (i in 1:length(.env.ra[[paste("models.", j, sep = "")]])) {
+    .env.ra[[paste("r2.", j, sep = "")]] <- append(.env.ra[[paste("r2.", j, sep = "")]], unlist(.env.ra[[paste("models.", j, sep = "")]][[i]]$r.squared))
+  }
+  names(.env.ra[[paste("r2.", j, sep = "")]]) <- colnames(.env.ra[[paste("pancan.achilles.topVar.", j, sep = "")]])
+  print(max(.env.ra[[paste("r2.", j, sep = "")]]))
+  print(names(.env.ra[[paste("r2.", j, sep = "")]][which(.env.ra[[paste("r2.", j, sep = "")]] == max(.env.ra[[paste("r2.", j, sep = "")]]))]))
+  print(unname(which(.env.ra[[paste("r2.", j, sep = "")]] == max(.env.ra[[paste("r2.", j, sep = "")]]))))
 }
-names(r2) <- colnames(pancan.achilles.topVar)
-length(r2)
-max(r2); min(r2)
-names(r2[which(r2 == max(r2))]); names(r2[which(r2 == min(r2))])
-unname(which(r2 == max(r2)))
 ```
 
 
 ```{r}
-plot(pancan.achilles.topVar[, 432], .env.ra$ef.pancan.max.percl.1, ylab = paste("Efficacy per dosage of", ef.pancan.perdrug[1]), xlab = paste("Achilles value of", names(r2[which(r2 == max(r2))])), main = paste("Correlation of", names(r2[which(r2 == max(r2))]), "with", ef.pancan.perdrug[1], "at r.squared =", round(max(r2), digits = 5)))
-abline(lm(.env.ra$ef.pancan.max.percl.1 ~ pancan.achilles.topVar[, 432]))
+plot(
+  .env.ra$pancan.achilles.topVar.1[, 432], 
+  .env.ra$ef.pancan.max.percl.1, 
+  ylab = paste("Efficacy per dosage of", names(.env.ra$dr.ef.pancan.max.1)), 
+  xlab = paste("Achilles value of", names(.env.ra$r2.1[which(.env.ra$r2.1 == max(.env.ra$r2.1))])), 
+  main = paste("Correlation of", names(.env.ra$r2.1[which(.env.ra$r2.1 == max(.env.ra$r2.1))]), "with", names(.env.ra$dr.ef.pancan.max.1), "at r.squared =", round(max(.env.ra$r2.1), digits = 5))
+)
+abline(lm(.env.ra$ef.pancan.max.percl.1 ~ .env.ra$pancan.achilles.topVar.1[, 432]))
 ```
 
 
 ```{r}
-pancan.achilles.na.imp <- df.NA.to.val(.env.ra$pancan.achilles.fitted.2, 2, "median")
-
-topVar <- apply(pancan.achilles.na.imp, 2, var) 
-summary(topVar)
-pancan.achilles.topVar <- pancan.achilles.na.imp[, topVar > quantile(topVar, probs = 0.95, na.rm = T)] 
-dim(pancan.achilles.topVar)
-```
-
-
-```{r}
-models <- list()
-for (i in 1:(ncol(pancan.achilles.topVar))) {
-  models[[i]] <- summary(lm(.env.ra$ef.pancan.max.percl.2 ~ pancan.achilles.topVar[, i]))
-}
-length(models)
-
-r2 <- c()
-
-for (i in 1:length(models)) {
-  r2 <- append(r2, unlist(models[[i]]$r.squared))
-}
-names(r2) <- colnames(pancan.achilles.topVar)
-length(r2)
-max(r2); min(r2)
-names(r2[which(r2 == max(r2))]); names(r2[which(r2 == min(r2))])
-unname(which(r2 == max(r2)))
-```
-
-
-```{r}
-plot(pancan.achilles.topVar[, 259], .env.ra$ef.pancan.max.percl.2, ylab = paste("Efficacy per dosage of", ef.pancan.perdrug[2]), xlab = paste("Achilles value of", names(r2[which(r2 == max(r2))])), main = paste("Correlation of", names(r2[which(r2 == max(r2))]), "with", ef.pancan.perdrug[2], "at r.squared =", round(max(r2), digits = 5)))
-abline(lm(.env.ra$ef.pancan.max.percl.2 ~ pancan.achilles.topVar[, 259]))
+plot(
+  .env.ra$pancan.achilles.topVar.2[, 475], 
+  .env.ra$ef.pancan.max.percl.2, 
+  ylab = paste("Efficacy per dosage of", names(.env.ra$dr.ef.pancan.max.2)), 
+  xlab = paste("Achilles value of", names(.env.ra$r2.2[which(.env.ra$r2.2 == max(.env.ra$r2.2))])), 
+  main = paste("Correlation of", names(.env.ra$r2.2[which(.env.ra$r2.2 == max(.env.ra$r2.2))]), "with", names(.env.ra$dr.ef.pancan.max.2), "at r.squared =", round(max(.env.ra$r2.2), digits = 5))
+)
+abline(lm(.env.ra$ef.pancan.max.percl.2 ~ .env.ra$pancan.achilles.topVar.2[, 475]))
 ```
