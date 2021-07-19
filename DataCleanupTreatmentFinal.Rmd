@@ -13,7 +13,7 @@ Furthermore, all data sets to be used have their information void columns and ro
 
 
 ```{r setup}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = F)
 source("Scripts/InitiatorFinal.R")
 ```
 
