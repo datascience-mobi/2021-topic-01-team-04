@@ -1,8 +1,8 @@
 ---
 title: "MC_achilles"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 
@@ -12,12 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 load("./Data/cellline_datasets.rda")
 load("./Data/prism_datasets.rda")
-```
-```{r}
-install.packages("dplyr")
-```
-```{r}
-install.packages("ggpubr")
+library("ggpubr")
 ```
 
 4 prism.achilles
@@ -26,7 +21,7 @@ install.packages("ggpubr")
 
 4.1.1 na removal
 
-```{r}
+```{r find NA}
 # Where are our NAs?
 which(is.na(prism.achilles[,14]))
 prism.achilles[275:280,14]
@@ -171,7 +166,7 @@ achilles.research.dataframe[7,] <- apply(prism.achilles.numeric, 2, var)
 
 
 ```{r}
-achilles.research.dataframe[1:6,1:100]
+achilles.research.dataframe[1:7,1]
 which(achilles.research.dataframe[6,] == 1)
 achilles.research.dataframe[1:7,which(achilles.research.dataframe[6,] == 1)]
 ```
@@ -182,16 +177,15 @@ shapiro.test(prism.achilles.numeric[,7638])
 shapiro.test(prism.achilles.numeric[,7955])
 shapiro.test(prism.achilles.numeric[,17229])
 ```
-```{r}
-library("ggpubr")
+
 ggqqplot(prism.achilles.numeric[,4283])
 ggqqplot(prism.achilles.numeric[,7638])
 ggqqplot(prism.achilles.numeric[,7955])
 ggqqplot(prism.achilles.numeric[,17229])
-```
 
 
-```{r}
+
+
 merlinsvariable <- 10000
 cor.mat.achilles <- cor(prism.achilles.numeric.pancan[,1:merlinsvariable])
 cor.mat.achilles[779,782]
@@ -199,7 +193,7 @@ interesting.cor.values <- which(cor.mat.achilles > 0.90 & cor.mat.achilles < 1 )
 interesting.cor.rows <- (((interesting.cor.values - (interesting.cor.values %% merlinsvariable)) /merlinsvariable) +1)
 interesting.cor.cols <- (interesting.cor.values %% merlinsvariable)
 cor.mat.achilles[interesting.cor.rows,  interesting.cor.cols]
-```
+
 
 
 k-means clustering
@@ -211,7 +205,7 @@ We first reduce our dataset to take the most variable gene, which are expected t
 topVar = apply(prism.achilles.numeric, 2, var) 
 summary(topVar)
 ```
-```{r}
+```{r variance filtering for clustering}
 ## filtering to keep genes which have a variance greater than the 75% percentile
 prism.achilles.numeric.topVar = prism.achilles.numeric[,topVar > quantile(topVar, probs = 0.75)] 
 dim(prism.achilles.numeric.topVar)
@@ -258,20 +252,18 @@ mydata <- prism.achilles.numeric.topVar
 
 wss.genes <- (ncol(mydata)-1)*sum(apply(mydata,1,var))
 dim(mydata)
-for (i in seq(500,1000, by = 10)) wss.genes[i] <- sum(kmeans(t(mydata), centers=i, iter.max = 500)$withinss)
-```
-```{r}
-for (i in 1:499) wss.genes[i] <- sum(kmeans(t(mydata), centers=i, iter.max = 500)$withinss)
+for (i in 500:501) wss.genes[i] <- sum(kmeans(t(mydata), centers=i, iter.max = 500)$withinss)
 ```
 
-```{r}
+
+
 wss.genes
 dim(wss.genes)
 plot(wss.genes[100:1000], type="b", xlab="Number of Clusters",
   ylab="Within groups sum of squares")
 plot(wss.genes[100:500], type="b", xlab="Number of Clusters",
   ylab="Within groups sum of squares")
-```
+
 
 
 ```{r}
