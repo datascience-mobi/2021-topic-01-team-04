@@ -1,15 +1,18 @@
 ---
 title: "Drug sensitivity in cancer cell lines"
-author: "D'Antoni, Marquard, Neumann, Zymela"
+author: "DAntoni, Marquard, Neumann, Zymela"
 date: "19 7 2021"
 output: pdf_document
 ---
 
-```{r include=FALSE}
-load("Data/prism_datasets.rda")
-load("Data/cellline_datasets.rda")
 
+```{r setup}
+knitr::opts_chunk$set(echo = F)
+source("Scripts/InitiatorFinal.R")
+th <- "q.005"
+source("./Scripts/EfDrIdentifierFinal.R")
 ```
+
 
 # Introduction:
 
@@ -36,9 +39,27 @@ The first step in our research was to clean up the Datasets. This meant to get r
 
 Afterwards we tried to visualize the given datasets to obtain a greater knowledge about their distribution using different dicriptive statistical methods. 
 
-## Prism dataset
+## prism dataset
 
-Here we tried to display  [.............]
+Here we tried to display the data containing the different treatment effects for each cell lines via a heatmap. 
+
+
+## prism.exp dataset cell lines 
+
+For this dataset we checked the distribution of the mean gene values of all 481 human cancer cell lines to observe some initial characteristics. This was done using a simple histogram.
+```{r echo=FALSE}
+# mean value for every column of prism.exp.pancreatic
+meanval.prism.exp.pan = apply(prism.exp.pan, 2, function(x){mean(x)})
+#welche gene am haeufigsten
+sorted.meanval.exp.pan = sort(meanval.prism.exp.pan, decreasing = TRUE, na.last = TRUE)
+hist(meanval.prism.exp.pan,
+     freq = TRUE,
+     main = "Summary mean expression values",
+     xlab = "Mean expression Values",
+     ylab = "Counts of Mean expression Values",
+     plot = TRUE,
+     breaks = "fd")
+```
 
 
 
@@ -119,18 +140,10 @@ The names of the top interesting genes can be viewed in this data frame. Here fo
 
 ##   Setup and Initiation   
 
-First we remove all variables of the global environment and load in all functions, data, and packages to be used. 
-Furthermore, all data sets to be used have their information void columns and rows removed. Then all prism data is dose correlated, meaning that a drugs effect on cell growth is normalised to the applied dosage (doscor). Morevover, this doscor data is further processed, where the mean is taken of each drug's effect per dosage (perdrug). All three---prism, prism.doscor, and prism.perdrug---are then split each into a data set, containing only data for pancreatic cancer cell lines and further into data sets, each containing only cell lines of one of the four subtypes of pancreatic cancer as identified in prism.treat. 
-Now we want to identify the most efficacious drugs in regards to their ability to inhabit cell growth per applied dosage. 
-we here extract the drugs above the 95th percentile for each of the six data sets: prism.perdrug, pancan.perdrug, and the four perdrug data frames for the four subtypes of pancreatic cancer. 
-
-
-```{r setup}
-knitr::opts_chunk$set(echo = F)
-source("Scripts/InitiatorFinal.R")
-th <- "q.005"
-source("./Scripts/EfDrIdentifierFinal.R")
-```
+First we removed all variables of the global environment and loaded in all functions, data, and packages to be used. 
+Furthermore, all data sets to be used had their information void columns and rows removed. Then all prism data were dose correlated, meaning that a drugs effect on cell growth is normalised to the applied dosage (doscor). Morevover, this doscor data is further processed, where the mean was taken of each drug's effect per dosage (perdrug). All three---prism, prism.doscor, and prism.perdrug---are then split each into a data set, containing only data for pancreatic cancer cell lines and further into data sets, each containing only cell lines of one of the four subtypes of pancreatic cancer as identified in prism.treat. 
+Then we identified the most efficacious drugs in regards to their ability to inhabit cell growth per applied dosage. 
+To this end we extracted the drugs above the 95th percentile for each of the six data sets: prism.perdrug, pancan.perdrug, and the four perdrug data frames for the four subtypes of pancreatic cancer. 
 
 
 #   Having a look at the most effective drugs
