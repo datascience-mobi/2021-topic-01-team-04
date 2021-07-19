@@ -35,6 +35,7 @@ na.achilles <- c(277,309,323)
 rownames(prism.achilles[na.achilles,])
 # removing NA containing rows from achilles
 prism.achilles <- prism.achilles[-na.achilles,]
+
 ```
 
 We make Prism.achilles numeric
@@ -48,11 +49,8 @@ rownames(prism.achilles.numeric) <- rownames(prism.achilles)
 10.Intermission - Sort Prism.cl by depmap_id resulting in prism.cl.ordered
 
 ```{r}
-
 # order prism.cl by DepMap_ID resulting in prism.cl.ordered
 prism.cl.ordered <- prism.cl[order(prism.cl$DepMap_ID),]
-# dimmension check - hasn't changed
-dim(prism.cl.ordered)
 # rownames are scrambled now -> reset
 rownames(prism.cl.ordered) <- 1:nrow(prism.cl.ordered)
 ```
@@ -68,12 +66,9 @@ b <- which(a == 0)
 # remove prism.cl rows that don't have a corresponding achilles value
 prism.cl.ordered.achilles <- prism.cl.ordered[-b, ]
 # check dimensions of prism.cl.ordered.achilles
-dim(prism.cl.ordered.achilles)
 # reset rownames of prism.cl.ordered.achilles
 rownames(prism.cl.ordered.achilles) <- 1:nrow(prism.cl.ordered.achilles)
-# compare rownames of achilles with cl - checking for same order and same elements - they are equal
-prism.cl.ordered.achilles[1:5,1]
-rownames(prism.achilles.numeric)[1:5]
+
 ```
 Find PanCan Cellines in prism.cl.achilles
 ```{r}
@@ -86,11 +81,8 @@ pancan.cl.names <- prism.cl.ordered.achilles[pancan.rownumbers,1]
 
 The data frame prism.achilles consists of gene knockdown scores. The score is a measure of how essential/important is a particular gene for the cell survival. This score reflects whether upon knocking down that genes does the cell reduce its proliferation or increases it or has no change. Smaller values refers to higher essentiality. The rows of this matrix are the gene names and the columns are the cancer cell line identifiers.
 
-Exploration of prism.achilles.numeric
-```{r}
-dim(prism.achilles.numeric)
-prism.achilles.numeric[1:10,1:2]
-```
+we Exploration of prism.achilles.numeric
+
 ```{r}
 # More exploration
 
@@ -106,9 +98,7 @@ quantile(prism.achilles.numeric.pancan,probs=seq(0,1,.1))
 ```
 
 ```{r}
-prism.achilles.numeric[345:347,1:5]
-dim(prism.achilles.numeric)
-dim(prism.achilles)
+
 rownames(prism.achilles.numeric) <- rownames(prism.achilles)
 ```
 New Dataframe for Analysis of prism.achilles.numeric
@@ -137,10 +127,9 @@ achilles.research.dataframe[7,] <- apply(prism.achilles.numeric, 2, var)
 
 ```
 
-
+The four interesting genes
 ```{r}
-achilles.research.dataframe[1:7,1]
-which(achilles.research.dataframe[6,] == 1)
+
 achilles.research.dataframe[1:7,which(achilles.research.dataframe[6,] == 1)]
 ```
 Shapiro tests of the four interesting prism.achilles columns shows that their values are not normally distributed. Thus the comparison of the prism.achilles.numeric.pancan mean and prism.achilles.numeric 10% quantile are of no importance until further examination. Shown is the result of a Shapiro-Wilk normality test on column 4283 of our prism.achilles.numeric dataset.
@@ -175,7 +164,7 @@ Clustering by depmap
 mydata <- prism.achilles.numeric.topVar
 # Determine number of clusters
 wss.depmap <- (nrow(mydata)-1)*sum(apply(mydata,2,var))
-wss.depmap
+
 for (i in 2:10) wss.depmap[i] <- sum(kmeans(mydata, centers=i)$withinss)
 ```
 The following plot shows that there is no amount of clusters that is by far the best for clustering prism.achilles by cell lines but that two Clusters is probably our best option according to a slight kink at two clusters.
