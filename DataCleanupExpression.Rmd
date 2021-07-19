@@ -187,8 +187,9 @@ Executing a lot of times to find out, which genes are really interesting.
 ```{r}
 
 test.interesting.genes = vector()
-q = 1
-alpha = 0.05/ncol(prism.exp.pan)
+q = 100
+alpha = 0.025/ncol(prism.exp.pan)
+beta = 1 - 0.025/ncol(prism.exp.pan)
 for(g in 1:q)
   {
     p.vector = vector()
@@ -203,9 +204,9 @@ for(g in 1:q)
   
     }
     
-    boolean.p.vector = p.vector <= alpha
+    boolean.p.vector = p.vector <= alpha | p.vector >= beta
     boolean.p.vector[is.na(boolean.p.vector)] = FALSE
-    # test.interesting.genes.pvector 
+  
     test.interesting.genes = append(test.interesting.genes, colnames(prism.exp.pan[,boolean.p.vector]))
   }
 ```
@@ -223,15 +224,19 @@ b = zwei.df.interesting.genes[a,]
 
 
 ```{r}
-hist(hundred.table.interesting.genes,
+hist(log(test.table.interesting.genes),
      freq = TRUE,
      main = "Frequency of genes with significant difference",
-     xlab = "Genes",
+     xlab = "Amount of genes",
      ylab = "Frequency",
      plot = TRUE,
-     breaks = "FD")
+     breaks = 10)
 
-dim(hundred.df.interesting.genes)
+dim(test.df.interesting.genes)
+```
+
+```{r}
+test.df.interesting.genes[10,10]
 ```
 
 
@@ -241,7 +246,30 @@ dim(hundred.df.interesting.genes)
 
 
 
+```{r}
+genettest = cmpfun(function() {
+for(g in 1:q)
+  {
+    p.vector = vector()
+    random.prism.exp = prism.exp.nopan[(sample(nrow(prism.exp.nopan), 33)),]
 
+
+    for(i in 1:ncol(prism.exp.pan))
+      {
+  
+        wil = c(wilcox.test(prism.exp.pan[,i], random.prism.exp[,i], exact = FALSE)$p.value)
+        p.vector = append(p.vector, wil)
+  
+    }
+    
+    boolean.p.vector = p.vector <= alpha
+    boolean.p.vector[is.na(boolean.p.vector)] = FALSE
+    interesting.genes = append(interesting.genes, colnames(prism.exp.pan[,boolean.p.vector]))
+  }
+  table.interesting.genes = table(interesting.genes)
+  df.interesting.genes = as.data.frame(table.interesting.genes)
+})
+```
 
 
 
