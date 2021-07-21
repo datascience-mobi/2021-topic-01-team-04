@@ -59,7 +59,7 @@ For this dataset we checked the distribution of the mean gene values of all 481 
 ```{r, echo=FALSE}
 # mean value for every column of prism.exp.pancreatic
 meanval.prism.exp.pan = apply(prism.exp.pan, 2, function(x){mean(x)})
-#welche gene am haeufigsten
+# welche gene am haeufigsten
 sorted.meanval.exp.pan = sort(meanval.prism.exp.pan, decreasing = TRUE, na.last = TRUE)
 hist(meanval.prism.exp.pan,
      freq = TRUE,
