@@ -50,7 +50,7 @@ Here we tried to display the data containing the different treatment effects for
 topVar <- apply(df.NA.to.val(pancan.perdrug, 2, "median"), 2, var) 
 pancan.perdrug.topVar <- df.NA.to.val(pancan.perdrug, 2, "median")[, topVar >= sort(topVar, decreasing = T)[100]]
 
-pheatmap::pheatmap(pancan.perdrug.topVar)
+pheatmap::pheatmap(pancan.perdrug.topVar, fontsize_row = 7, fontsize_col = 4)
 ```
 
 ## prism.exp Dataset 
